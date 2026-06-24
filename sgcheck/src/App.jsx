@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import Dashboard from './Dashboard'
+import { useState } from "react"
+import Dashboard from "./Dashboard"
 
 function App() {
   const [uploadedImage, setUploadedImage] = useState(null)
@@ -14,7 +14,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-background">
       <Dashboard
         uploadedImage={uploadedImage}
         onImageUpload={handleImageUpload}
