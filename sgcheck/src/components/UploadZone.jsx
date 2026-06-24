@@ -1,5 +1,9 @@
-import { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { ImageUp } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 function UploadZone({ onImageUpload, uploadedImage }) {
   const [isDragging, setIsDragging] = useState(false)
@@ -48,15 +52,15 @@ function UploadZone({ onImageUpload, uploadedImage }) {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="mb-4">
-        <span className="inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 rounded-none border border-primary">
-          Stage 1
-        </span>
-        <h2 className="vintage-heading mt-3">Upload Billet Image</h2>
-        <p className="text-gray-600 mt-2 text-sm">
-          Drag and drop or click to upload sugarcane seed billet photos
-        </p>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="text-sm font-medium tracking-tight">Billet image</div>
+          <div className="text-xs text-muted-foreground">
+            Drop a photo of the seed billet for quality cues.
+          </div>
+        </div>
+        <Badge variant="secondary">Stage 1</Badge>
       </div>
 
       <AnimatePresence mode="wait">
@@ -69,15 +73,9 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={handleClick}
             className={`
-              flex-1 min-h-[200px] rounded-none border-2 border-dashed border-primary
-              flex flex-col items-center justify-center cursor-pointer
-              transition-all duration-300
-              ${isDragging
-                ? 'border-primary bg-primary/10 scale-[1.02]'
-                : 'border-gray-400 hover:border-primary hover:bg-primary/5'
-              }
+              rounded-xl border border-dashed p-5 transition-colors
+              ${isDragging ? "border-ring bg-muted/60" : "border-border bg-card"}
             `}
           >
             <input
@@ -88,31 +86,27 @@ function UploadZone({ onImageUpload, uploadedImage }) {
               className="hidden"
             />
 
-            <motion.div
-              animate={isDragging ? { scale: 1.1 } : { scale: 1 }}
-              className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center mb-4"
-            >
-              <svg
-                className="w-8 h-8 text-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </motion.div>
-
-            <p className="text-gray-800 font-medium text-center">
-              {isDragging ? 'Drop your image here!' : 'Drop image or click to browse'}
-            </p>
-            <p className="text-gray-600 text-sm mt-1">
-              Supports JPG, PNG, WEBP
-            </p>
+            <div className="flex items-start gap-4">
+              <div className={cn("rounded-lg border bg-background p-2", isDragging && "border-ring")}>
+                <ImageUp />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium">
+                  {isDragging ? "Drop the image here" : "Drag & drop an image"}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  JPG / PNG / WEBP. Or choose a file.
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <Button type="button" variant="secondary" size="sm" onClick={handleClick}>
+                    Choose file
+                  </Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={handleClick}>
+                    Browse
+                  </Button>
+                </div>
+              </div>
+            </div>
           </motion.div>
         ) : (
           <motion.div
@@ -120,29 +114,20 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="flex-1 flex flex-col"
+            className="flex flex-col gap-3"
           >
-            <div className="relative flex-1 rounded-none overflow-hidden bg-gray-200">
-              <img
-                src={uploadedImage.preview}
-                alt={uploadedImage.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            <div className="overflow-hidden rounded-xl border bg-muted">
+              <img src={uploadedImage.preview} alt={uploadedImage.name} className="h-48 w-full object-cover" />
             </div>
-            <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-none bg-primary" />
-                <span className="text-sm text-gray-600 truncate max-w-[150px]">
+                <Badge variant="secondary" className="max-w-[220px] truncate">
                   {uploadedImage.name}
-                </span>
+                </Badge>
               </div>
-              <button
-                onClick={handleClick}
-                className="text-sm text-primary font-medium hover:underline"
-              >
+              <Button type="button" variant="outline" size="sm" onClick={handleClick}>
                 Replace
-              </button>
+              </Button>
             </div>
           </motion.div>
         )}

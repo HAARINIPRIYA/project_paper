@@ -1,38 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-bg font-sans text-gray-800;
-  }
+:root {
+  --background: 36 33% 98%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 222 47% 11%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 36 20% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 35 18% 95%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 35 18% 95%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 30 10% 88%;
+  --input: 30 10% 88%;
+  --ring: 222 47% 11%;
+  --radius: 0.95rem;
 }
 
-@layer components {
-  .card-container {
-    @apply bg-card rounded-portis shadow-portis-card p-6 md:p-8 border border-border-color;
-  }
+.dark {
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222 47% 7%;
+  --secondary: 217 24% 14%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 24% 14%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 24% 14%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62% 40%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 24% 16%;
+  --input: 217 24% 16%;
+  --ring: 210 40% 98%;
+}
 
-  .vintage-heading {
-    @apply font-serif text-primary text-3xl md:text-4xl font-bold tracking-tight;
+@layer base {
+  * {
+    @apply border-border;
   }
-
-  .metric-value {
-    @apply text-5xl md:text-6xl lg:text-7xl font-semibold text-primary;
-  }
-
-  .form-input {
-    @apply w-full px-4 py-3 rounded-md border-2 border-gray-300
-           bg-white text-gray-800 placeholder-gray-400
-           focus:outline-none focus:border-primary focus:ring-2
-           focus:ring-primary/20 transition-all duration-300;
-  }
-
-  .action-button {
-    @apply px-6 py-3 rounded-md bg-primary text-white font-semibold
-           shadow-md hover:shadow-lg hover:bg-primary/90
-           active:scale-95 transition-all duration-200;
+  body {
+    @apply bg-background text-foreground font-sans;
   }
 }
