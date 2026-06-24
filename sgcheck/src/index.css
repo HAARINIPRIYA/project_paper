@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg font-sans text-gray-800;
+  }
+}
+
+@layer components {
+  .card-container {
+    @apply bg-card rounded-portis shadow-portis-card p-6 md:p-8 border border-border-color;
+  }
+
+  .vintage-heading {
+    @apply font-serif text-primary text-3xl md:text-4xl font-bold tracking-tight;
+  }
+
+  .metric-value {
+    @apply text-5xl md:text-6xl lg:text-7xl font-semibold text-primary;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-3 rounded-md border-2 border-gray-300
+           bg-white text-gray-800 placeholder-gray-400
+           focus:outline-none focus:border-primary focus:ring-2
+           focus:ring-primary/20 transition-all duration-300;
+  }
+
+  .action-button {
+    @apply px-6 py-3 rounded-md bg-primary text-white font-semibold
+           shadow-md hover:shadow-lg hover:bg-primary/90
+           active:scale-95 transition-all duration-200;
+  }
+}
