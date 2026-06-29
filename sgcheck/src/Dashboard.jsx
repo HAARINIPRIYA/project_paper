@@ -94,17 +94,17 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
   return (
     <div className="h-screen w-full">
       <ResizablePanelGroup direction="horizontal" className="hidden md:flex">
-        <ResizablePanel defaultSize={22} minSize={16} maxSize={30}>
+        <ResizablePanel defaultSize={20} minSize={14} maxSize={26}>
           <aside className="flex h-full flex-col border-r bg-background/70 backdrop-blur">
             <div className="px-4 py-4">
               <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="grid size-9 place-items-center rounded-lg bg-foreground text-background">
-                    <span className="font-serif text-[15px] leading-none">CS</span>
+                <div className="flex items-center gap-2.5">
+                  <div className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-xs">
+                    <span className="text-[13px] font-semibold leading-none tracking-tight">CS</span>
                   </div>
                   <div className="leading-tight">
-                    <div className="font-medium tracking-tight">CaneSense</div>
-                    <div className="text-xs text-muted-foreground">Workspace</div>
+                    <div className="text-sm font-semibold tracking-tight">CaneSense</div>
+                    <div className="text-[11px] text-muted-foreground">Workspace</div>
                   </div>
                 </div>
                 {view === "analysis" ? (
@@ -116,25 +116,31 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
             </div>
 
             <div className="px-4 pb-4">
-              <div className="grid grid-cols-2 gap-2">
-                <Button
+              <div className="flex flex-col gap-1">
+                <button
                   type="button"
-                  variant={view === "dashboard" ? "secondary" : "ghost"}
-                  size="sm"
                   onClick={() => setView("dashboard")}
+                  className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all ${
+                    view === "dashboard"
+                      ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  }`}
                 >
-                  <LayoutDashboard data-icon="inline-start" />
+                  <LayoutDashboard className="size-4 shrink-0" />
                   Dashboard
-                </Button>
-                <Button
+                </button>
+                <button
                   type="button"
-                  variant={view === "analysis" ? "secondary" : "ghost"}
-                  size="sm"
                   onClick={() => setView("analysis")}
+                  className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all ${
+                    view === "analysis"
+                      ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  }`}
                 >
-                  <MessageSquareText data-icon="inline-start" />
+                  <MessageSquareText className="size-4 shrink-0" />
                   Analysis
-                </Button>
+                </button>
               </div>
             </div>
 
@@ -173,30 +179,28 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
               )}
             </ScrollArea>
 
-            <div className="p-4">
-              <Card>
-                <CardContent className="flex items-center gap-3 p-3">
-                  <Avatar className="size-8">
-                    <AvatarFallback className="bg-muted text-xs">U</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">You</div>
-                    <div className="truncate text-xs text-muted-foreground">CaneSense workspace</div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="border-t p-3">
+              <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50">
+                <Avatar className="size-7">
+                  <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">U</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium leading-tight">You</div>
+                  <div className="truncate text-[11px] text-muted-foreground">CaneSense workspace</div>
+                </div>
+              </div>
             </div>
           </aside>
         </ResizablePanel>
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={56} minSize={35}>
+        <ResizablePanel defaultSize={56} minSize={30}>
           <main className="flex h-full min-w-0 flex-col">
             <div className="flex items-center justify-between gap-3 border-b bg-background/70 px-4 py-3 backdrop-blur">
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium tracking-tight">
-                  {view === "analysis" ? "CaneSense Analysis" : "CaneSense Dashboard"}
+                  {view === "analysis" ? "CaneSense" : "Dashboard"}
                 </div>
                 <div className="truncate text-xs text-muted-foreground">
                   {view === "analysis"
@@ -209,12 +213,16 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                 <Button variant="outline" size="icon-sm" aria-label="Attach">
                   <Paperclip />
                 </Button>
+                <div className="flex items-center gap-1.5">
+                  {uploadedImage ? <span className="size-1.5 rounded-full bg-emerald-400" title="Image ready" /> : null}
+                  {gpsData ? <span className="size-1.5 rounded-full bg-emerald-400" title="Field data ready" /> : null}
+                </div>
               </div>
             </div>
 
             <ScrollArea className="flex-1">
               {view === "analysis" ? (
-                <div className="mx-auto flex w-full max-w-[820px] flex-col gap-4 px-4 py-6">
+                <div className="mx-auto flex w-full max-w-[720px] flex-col gap-3 px-4 py-6">
                   {messages.map((m, idx) => {
                     const isUser = m.role === "user"
                     return (
@@ -233,10 +241,10 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
                         <div
                           className={cn(
-                            "max-w-[680px] rounded-xl px-4 py-3 text-sm leading-relaxed",
+                            "max-w-[min(90%,620px)] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                             isUser
-                              ? "bg-secondary text-secondary-foreground"
-                              : "bg-card text-card-foreground border shadow-sm"
+                              ? "bg-primary/[0.08] text-foreground"
+                              : "bg-card text-card-foreground border shadow-xs"
                           )}
                         >
                           {m.content}
@@ -252,7 +260,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                   })}
                 </div>
               ) : (
-                <div className="mx-auto w-full max-w-[1100px] px-4 py-6">
+                <div className="mx-auto w-full px-4 py-6">
                   <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} />
                 </div>
               )}
@@ -260,30 +268,32 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
             {view === "analysis" ? (
               <div className="border-t bg-background/70 backdrop-blur">
-                <div className="mx-auto w-full max-w-[820px] px-4 py-4">
-                  <div className="rounded-xl border bg-card p-2 shadow-sm">
-                    <div className="flex items-end gap-2">
-                      <Textarea
-                        value={composer}
-                        onChange={(e) => setComposer(e.target.value)}
-                        placeholder="Message CaneSense…"
-                        className="min-h-[44px] resize-none border-0 bg-transparent px-3 py-2 shadow-none focus-visible:ring-0"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault()
-                            onSend()
-                          }
-                        }}
-                      />
-                      <Button size="icon" aria-label="Send" onClick={onSend}>
+                <div className="mx-auto w-full max-w-[720px] px-4 py-3">
+                  <div className="rounded-2xl border bg-card p-1.5 shadow-xs">
+                    <div className="flex items-end gap-1.5">
+                      <div className="flex-1">
+                        <Textarea
+                          value={composer}
+                          onChange={(e) => setComposer(e.target.value)}
+                          placeholder="Message CaneSense…"
+                          className="min-h-[40px] resize-none border-0 bg-transparent px-3 py-2.5 text-sm shadow-none focus-visible:ring-0"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault()
+                              onSend()
+                            }
+                          }}
+                        />
+                      </div>
+                      <Button size="icon" aria-label="Send" onClick={onSend} className="mb-[3px]">
                         <Send />
                       </Button>
                     </div>
-                    <div className="mt-1 flex items-center justify-between px-3 pb-1">
-                      <div className="text-xs text-muted-foreground">Shift + Enter for a new line</div>
-                      <div className="flex items-center gap-2">
-                        {uploadedImage ? <Badge variant="secondary">Image ready</Badge> : null}
-                        {gpsData ? <Badge variant="secondary">Field ready</Badge> : null}
+                    <div className="flex items-center justify-between px-3 pb-1.5">
+                      <div className="text-[11px] text-muted-foreground/60">Shift + Enter for a new line</div>
+                      <div className="flex items-center gap-1.5">
+                        {uploadedImage ? <Badge variant="secondary" className="text-[10px] h-4">Image ready</Badge> : null}
+                        {gpsData ? <Badge variant="secondary" className="text-[10px] h-4">Field ready</Badge> : null}
                       </div>
                     </div>
                   </div>
@@ -295,11 +305,15 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={22} minSize={18} maxSize={40}>
-          <aside className="flex h-full flex-col border-l bg-background/70 p-4 backdrop-blur">
-            <Card className="flex-1 overflow-hidden">
-              <CardContent className="h-full p-4">{toolPanel}</CardContent>
-            </Card>
+        <ResizablePanel defaultSize={24} minSize={20} maxSize={40}>
+          <aside className="flex h-full flex-col border-l bg-background/70 backdrop-blur">
+            <div className="flex h-full flex-col overflow-hidden p-4">
+              <div className="flex-1 overflow-y-auto">
+                <div className="rounded-xl border bg-card p-4 shadow-sm">
+                  {toolPanel}
+                </div>
+              </div>
+            </div>
           </aside>
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -308,7 +322,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
         <div className="flex items-center justify-between gap-3 border-b bg-background/70 px-4 py-3 backdrop-blur">
           <div className="min-w-0">
             <div className="truncate text-sm font-medium tracking-tight">
-              {view === "analysis" ? "CaneSense Analysis" : "CaneSense Dashboard"}
+              {view === "analysis" ? "CaneSense" : "Dashboard"}
             </div>
             <div className="truncate text-xs text-muted-foreground">
               {view === "analysis" ? "Chat + field tools" : "Metrics overview"}
@@ -394,7 +408,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
         <ScrollArea className="flex-1">
           {view === "analysis" ? (
-            <div className="mx-auto flex w-full max-w-[820px] flex-col gap-4 px-4 py-6">
+            <div className="mx-auto flex w-full flex-col gap-3 px-4 py-6">
               {messages.map((m, idx) => {
                 const isUser = m.role === "user"
                 return (
@@ -406,23 +420,25 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                     className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}
                   >
                     {!isUser ? (
-                      <Avatar className="size-8">
-                        <AvatarFallback className="bg-foreground text-background text-xs">CS</AvatarFallback>
+                      <Avatar className="size-7">
+                        <AvatarFallback className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white text-[10px]">CS</AvatarFallback>
                       </Avatar>
                     ) : null}
 
                     <div
                       className={cn(
-                        "max-w-[680px] rounded-xl px-4 py-3 text-sm leading-relaxed",
-                        isUser ? "bg-secondary text-secondary-foreground" : "bg-card text-card-foreground border shadow-sm"
+                        "max-w-[min(85%,480px)] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                        isUser
+                          ? "bg-primary/[0.08] text-foreground"
+                          : "bg-card text-card-foreground border shadow-xs"
                       )}
                     >
                       {m.content}
                     </div>
 
                     {isUser ? (
-                      <Avatar className="size-8">
-                        <AvatarFallback className="bg-muted text-xs">U</AvatarFallback>
+                      <Avatar className="size-7">
+                        <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">U</AvatarFallback>
                       </Avatar>
                     ) : null}
                   </motion.div>
@@ -430,7 +446,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
               })}
             </div>
           ) : (
-            <div className="mx-auto w-full max-w-[1100px] px-4 py-6">
+            <div className="mx-auto w-full px-4 py-6">
               <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} />
             </div>
           )}
@@ -438,30 +454,32 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
         {view === "analysis" ? (
           <div className="border-t bg-background/70 backdrop-blur">
-            <div className="mx-auto w-full max-w-[820px] px-4 py-4">
-              <div className="rounded-xl border bg-card p-2 shadow-sm">
-                <div className="flex items-end gap-2">
-                  <Textarea
-                    value={composer}
-                    onChange={(e) => setComposer(e.target.value)}
-                    placeholder="Message CaneSense…"
-                    className="min-h-[44px] resize-none border-0 bg-transparent px-3 py-2 shadow-none focus-visible:ring-0"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault()
-                        onSend()
-                      }
-                    }}
-                  />
-                  <Button size="icon" aria-label="Send" onClick={onSend}>
+            <div className="mx-auto w-full px-4 py-3">
+              <div className="rounded-2xl border bg-card p-1.5 shadow-xs">
+                <div className="flex items-end gap-1.5">
+                  <div className="flex-1">
+                    <Textarea
+                      value={composer}
+                      onChange={(e) => setComposer(e.target.value)}
+                      placeholder="Message CaneSense…"
+                      className="min-h-[40px] resize-none border-0 bg-transparent px-3 py-2.5 text-sm shadow-none focus-visible:ring-0"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault()
+                          onSend()
+                        }
+                      }}
+                    />
+                  </div>
+                  <Button size="icon" aria-label="Send" onClick={onSend} className="mb-[3px]">
                     <Send />
                   </Button>
                 </div>
-                <div className="mt-1 flex items-center justify-between px-3 pb-1">
-                  <div className="text-xs text-muted-foreground">Shift + Enter for a new line</div>
-                  <div className="flex items-center gap-2">
-                    {uploadedImage ? <Badge variant="secondary">Image ready</Badge> : null}
-                    {gpsData ? <Badge variant="secondary">Field ready</Badge> : null}
+                <div className="flex items-center justify-between px-3 pb-1.5">
+                  <div className="text-[11px] text-muted-foreground/60">Shift + Enter for a new line</div>
+                  <div className="flex items-center gap-1.5">
+                    {uploadedImage ? <Badge variant="secondary" className="text-[10px] h-4">Image ready</Badge> : null}
+                    {gpsData ? <Badge variant="secondary" className="text-[10px] h-4">Field ready</Badge> : null}
                   </div>
                 </div>
               </div>
