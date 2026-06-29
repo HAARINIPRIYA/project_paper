@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from "framer-motion"
 import { ImageUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 
 function UploadZone({ onImageUpload, uploadedImage }) {
   const [isDragging, setIsDragging] = useState(false)
@@ -73,10 +72,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`
-              rounded-xl border border-dashed p-4 transition-colors
-              ${isDragging ? "border-ring bg-muted/60" : "border-border bg-card"}
-            `}
+            className={"upload-dropzone" + (isDragging ? " dragging" : "")}
           >
             <input
               ref={fileInputRef}
@@ -87,7 +83,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             />
 
             <div className="flex items-start gap-3">
-              <div className={cn("rounded-lg border bg-background p-1.5 shrink-0", isDragging && "border-ring")}>
+              <div className={"upload-icon-wrap" + (isDragging ? " dragging" : "")}>
                 <ImageUp className="size-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -118,7 +114,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             </div>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="max-w-[220px] truncate">
+                <Badge variant="secondary" className="truncate" style={{ maxWidth: "220px" }}>
                   {uploadedImage.name}
                 </Badge>
               </div>

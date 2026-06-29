@@ -14,7 +14,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="app-root">
       <Dashboard
         uploadedImage={uploadedImage}
         onImageUpload={handleImageUpload}

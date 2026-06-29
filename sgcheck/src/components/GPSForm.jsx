@@ -4,7 +4,6 @@ import { Calendar, MapPin } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
 
 function GPSForm({ onSubmit, gpsData }) {
   const [formData, setFormData] = useState({
@@ -92,10 +91,10 @@ function GPSForm({ onSubmit, gpsData }) {
             const Icon = f.icon
             const err = errors[f.name]
             return (
-              <div key={f.name} className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <Icon className="text-muted-foreground" />
-                  <label className="text-xs font-medium text-muted-foreground">{f.label}</label>
+              <div key={f.name} className="field-section">
+                <div className="field-label-row">
+                  <Icon className="text-muted-foreground size-4" />
+                  <label className="field-label">{f.label}</label>
                 </div>
                 <Input
                   name={f.name}
@@ -103,7 +102,7 @@ function GPSForm({ onSubmit, gpsData }) {
                   onChange={handleChange}
                   placeholder={f.placeholder}
                   aria-invalid={Boolean(err)}
-                  className={cn(err && "border-destructive focus-visible:ring-destructive/20")}
+                  style={err ? { borderColor: "var(--destructive)", boxShadow: "0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent)" } : {}}
                 />
                 {err ? (
                   <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-destructive">
@@ -114,10 +113,10 @@ function GPSForm({ onSubmit, gpsData }) {
             )
           })}
 
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
-              <Calendar className="text-muted-foreground" />
-              <label className="text-xs font-medium text-muted-foreground">Planting date</label>
+          <div className="field-section">
+            <div className="field-label-row">
+              <Calendar className="text-muted-foreground size-4" />
+              <label className="field-label">Planting date</label>
             </div>
             <Input
               type="date"
@@ -125,7 +124,7 @@ function GPSForm({ onSubmit, gpsData }) {
               value={formData.plantingDate}
               onChange={handleChange}
               aria-invalid={Boolean(errors.plantingDate)}
-              className={cn(errors.plantingDate && "border-destructive focus-visible:ring-destructive/20")}
+              style={errors.plantingDate ? { borderColor: "var(--destructive)", boxShadow: "0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent)" } : {}}
             />
             {errors.plantingDate ? (
               <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-destructive">
@@ -136,12 +135,12 @@ function GPSForm({ onSubmit, gpsData }) {
         </div>
 
         <Button type="submit" disabled={isSubmitting} className="mt-1">
-          {isSubmitting ? "Saving…" : "Save field details"}
+          {isSubmitting ? "Saving..." : "Save field details"}
         </Button>
 
         {gpsData ? (
           <div className="text-xs text-muted-foreground">
-            Saved: {gpsData.latitude}, {gpsData.longitude} · {gpsData.plantingDate}
+            Saved: {gpsData.latitude}, {gpsData.longitude} . {gpsData.plantingDate}
           </div>
         ) : null}
       </form>

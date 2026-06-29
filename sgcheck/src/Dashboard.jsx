@@ -21,7 +21,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
-import { cn } from "@/lib/utils"
 import GPSForm from "./components/GPSForm"
 import UploadZone from "./components/UploadZone"
 import DashboardPage from "./pages/DashboardPage"
@@ -35,7 +34,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
       id: "m1",
       role: "assistant",
       content:
-        "Hi — I’m CaneSense. Upload a billet image and add field coordinates to start a growth-quality analysis.",
+        "Hi — I'm CaneSense. Upload a billet image and add field coordinates to start a growth-quality analysis.",
     },
   ])
 
@@ -60,15 +59,15 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
         <Badge variant="secondary">Tools</Badge>
       </div>
 
-      <Tabs defaultValue="image" className="w-full">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="image">Billet Image</TabsTrigger>
-          <TabsTrigger value="field">Field Details</TabsTrigger>
+      <Tabs defaultValue="image">
+        <TabsList className="w-full justify-start" style={{ width: "100%", justifyContent: "flex-start" }}>
+          <TabsTrigger value="image" style={{ flex: "1 1 0%" }}>Billet Image</TabsTrigger>
+          <TabsTrigger value="field" style={{ flex: "1 1 0%" }}>Field Details</TabsTrigger>
         </TabsList>
-        <TabsContent value="image" className="mt-4">
+        <TabsContent value="image" style={{ marginTop: "1rem" }}>
           <UploadZone onImageUpload={onImageUpload} uploadedImage={uploadedImage} />
         </TabsContent>
-        <TabsContent value="field" className="mt-4">
+        <TabsContent value="field" style={{ marginTop: "1rem" }}>
           <GPSForm onSubmit={onGPSSubmit} gpsData={gpsData} />
         </TabsContent>
       </Tabs>
@@ -85,7 +84,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
         id: `${Date.now()}-a`,
         role: "assistant",
         content:
-          "Got it. If you haven’t yet, add an image and field details in the Tools panel so I can contextualize the analysis.",
+          "Got it. If you haven't yet, add an image and field details in the Tools panel so I can contextualize the analysis.",
       },
     ])
     setComposer("")
@@ -94,17 +93,17 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
   return (
     <div className="h-screen w-full">
       <ResizablePanelGroup direction="horizontal" className="hidden md:flex">
-        <ResizablePanel defaultSize={20} minSize={8} maxSize={30}>
-          <aside className="flex h-full flex-col border-r bg-background/70 backdrop-blur">
+        <ResizablePanel style={{ minWidth: 0 }} defaultSize={20} minSize={6} maxSize={30}>
+          <aside className="sidebar" style={{ overflow: "hidden" }}>
             <div className="px-4 py-4">
               <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-xs">
-                    <span className="text-[13px] font-semibold leading-none tracking-tight">CS</span>
+                <div className="sidebar-brand">
+                  <div className="sidebar-logo">
+                    <span>CS</span>
                   </div>
                   <div className="leading-tight">
-                    <div className="text-sm font-semibold tracking-tight">CaneSense</div>
-                    <div className="text-[11px] text-muted-foreground">Workspace</div>
+                    <div className="sidebar-name">CaneSense</div>
+                    <div className="sidebar-subtitle">Workspace</div>
                   </div>
                 </div>
                 {view === "analysis" ? (
@@ -120,35 +119,25 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                 <button
                   type="button"
                   onClick={() => setView("dashboard")}
-                  className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all ${
-                    view === "dashboard"
-                      ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                  }`}
+                  className={"sidebar-nav-btn" + (view === "dashboard" ? " active" : "")}
                 >
-                  <LayoutDashboard className="size-4 shrink-0" />
+                  <LayoutDashboard />
                   Dashboard
                 </button>
                 <button
                   type="button"
                   onClick={() => setView("analysis")}
-                  className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all ${
-                    view === "analysis"
-                      ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                  }`}
+                  className={"sidebar-nav-btn" + (view === "analysis" ? " active" : "")}
                 >
-                  <MessageSquareText className="size-4 shrink-0" />
+                  <MessageSquareText />
                   Analysis
                 </button>
               </div>
             </div>
 
-            <div className="px-4 pb-4">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input className="pl-9" placeholder={view === "analysis" ? "Search chats" : "Search"} />
-              </div>
+            <div className="sidebar-search-wrap">
+              <Search className="sidebar-search-icon" />
+              <Input className="pl-9" placeholder={view === "analysis" ? "Search chats" : "Search"} />
             </div>
 
             <Separator />
@@ -161,14 +150,10 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                       key={c.id}
                       type="button"
                       onClick={() => setActiveChatId(c.id)}
-                      className={cn(
-                        "rounded-lg px-3 py-2 text-left transition-colors",
-                        "hover:bg-muted/70",
-                        activeChatId === c.id && "bg-muted"
-                      )}
+                      className={"chat-item" + (activeChatId === c.id ? " active" : "")}
                     >
-                      <div className="text-sm font-medium leading-tight">{c.title}</div>
-                      <div className="text-xs text-muted-foreground">{c.subtitle}</div>
+                      <div className="chat-item-title">{c.title}</div>
+                      <div className="chat-item-subtitle">{c.subtitle}</div>
                     </button>
                   ))}
                 </div>
@@ -179,14 +164,14 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
               )}
             </ScrollArea>
 
-            <div className="border-t p-3">
-              <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50">
-                <Avatar className="size-7">
-                  <AvatarFallback className="bg-muted text-[11px] text-muted-foreground">U</AvatarFallback>
+            <div className="sidebar-user">
+              <div className="sidebar-user-inner">
+                <Avatar size="sm">
+                  <AvatarFallback>U</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium leading-tight">You</div>
-                  <div className="truncate text-[11px] text-muted-foreground">CaneSense workspace</div>
+                  <div className="truncate sidebar-subtitle">CaneSense workspace</div>
                 </div>
               </div>
             </div>
@@ -195,14 +180,14 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={56} minSize={20}>
+        <ResizablePanel style={{ minWidth: 0 }} defaultSize={56} minSize={15}>
           <main className="flex h-full min-w-0 flex-col">
-            <div className="flex items-center justify-between gap-3 border-b bg-background/70 px-4 py-3 backdrop-blur">
+            <div className="main-header">
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium tracking-tight">
+                <div className="main-header-title">
                   {view === "analysis" ? "CaneSense" : "Dashboard"}
                 </div>
-                <div className="truncate text-xs text-muted-foreground">
+                <div className="main-header-subtitle">
                   {view === "analysis"
                     ? "Ask questions, upload a billet image, and set field context."
                     : "Metrics and session overview."}
@@ -214,15 +199,15 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                   <Paperclip />
                 </Button>
                 <div className="flex items-center gap-1.5">
-                  {uploadedImage ? <span className="size-1.5 rounded-full bg-emerald-400" title="Image ready" /> : null}
-                  {gpsData ? <span className="size-1.5 rounded-full bg-emerald-400" title="Field data ready" /> : null}
+                  {uploadedImage ? <span className="status-dot ready" title="Image ready" /> : null}
+                  {gpsData ? <span className="status-dot ready" title="Field data ready" /> : null}
                 </div>
               </div>
             </div>
 
             <ScrollArea className="flex-1">
               {view === "analysis" ? (
-                <div className="mx-auto flex w-full max-w-[720px] flex-col gap-3 px-4 py-6">
+                <div style={{ margin: "0 auto", maxWidth: "720px", display: "flex", flexDirection: "column", gap: "0.75rem", padding: "1.5rem 1rem" }}>
                   {messages.map((m, idx) => {
                     const isUser = m.role === "user"
                     return (
@@ -231,28 +216,21 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.22, delay: Math.min(0.02 * idx, 0.18) }}
-                        className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}
+                        className={"message-row" + (isUser ? " user" : " assistant")}
                       >
                         {!isUser ? (
-                          <Avatar className="size-8">
-                            <AvatarFallback className="bg-foreground text-background text-xs">CS</AvatarFallback>
+                          <Avatar>
+                            <AvatarFallback style={{ background: "var(--fg)", color: "var(--bg)" }}>CS</AvatarFallback>
                           </Avatar>
                         ) : null}
 
-                        <div
-                          className={cn(
-                            "max-w-[min(90%,620px)] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-                            isUser
-                              ? "bg-primary/[0.08] text-foreground"
-                              : "bg-card text-card-foreground border shadow-xs"
-                          )}
-                        >
+                        <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
                           {m.content}
                         </div>
 
                         {isUser ? (
-                          <Avatar className="size-8">
-                            <AvatarFallback className="bg-muted text-xs">U</AvatarFallback>
+                          <Avatar>
+                            <AvatarFallback>U</AvatarFallback>
                           </Avatar>
                         ) : null}
                       </motion.div>
@@ -267,16 +245,16 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
             </ScrollArea>
 
             {view === "analysis" ? (
-              <div className="border-t bg-background/70 backdrop-blur">
-                <div className="mx-auto w-full max-w-[720px] px-4 py-3">
-                  <div className="rounded-2xl border bg-card p-1.5 shadow-xs">
-                    <div className="flex items-end gap-1.5">
-                      <div className="flex-1">
+              <div className="composer-wrap">
+                <div className="composer-inner">
+                  <div className="composer-box">
+                    <div className="composer-flex">
+                      <div className="composer-input-wrap">
                         <Textarea
                           value={composer}
                           onChange={(e) => setComposer(e.target.value)}
                           placeholder="Message CaneSense…"
-                          className="min-h-[40px] resize-none border-0 bg-transparent px-3 py-2.5 text-sm shadow-none focus-visible:ring-0"
+                          style={{ minHeight: "40px", border: "none", background: "transparent", padding: "0.625rem 0.75rem", fontSize: "0.875rem", boxShadow: "none" }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter" && !e.shiftKey) {
                               e.preventDefault()
@@ -285,15 +263,15 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                           }}
                         />
                       </div>
-                      <Button size="icon" aria-label="Send" onClick={onSend} className="mb-[3px]">
+                      <Button size="icon" aria-label="Send" onClick={onSend} style={{ marginBottom: "3px" }}>
                         <Send />
                       </Button>
                     </div>
-                    <div className="flex items-center justify-between px-3 pb-1.5">
-                      <div className="text-[11px] text-muted-foreground/60">Shift + Enter for a new line</div>
-                      <div className="flex items-center gap-1.5">
-                        {uploadedImage ? <Badge variant="secondary" className="text-[10px] h-4">Image ready</Badge> : null}
-                        {gpsData ? <Badge variant="secondary" className="text-[10px] h-4">Field ready</Badge> : null}
+                    <div className="composer-footer">
+                      <div className="composer-hint">Shift + Enter for a new line</div>
+                      <div className="composer-status">
+                        {uploadedImage ? <Badge variant="secondary" style={{ fontSize: "10px", height: "1rem" }}>Image ready</Badge> : null}
+                        {gpsData ? <Badge variant="secondary" style={{ fontSize: "10px", height: "1rem" }}>Field ready</Badge> : null}
                       </div>
                     </div>
                   </div>
@@ -305,11 +283,11 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={24} minSize={12} maxSize={45}>
-          <aside className="flex h-full flex-col border-l bg-background/70 backdrop-blur">
-            <div className="flex h-full min-w-0 flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto">
-                <div className="rounded-xl border bg-card p-3 shadow-sm sm:p-4">
+        <ResizablePanel style={{ minWidth: 0 }} defaultSize={24} minSize={6} maxSize={45}>
+          <aside className="flex h-full flex-col border-l" style={{ background: "color-mix(in srgb, var(--bg) 70%, transparent)", backdropFilter: "blur(8px)", overflow: "hidden" }}>
+            <div className="tools-panel">
+              <div className="tools-scroll">
+                <div className="tools-card">
                   {toolPanel}
                 </div>
               </div>
@@ -319,7 +297,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
       </ResizablePanelGroup>
 
       <div className="flex h-full flex-col md:hidden">
-        <div className="flex items-center justify-between gap-3 border-b bg-background/70 px-4 py-3 backdrop-blur">
+        <div className="flex items-center justify-between gap-3 border-b px-4 py-3" style={{ background: "color-mix(in srgb, var(--bg) 70%, transparent)", backdropFilter: "blur(8px)" }}>
           <div className="min-w-0">
             <div className="truncate text-sm font-medium tracking-tight">
               {view === "analysis" ? "CaneSense" : "Dashboard"}
@@ -336,19 +314,19 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                   <Menu />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[320px]">
+              <SheetContent side="left">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 flex flex-col gap-4">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="nav-btn-grid">
                     <Button
                       type="button"
                       variant={view === "dashboard" ? "secondary" : "ghost"}
                       size="sm"
                       onClick={() => setView("dashboard")}
                     >
-                      <LayoutDashboard data-icon="inline-start" />
+                      <LayoutDashboard />
                       Dashboard
                     </Button>
                     <Button
@@ -357,7 +335,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                       size="sm"
                       onClick={() => setView("analysis")}
                     >
-                      <MessageSquareText data-icon="inline-start" />
+                      <MessageSquareText />
                       Analysis
                     </Button>
                   </div>
@@ -369,14 +347,10 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                           key={c.id}
                           type="button"
                           onClick={() => setActiveChatId(c.id)}
-                          className={cn(
-                            "rounded-lg px-3 py-2 text-left transition-colors",
-                            "hover:bg-muted/70",
-                            activeChatId === c.id && "bg-muted"
-                          )}
+                          className={"chat-item" + (activeChatId === c.id ? " active" : "")}
                         >
-                          <div className="text-sm font-medium leading-tight">{c.title}</div>
-                          <div className="text-xs text-muted-foreground">{c.subtitle}</div>
+                          <div className="chat-item-title">{c.title}</div>
+                          <div className="chat-item-subtitle">{c.subtitle}</div>
                         </button>
                       ))}
                     </div>
@@ -392,11 +366,11 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <SlidersHorizontal data-icon="inline-start" />
+                  <SlidersHorizontal />
                   Tools
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[360px] sm:w-[420px]">
+              <SheetContent side="right" style={{ width: "360px" }} className="sm:w-[420px]">
                 <SheetHeader>
                   <SheetTitle>Tools</SheetTitle>
                 </SheetHeader>
@@ -408,7 +382,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
         <ScrollArea className="flex-1">
           {view === "analysis" ? (
-            <div className="mx-auto flex w-full flex-col gap-3 px-4 py-6">
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "1.5rem 1rem" }}>
               {messages.map((m, idx) => {
                 const isUser = m.role === "user"
                 return (
@@ -417,28 +391,21 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.22, delay: Math.min(0.02 * idx, 0.18) }}
-                    className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}
+                    className={"message-row" + (isUser ? " user" : " assistant")}
                   >
                     {!isUser ? (
-                      <Avatar className="size-7">
-                        <AvatarFallback className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white text-[10px]">CS</AvatarFallback>
+                      <Avatar>
+                        <AvatarFallback style={{ background: "linear-gradient(to bottom right, var(--color-emerald-600), var(--color-emerald-700))", color: "#fff" }}>CS</AvatarFallback>
                       </Avatar>
                     ) : null}
 
-                    <div
-                      className={cn(
-                        "max-w-[min(85%,480px)] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-                        isUser
-                          ? "bg-primary/[0.08] text-foreground"
-                          : "bg-card text-card-foreground border shadow-xs"
-                      )}
-                    >
+                    <div className={"message-bubble" + (isUser ? " user" : " assistant")} style={{ maxWidth: "min(85%, 480px)" }}>
                       {m.content}
                     </div>
 
                     {isUser ? (
-                      <Avatar className="size-7">
-                        <AvatarFallback className="bg-muted text-[10px] text-muted-foreground">U</AvatarFallback>
+                      <Avatar size="sm">
+                        <AvatarFallback>U</AvatarFallback>
                       </Avatar>
                     ) : null}
                   </motion.div>
@@ -453,16 +420,16 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
         </ScrollArea>
 
         {view === "analysis" ? (
-          <div className="border-t bg-background/70 backdrop-blur">
-            <div className="mx-auto w-full px-4 py-3">
-              <div className="rounded-2xl border bg-card p-1.5 shadow-xs">
-                <div className="flex items-end gap-1.5">
-                  <div className="flex-1">
+          <div className="composer-wrap">
+            <div className="px-4 py-3">
+              <div className="composer-box">
+                <div className="composer-flex">
+                  <div className="composer-input-wrap">
                     <Textarea
                       value={composer}
                       onChange={(e) => setComposer(e.target.value)}
                       placeholder="Message CaneSense…"
-                      className="min-h-[40px] resize-none border-0 bg-transparent px-3 py-2.5 text-sm shadow-none focus-visible:ring-0"
+                      style={{ minHeight: "40px", border: "none", background: "transparent", padding: "0.625rem 0.75rem", fontSize: "0.875rem", boxShadow: "none" }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault()
@@ -471,15 +438,15 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                       }}
                     />
                   </div>
-                  <Button size="icon" aria-label="Send" onClick={onSend} className="mb-[3px]">
+                  <Button size="icon" aria-label="Send" onClick={onSend} style={{ marginBottom: "3px" }}>
                     <Send />
                   </Button>
                 </div>
-                <div className="flex items-center justify-between px-3 pb-1.5">
-                  <div className="text-[11px] text-muted-foreground/60">Shift + Enter for a new line</div>
-                  <div className="flex items-center gap-1.5">
-                    {uploadedImage ? <Badge variant="secondary" className="text-[10px] h-4">Image ready</Badge> : null}
-                    {gpsData ? <Badge variant="secondary" className="text-[10px] h-4">Field ready</Badge> : null}
+                <div className="composer-footer">
+                  <div className="composer-hint">Shift + Enter for a new line</div>
+                  <div className="composer-status">
+                    {uploadedImage ? <Badge variant="secondary" style={{ fontSize: "10px", height: "1rem" }}>Image ready</Badge> : null}
+                    {gpsData ? <Badge variant="secondary" style={{ fontSize: "10px", height: "1rem" }}>Field ready</Badge> : null}
                   </div>
                 </div>
               </div>
