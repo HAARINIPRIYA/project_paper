@@ -511,10 +511,12 @@ body {
 .chat-item-title { font-size: 0.875rem; font-weight: 500; line-height: 1.25; }
 .chat-item-subtitle { font-size: 0.75rem; color: var(--muted-fg); }
 
-/* ===== Resizable Handle ===== */
-.resize-handle { position: relative; display: flex; width: 8px; flex-shrink: 0; align-items: center; justify-content: center; background: var(--border); cursor: col-resize; transition: background 150ms; touch-action: none; user-select: none; }
-.resize-handle:hover { background: color-mix(in srgb, var(--fg) 20%, transparent); }
-.resize-handle[data-resize-handle-active] { background: color-mix(in srgb, var(--fg) 30%, transparent); }
+/* ===== App Grid Layout ===== */
+.app-grid { display: grid; grid-template-columns: 260px 1fr 320px; height: 100vh; overflow: hidden; }
+.app-grid > * { min-width: 0; min-height: 0; overflow: hidden; }
+@media (max-width: 767px) {
+  .app-grid { display: none; }
+}
 
 /* ===== Card ===== */
 .cane-card { display: flex; flex-direction: column; gap: var(--card-spacing); overflow: hidden; border-radius: calc(var(--radius) + 2px); background: var(--card-bg); padding: var(--card-spacing) 0; color: var(--card-fg); box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent); }

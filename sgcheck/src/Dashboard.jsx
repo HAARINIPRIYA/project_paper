@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
+
 import GPSForm from "./components/GPSForm"
 import UploadZone from "./components/UploadZone"
 import DashboardPage from "./pages/DashboardPage"
@@ -92,8 +92,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
   return (
     <div className="h-screen w-full">
-      <ResizablePanelGroup orientation="horizontal" className="hidden md:flex">
-        <ResizablePanel defaultSize={20} minSize={6} maxSize={30}>
+      <div className="app-grid hidden md:flex">
           <aside className="sidebar" style={{ overflow: "hidden" }}>
             <div className="px-4 py-4">
               <div className="flex items-center justify-between gap-3">
@@ -176,11 +175,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
               </div>
             </div>
           </aside>
-        </ResizablePanel>
 
-        <ResizableHandle />
-
-        <ResizablePanel defaultSize={56} minSize={15}>
           <main className="flex h-full min-w-0 flex-col">
             <div className="main-header">
               <div className="min-w-0">
@@ -279,11 +274,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
               </div>
             ) : null}
           </main>
-        </ResizablePanel>
 
-        <ResizableHandle />
-
-        <ResizablePanel defaultSize={24} minSize={6} maxSize={45}>
           <aside className="flex h-full flex-col border-l" style={{ background: "color-mix(in srgb, var(--bg) 70%, transparent)", backdropFilter: "blur(8px)", overflow: "hidden" }}>
             <div className="tools-panel">
               <div className="tools-scroll">
@@ -293,8 +284,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
               </div>
             </div>
           </aside>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      </div>
 
       <div className="flex h-full flex-col md:hidden">
         <div className="flex items-center justify-between gap-3 border-b px-4 py-3" style={{ background: "color-mix(in srgb, var(--bg) 70%, transparent)", backdropFilter: "blur(8px)" }}>
