@@ -15,9 +15,10 @@ function ResizablePanelGroup({
 }
 
 function ResizablePanel({
+  style,
   ...props
 }) {
-  return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
+  return <ResizablePrimitive.Panel data-slot="resizable-panel" style={{ minWidth: 0, ...style }} {...props} />;
 }
 
 function ResizableHandle({
