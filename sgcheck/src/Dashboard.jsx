@@ -94,7 +94,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
   return (
     <div className="h-screen w-full">
       <ResizablePanelGroup direction="horizontal" className="hidden md:flex">
-        <ResizablePanel defaultSize={20} minSize={14} maxSize={26}>
+        <ResizablePanel defaultSize={20} minSize={8} maxSize={30}>
           <aside className="flex h-full flex-col border-r bg-background/70 backdrop-blur">
             <div className="px-4 py-4">
               <div className="flex items-center justify-between gap-3">
@@ -195,7 +195,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={56} minSize={30}>
+        <ResizablePanel defaultSize={56} minSize={20}>
           <main className="flex h-full min-w-0 flex-col">
             <div className="flex items-center justify-between gap-3 border-b bg-background/70 px-4 py-3 backdrop-blur">
               <div className="min-w-0">
@@ -305,11 +305,11 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={24} minSize={20} maxSize={40}>
+        <ResizablePanel defaultSize={24} minSize={12} maxSize={45}>
           <aside className="flex h-full flex-col border-l bg-background/70 backdrop-blur">
-            <div className="flex h-full flex-col overflow-hidden p-4">
+            <div className="flex h-full min-w-0 flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto">
-                <div className="rounded-xl border bg-card p-4 shadow-sm">
+                <div className="rounded-xl border bg-card p-3 shadow-sm sm:p-4">
                   {toolPanel}
                 </div>
               </div>

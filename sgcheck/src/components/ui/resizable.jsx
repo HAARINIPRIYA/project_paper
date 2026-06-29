@@ -34,13 +34,13 @@ function ResizableHandle({
       )}
       {...props}>
       <div className={cn(
-        "z-10 h-8 w-[3px] shrink-0 rounded-full bg-border transition-all duration-150",
+        "pointer-events-none z-10 h-8 w-[3px] shrink-0 rounded-full bg-border transition-all duration-150",
         "group-hover:h-10 group-hover:w-[4px] group-hover:bg-foreground/20",
         "group-data-[resize-handle-active]:h-10 group-data-[resize-handle-active]:w-[4px] group-data-[resize-handle-active]:bg-foreground/30"
       )} />
       {withHandle && (
-        <div className="absolute z-20 flex h-10 w-[18px] items-center justify-center rounded-full bg-border/50 opacity-0 transition-all duration-150 group-hover:opacity-100 group-data-active:opacity-100 group-hover:bg-foreground/10">
-          <div className="flex flex-col gap-[3px]">
+        <div className="pointer-events-none absolute z-20 flex h-10 w-[18px] items-center justify-center rounded-full bg-border/50 opacity-0 transition-all duration-150 group-hover:opacity-100 group-data-active:opacity-100 group-hover:bg-foreground/10">
+          <div className="pointer-events-none flex flex-col gap-[3px]">
             <div className="h-[3px] w-[3px] rounded-full bg-foreground/30" />
             <div className="h-[3px] w-[3px] rounded-full bg-foreground/30" />
             <div className="h-[3px] w-[3px] rounded-full bg-foreground/30" />
