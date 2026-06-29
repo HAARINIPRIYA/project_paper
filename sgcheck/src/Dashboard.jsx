@@ -92,7 +92,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
 
   return (
     <div className="h-screen w-full">
-      <ResizablePanelGroup direction="horizontal" className="hidden md:flex">
+      <ResizablePanelGroup orientation="horizontal" className="hidden md:flex">
         <ResizablePanel defaultSize={20} minSize={6} maxSize={30}>
           <aside className="sidebar" style={{ overflow: "hidden" }}>
             <div className="px-4 py-4">
@@ -178,7 +178,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
           </aside>
         </ResizablePanel>
 
-        <ResizableHandle withHandle />
+        <ResizableHandle />
 
         <ResizablePanel defaultSize={56} minSize={15}>
           <main className="flex h-full min-w-0 flex-col">
@@ -281,7 +281,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
           </main>
         </ResizablePanel>
 
-        <ResizableHandle withHandle />
+        <ResizableHandle />
 
         <ResizablePanel defaultSize={24} minSize={6} maxSize={45}>
           <aside className="flex h-full flex-col border-l" style={{ background: "color-mix(in srgb, var(--bg) 70%, transparent)", backdropFilter: "blur(8px)", overflow: "hidden" }}>

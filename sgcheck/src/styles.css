@@ -512,17 +512,9 @@ body {
 .chat-item-subtitle { font-size: 0.75rem; color: var(--muted-fg); }
 
 /* ===== Resizable Handle ===== */
-.resize-handle { position: relative; display: flex; width: 10px; flex-shrink: 0; align-items: center; justify-content: center; background: transparent; cursor: col-resize; transition: background 150ms; }
-.resize-handle::after { content: ''; position: absolute; inset: -6px; }
-.resize-handle:hover { background: color-mix(in srgb, var(--accent) 50%, transparent); }
-.resize-handle[data-resize-handle-active] { background: color-mix(in srgb, var(--accent) 70%, transparent); }
-.resize-handle-bar { pointer-events: none; z-index: 10; height: 2rem; width: 3px; flex-shrink: 0; border-radius: 9999px; background: var(--border); transition: all 150ms; }
-.resize-handle:hover .resize-handle-bar { height: 2.5rem; width: 4px; background: color-mix(in srgb, var(--fg) 20%, transparent); }
-.resize-handle[data-resize-handle-active] .resize-handle-bar { height: 2.5rem; width: 4px; background: color-mix(in srgb, var(--fg) 30%, transparent); }
-.resize-handle-grip { pointer-events: none; position: absolute; z-index: 20; display: flex; height: 2.5rem; width: 18px; align-items: center; justify-content: center; border-radius: 9999px; background: color-mix(in srgb, var(--border) 50%, transparent); opacity: 0; transition: all 150ms; }
-.resize-handle:hover .resize-handle-grip { opacity: 1; background: color-mix(in srgb, var(--fg) 10%, transparent); }
-.resize-handle-dots { pointer-events: none; display: flex; flex-direction: column; gap: 3px; }
-.resize-handle-dot { height: 3px; width: 3px; border-radius: 9999px; background: color-mix(in srgb, var(--fg) 30%, transparent); }
+.resize-handle { position: relative; display: flex; width: 8px; flex-shrink: 0; align-items: center; justify-content: center; background: var(--border); cursor: col-resize; transition: background 150ms; touch-action: none; user-select: none; }
+.resize-handle:hover { background: color-mix(in srgb, var(--fg) 20%, transparent); }
+.resize-handle[data-resize-handle-active] { background: color-mix(in srgb, var(--fg) 30%, transparent); }
 
 /* ===== Card ===== */
 .cane-card { display: flex; flex-direction: column; gap: var(--card-spacing); overflow: hidden; border-radius: calc(var(--radius) + 2px); background: var(--card-bg); padding: var(--card-spacing) 0; color: var(--card-fg); box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent); }

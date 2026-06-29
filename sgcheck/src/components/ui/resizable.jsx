@@ -22,7 +22,6 @@ function ResizablePanel({
 }
 
 function ResizableHandle({
-  withHandle,
   className,
   ...props
 }) {
@@ -30,18 +29,7 @@ function ResizableHandle({
     <ResizablePrimitive.Separator
       data-slot="resizable-handle"
       className={cn("resize-handle", className)}
-      {...props}>
-      <div className="resize-handle-bar" />
-      {withHandle && (
-        <div className="resize-handle-grip">
-          <div className="resize-handle-dots">
-            <div className="resize-handle-dot" />
-            <div className="resize-handle-dot" />
-            <div className="resize-handle-dot" />
-          </div>
-        </div>
-      )}
-    </ResizablePrimitive.Separator>
+      {...props} />
   );
 }
 
