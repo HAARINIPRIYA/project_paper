@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from "framer-motion"
 import { ImageUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 
 function UploadZone({ onImageUpload, uploadedImage }) {
   const [isDragging, setIsDragging] = useState(false)
@@ -73,10 +72,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`
-              rounded-xl border border-dashed p-5 transition-colors
-              ${isDragging ? "border-ring bg-muted/60" : "border-border bg-card"}
-            `}
+            className={"upload-dropzone" + (isDragging ? " dragging" : "")}
           >
             <input
               ref={fileInputRef}
@@ -86,9 +82,9 @@ function UploadZone({ onImageUpload, uploadedImage }) {
               className="hidden"
             />
 
-            <div className="flex items-start gap-4">
-              <div className={cn("rounded-lg border bg-background p-2", isDragging && "border-ring")}>
-                <ImageUp />
+            <div className="flex items-start gap-3">
+              <div className={"upload-icon-wrap" + (isDragging ? " dragging" : "")}>
+                <ImageUp className="size-4" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium">
@@ -97,12 +93,9 @@ function UploadZone({ onImageUpload, uploadedImage }) {
                 <div className="text-xs text-muted-foreground">
                   JPG / PNG / WEBP. Or choose a file.
                 </div>
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-2 flex items-center gap-2">
                   <Button type="button" variant="secondary" size="sm" onClick={handleClick}>
                     Choose file
-                  </Button>
-                  <Button type="button" variant="ghost" size="sm" onClick={handleClick}>
-                    Browse
                   </Button>
                 </div>
               </div>
@@ -117,11 +110,11 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             className="flex flex-col gap-3"
           >
             <div className="overflow-hidden rounded-xl border bg-muted">
-              <img src={uploadedImage.preview} alt={uploadedImage.name} className="h-48 w-full object-cover" />
+              <img src={uploadedImage.preview} alt={uploadedImage.name} className="h-40 w-full object-cover" />
             </div>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="max-w-[220px] truncate">
+                <Badge variant="secondary" className="truncate" style={{ maxWidth: "220px" }}>
                   {uploadedImage.name}
                 </Badge>
               </div>
