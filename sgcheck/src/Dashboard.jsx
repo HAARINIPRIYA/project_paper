@@ -1,7 +1,10 @@
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
+  BarChart3,
+  Cog,
   LayoutDashboard,
+  Loader2,
   Menu,
   MessageSquareText,
   Paperclip,
@@ -13,7 +16,6 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -24,8 +26,23 @@ import { Textarea } from "@/components/ui/textarea"
 import GPSForm from "./components/GPSForm"
 import UploadZone from "./components/UploadZone"
 import DashboardPage from "./pages/DashboardPage"
+import ModelResults from "./components/ModelResults"
+import { predictAuto, predictEnsemble } from "./lib/api"
 
-function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
+function Dashboard({
+  uploadedImage,
+  onImageUpload,
+  gpsData,
+  onGPSSubmit,
+  predictionResult,
+  onPredictionResult,
+  ensembleResult,
+  onEnsembleResult,
+  backendStatus,
+  availableModels,
+  modelMetrics,
+  backendError,
+}) {
   const [view, setView] = useState("analysis")
   const [activeChatId, setActiveChatId] = useState("new")
   const [composer, setComposer] = useState("")
@@ -34,9 +51,24 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
       id: "m1",
       role: "assistant",
       content:
-        "Hi — I'm CaneSense. Upload a billet image and add field coordinates to start a growth-quality analysis.",
+        "Hi — I'm CaneSense. I'm connected to ML models trained on field & spectral data for sugarcane yield prediction. Fill in the field details in the Tools panel, then send me a message to run a prediction.",
     },
   ])
+  const [isPredicting, setIsPredicting] = useState(false)
+
+  // Update welcome message once backend connects with real model count
+  useMemo(() => {
+    if (backendStatus === "connected" && availableModels.length > 0 && messages.length === 1 && messages[0].id === "m1") {
+      setMessages([
+        {
+          id: "m1",
+          role: "assistant",
+          content:
+            `Hi — I'm CaneSense. I'm connected to ${availableModels.length} ML models (CatBoost: 90.9% R², XGBoost: 83.6%, RandomForest: 81.7%, and more) trained on field & spectral data for sugarcane yield prediction. Fill in the field details in the Tools panel, then send me a message to run a prediction.`,
+        },
+      ])
+    }
+  }, [backendStatus, availableModels])
 
   const chats = useMemo(
     () => [
@@ -59,36 +91,163 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
         <Badge variant="secondary">Tools</Badge>
       </div>
 
-      <Tabs defaultValue="image">
+      {/* Backend status */}
+      <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+        {backendStatus === "connected" ? (
+          <span className="size-2 rounded-full" style={{ background: "var(--color-emerald-500)" }} />
+        ) : backendStatus === "checking" ? (
+          <Loader2 className="size-3 animate-spin text-muted-foreground" />
+        ) : (
+          <span className="size-2 rounded-full bg-destructive" />
+        )}
+        <span className="text-xs text-muted-foreground">
+          {backendStatus === "connected"
+            ? `${availableModels.length} models ready`
+            : backendStatus === "checking"
+              ? "Connecting to backend..."
+              : `Backend offline: ${backendError || ""}`}
+        </span>
+      </div>
+
+      <Tabs defaultValue="field" style={{ display: "flex", flexDirection: "column" }}>
         <TabsList className="w-full justify-start" style={{ width: "100%", justifyContent: "flex-start" }}>
-          <TabsTrigger value="image" style={{ flex: "1 1 0%" }}>Billet Image</TabsTrigger>
           <TabsTrigger value="field" style={{ flex: "1 1 0%" }}>Field Details</TabsTrigger>
+          <TabsTrigger value="results" style={{ flex: "1 1 0%" }}>Predictions</TabsTrigger>
+          <TabsTrigger value="image" style={{ flex: "1 1 0%" }}>Image</TabsTrigger>
         </TabsList>
+        <TabsContent value="field" style={{ marginTop: "1rem" }}>
+          <GPSForm onSubmit={onGPSSubmit} gpsData={gpsData} availableModels={availableModels} />
+        </TabsContent>
+        <TabsContent value="results" style={{ marginTop: "1rem" }}>
+          {backendStatus !== "connected" ? (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <Cog className="size-8 text-muted-foreground/40" />
+              <div className="text-sm text-muted-foreground">
+                {backendStatus === "checking" ? "Connecting to backend..." : "Backend not connected. Run the API server first."}
+              </div>
+            </div>
+          ) : ensembleResult ? (
+            <ModelResults result={ensembleResult} isEnsemble />
+          ) : predictionResult ? (
+            <ModelResults result={predictionResult} />
+          ) : (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <BarChart3 className="size-8 text-muted-foreground/40" />
+              <div className="text-sm text-muted-foreground">
+                Enter field details and send a prediction query in the chat.
+              </div>
+            </div>
+          )}
+          {isPredicting ? (
+            <div className="mt-2 flex items-center justify-center gap-2 py-3">
+              <Loader2 className="size-4 animate-spin text-emerald-600" />
+              <span className="text-xs text-muted-foreground">Running prediction...</span>
+            </div>
+          ) : null}
+        </TabsContent>
         <TabsContent value="image" style={{ marginTop: "1rem" }}>
           <UploadZone onImageUpload={onImageUpload} uploadedImage={uploadedImage} />
         </TabsContent>
-        <TabsContent value="field" style={{ marginTop: "1rem" }}>
-          <GPSForm onSubmit={onGPSSubmit} gpsData={gpsData} />
-        </TabsContent>
       </Tabs>
+
+      {/* Quick model stats */}
+      {backendStatus === "connected" && availableModels.length > 0 ? (
+        <div className="flex flex-col gap-1.5">
+          <div className="text-xs font-medium text-muted-foreground">Model Performance</div>
+          {availableModels.map((name) => {
+            const m = modelMetrics[name] || {}
+            return (
+              <div key={name} className="flex items-center justify-between gap-2 rounded-md border bg-muted/20 px-2.5 py-1.5">
+                <span className="text-xs font-medium capitalize">{name.replace(/_/g, " ")}</span>
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  R² {m.r2 ? m.r2.toFixed(3) : "—"}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      ) : null}
     </div>
   )
 
-  const onSend = () => {
+  const onSend = useCallback(async () => {
     const text = composer.trim()
-    if (!text) return
-    setMessages((prev) => [
-      ...prev,
-      { id: `${Date.now()}-u`, role: "user", content: text },
-      {
-        id: `${Date.now()}-a`,
-        role: "assistant",
-        content:
-          "Got it. If you haven't yet, add an image and field details in the Tools panel so I can contextualize the analysis.",
-      },
-    ])
+    if (!text || isPredicting) return
+
+    // Add user message
+    setMessages((prev) => [...prev, { id: `${Date.now()}-u`, role: "user", content: text }])
     setComposer("")
-  }
+    setIsPredicting(true)
+
+    // Check if we have field data and if user is asking about prediction
+    const isPredictionQuery = /predict|yield|cane|forecast|estimate/i.test(text)
+
+    try {
+      if (isPredictionQuery && gpsData) {
+        // Build field data payload from GPS form + defaults
+        const fieldData = {
+          Planting_Date: gpsData.plantingDate || undefined,
+        }
+
+        // Try ensemble first, fall back to auto
+        try {
+          const ensemble = await predictEnsemble([fieldData])
+          onEnsembleResult(ensemble)
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `${Date.now()}-a`,
+              role: "assistant",
+              content: `**Ensemble Predicted Yield: ${ensemble.predictions?.[0]?.toFixed(1) || "—"} Quintal per Acre**\n\nThis is a weighted average across all ${availableModels.length} trained models. ${ensemble.individual_predictions ? "Individual model breakdown shown in the panel." : ""}\n\nWant a more detailed field-specific run? You can also try sending your GPS coordinates and planting date for a single-model prediction.`,
+            },
+          ])
+        } catch {
+          // Fallback to auto predict
+          const auto = await predictAuto(fieldData)
+          onPredictionResult(auto)
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `${Date.now()}-a`,
+              role: "assistant",
+              content: `**Predicted Yield: ${auto.predictions?.[0]?.toFixed(1) || "—"} Quintal per Acre** (using ${auto.best_model || auto.model})`,
+            },
+          ])
+        }
+      } else if (isPredictionQuery && !gpsData) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `${Date.now()}-a`,
+            role: "assistant",
+            content: "I need field details to run a prediction. Open the **Tools** panel, go to **Field Details**, and enter the GPS coordinates and planting date first.",
+          },
+        ])
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `${Date.now()}-a`,
+            role: "assistant",
+            content: `I have ${availableModels.length} models ready to predict sugarcane yield. Try saying something like **"predict yield for my field"** after entering your field details in the Tools panel.`,
+          },
+        ])
+      }
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `${Date.now()}-a`,
+          role: "assistant",
+          content: `⚠️ Prediction failed: ${err.message}. Make sure the backend server is running.`,
+        },
+      ])
+    } finally {
+      setIsPredicting(false)
+    }
+  }, [composer, gpsData, isPredicting, availableModels, onPredictionResult, onEnsembleResult])
 
   return (
     <div className="h-screen w-full">
@@ -234,7 +393,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
                 </div>
               ) : (
                 <div className="mx-auto w-full px-4 py-6">
-                  <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} />
+                  <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} availableModels={availableModels} modelMetrics={modelMetrics} backendStatus={backendStatus} />
                 </div>
               )}
             </ScrollArea>
@@ -404,7 +563,7 @@ function Dashboard({ uploadedImage, onImageUpload, gpsData, onGPSSubmit }) {
             </div>
           ) : (
             <div className="mx-auto w-full px-4 py-6">
-              <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} />
+              <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} availableModels={availableModels} modelMetrics={modelMetrics} backendStatus={backendStatus} />
             </div>
           )}
         </ScrollArea>

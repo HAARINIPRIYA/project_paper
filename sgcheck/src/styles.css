@@ -650,6 +650,95 @@ body {
 .field-label-row { display: flex; align-items: center; gap: 0.5rem; }
 .field-label { font-size: 0.75rem; font-weight: 500; color: var(--muted-fg); }
 
+/* ===== Model Rank Items ===== */
+.model-rank-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: calc(var(--radius) + 2px);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 50%, transparent);
+  padding: 0.625rem 0.75rem;
+  transition: all 150ms;
+}
+.model-rank-item:hover {
+  border-color: color-mix(in srgb, var(--fg) 15%, transparent);
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+}
+.model-rank-item.best {
+  border-color: color-mix(in srgb, var(--color-emerald-500) 30%, transparent);
+  background: color-mix(in srgb, var(--color-emerald-50) 50%, transparent);
+}
+.dark .model-rank-item.best {
+  border-color: color-mix(in srgb, var(--color-emerald-500) 15%, transparent);
+  background: color-mix(in srgb, var(--color-emerald-950) 25%, transparent);
+}
+.model-rank-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.375rem;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--muted);
+  color: var(--muted-fg);
+  flex-shrink: 0;
+}
+.model-rank-item.best .model-rank-badge {
+  background: var(--color-emerald-500);
+  color: #fff;
+}
+.model-rank-bar-wrap {
+  width: 4rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: var(--muted);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.model-rank-bar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 500ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* ===== Model Chips ===== */
+.model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--muted-fg);
+  cursor: pointer;
+  transition: all 150ms;
+  line-height: 1.75rem;
+  height: 1.75rem;
+}
+.model-chip:hover {
+  border-color: color-mix(in srgb, var(--fg) 15%, transparent);
+  color: var(--fg);
+  background: color-mix(in srgb, var(--muted) 40%, transparent);
+}
+.model-chip.active {
+  border-color: var(--color-emerald-500);
+  background: color-mix(in srgb, var(--color-emerald-500) 8%, transparent);
+  color: var(--color-emerald-700);
+}
+.dark .model-chip.active {
+  color: #6ee7b7;
+  border-color: #6ee7b7;
+  background: color-mix(in srgb, var(--color-emerald-950) 30%, transparent);
+}
+
 /* ===== Navigation Buttons (Mobile) ===== */
 .nav-btn-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
 .nav-btn-grid .btn { width: 100%; }
