@@ -9,6 +9,7 @@ const badgeStyles = {
   secondary: "badge-secondary",
   destructive: "badge-destructive",
   outline: "badge-outline",
+  emerald: "badge-emerald",
   ghost: "",
   link: "",
 }
