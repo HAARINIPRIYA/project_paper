@@ -94,8 +94,8 @@ def predict(
     meta = model_data["metadata"]
     features = meta.get("features", [])
 
-    # Prepare raw data
-    raw_df = pd.DataFrame([prepare_input(r) for r in records])
+    # Prepare raw data — concat DataFrames row-wise
+    raw_df = pd.concat([prepare_input(r) for r in records], ignore_index=True)
 
     is_catboost = model_name == "catboost"
 
@@ -112,24 +112,18 @@ def predict(
                 )
                 raw_df[col] = le.transform(raw_df[col])
 
-    # Ensure all required features exist
-    for f in features:
-        if f not in raw_df.columns:
-            raw_df[f] = 0  # fallback
-
-    X = raw_df[features]
+    # Ensure all required features exist — build a new DataFrame to avoid
+    # "highly fragmented" PerformanceWarning from adding columns one-by-one.
+    X = pd.DataFrame({f: raw_df[f] if f in raw_df.columns else 0 for f in features})
 
     # Apply scaler for linear / elastic net
     scaler = meta.get("scaler")
     if scaler is not None:
         X = scaler.transform(X)
 
-    # For CatBoost, pass categorical feature indices so it treats them correctly
-    if is_catboost:
-        cat_indices = meta.get("cat_features_indices", [])
-        preds = model.predict(X, cat_features=cat_indices)
-    else:
-        preds = model.predict(X)
+    # CatBoost already knows which features are categorical from training,
+    # so we just pass X directly (cat_features is NOT a predict() parameter).
+    preds = model.predict(X)
 
     preds_list = [round(float(p), 4) for p in preds]
 

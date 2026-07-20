@@ -242,31 +242,38 @@ function Dashboard({
 
     try {
       if (isPredictionQuery && gpsData) {
-        const fieldData = {
-          Planting_Date: gpsData.plantingDate || undefined,
+        // Pass ALL field data with exact backend field names, omit empty values
+        const fieldData = {}
+        const backendFields = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type", "Soil_Type", "Irrigation_Type", "Fertilizer_Type"]
+        for (const key of backendFields) {
+          if (gpsData[key] && gpsData[key].trim() !== '') {
+            fieldData[key] = gpsData[key]
+          }
         }
 
         try {
           const ensemble = await predictEnsemble([fieldData])
           onEnsembleResult(ensemble)
           const topPred = ensemble.predictions?.[0]
+          const fieldCount = Object.keys(fieldData).length
           setMessages((prev) => [
             ...prev,
             {
               id: `${Date.now()}-a`,
               role: "assistant",
-              content: `**Ensemble Prediction Complete**\n\n**Predicted Yield: ${topPred?.toFixed(1) || "—"} Quintal per Acre**\n\nThis is a weighted average across all ${availableModels.length} trained models. Individual breakdown available in the results panel.\n\nWant to refine? Try different field parameters or select a specific model.`,
+              content: `**Ensemble Prediction Complete**\n\n**Predicted Yield: ${topPred?.toFixed(1) || "—"} Quintal per Acre**\n\nThis is a weighted average across all ${availableModels.length} trained models, using ${fieldCount} field parameter(s). Individual breakdown available in the results panel.\n\nWant to refine? Try different field parameters or select a specific model.`,
             },
           ])
         } catch {
           const auto = await predictAuto(fieldData)
           onPredictionResult(auto)
+          const fieldCount = Object.keys(fieldData).length
           setMessages((prev) => [
             ...prev,
             {
               id: `${Date.now()}-a`,
               role: "assistant",
-              content: `**Prediction Complete**\n\n**Predicted Yield: ${auto.predictions?.[0]?.toFixed(1) || "—"} Quintal per Acre**\n\nModel used: **${auto.best_model || auto.model}**\n\nCheck the Dashboard for a full model comparison.`,
+              content: `**Prediction Complete**\n\n**Predicted Yield: ${auto.predictions?.[0]?.toFixed(1) || "—"} Quintal per Acre**\n\nModel used: **${auto.best_model || auto.model}** with ${fieldCount} field parameter(s).\n\nCheck the Dashboard for a full model comparison.`,
             },
           ])
         }

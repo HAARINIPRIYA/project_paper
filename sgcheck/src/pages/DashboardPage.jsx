@@ -77,7 +77,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
       label: "Field Context",
       value: gpsData ? "Configured" : "Not Set",
       meta: gpsData
-        ? `${gpsData.latitude}, ${gpsData.longitude}`
+        ? `${gpsData.Planting_Date || gpsData.Variety || "Parameters saved"}`
         : "Add in Tools panel",
       icon: MapPinned,
       gradient: gpsData ? "from-amber-400 to-amber-500" : "",
@@ -362,13 +362,18 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 <div className="info-card-value">
                   {gpsData ? (
                     <div className="flex flex-col gap-1">
-                      <div className="text-xs">
-                        <span className="font-medium">{gpsData.latitude}</span>, {gpsData.longitude}
-                      </div>
-                      <div className="text-[10px] text-muted-foreground">
-                        Planted: {gpsData.plantingDate}
-                        {gpsData.variety && ` · ${gpsData.variety}`}
-                        {gpsData.soilType && ` · ${gpsData.soilType}`}
+                      {gpsData.Planting_Date && (
+                        <div className="text-xs">
+                          <span className="font-medium">Planted:</span> {gpsData.Planting_Date}
+                          {gpsData.Harvesting_Date && ` · Harvest: ${gpsData.Harvesting_Date}`}
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-1">
+                        {gpsData.Variety && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Variety}</span>}
+                        {gpsData.Crop_Type && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Crop_Type}</span>}
+                        {gpsData.Soil_Type && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Soil_Type}</span>}
+                        {gpsData.Irrigation_Type && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Irrigation_Type}</span>}
+                        {gpsData.Fertilizer_Type && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Fertilizer_Type}</span>}
                       </div>
                     </div>
                   ) : (

@@ -1,0 +1,344 @@
+╔══════════════════════════════════════════════════════════════╗
+║               CaneSense — Sample Test Data                   ║
+║       Sugarcane Yield Prediction API Test Cases              ║
+╚══════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SINGLE PREDICTION — JSON body for POST /predict/{model}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copy these JSON objects to use with:
+  POST http://localhost:8000/predict/catboost
+  POST http://localhost:8000/predict/xgboost
+  POST http://localhost:8000/predict/random_forest
+  POST http://localhost:8000/predict/linear_regression
+  POST http://localhost:8000/predict/elastic_net
+  POST http://localhost:8000/predict              (auto-best model)
+  POST http://localhost:8000/predict/ensemble      (weighted all models)
+
+───────────────────────────────────────────────────────────────
+  TEST CASE 1: Spring planting — Autumn variety (Co-0238)
+───────────────────────────────────────────────────────────────
+{
+  "Planting_Date": "2023-06-15",
+  "Harvesting_Date": "2024-01-10",
+  "Variety": "Co-0238",
+  "Crop_Type": "Autumn",
+  "Soil_Type": "Loamy",
+  "Irrigation_Type": "Drip",
+  "Fertilizer_Type": "Urea"
+}
+
+───────────────────────────────────────────────────────────────
+  TEST CASE 2: Summer planting — CoJ64 variety, flood irrigated
+───────────────────────────────────────────────────────────────
+{
+  "Planting_Date": "2024-03-01",
+  "Harvesting_Date": "2024-11-15",
+  "Variety": "CoJ64",
+  "Crop_Type": "Spring",
+  "Soil_Type": "Clay",
+  "Irrigation_Type": "Flood",
+  "Fertilizer_Type": "DAP"
+}
+
+───────────────────────────────────────────────────────────────
+  TEST CASE 3: Winter planting — Co98014, sandy soil, dripper
+───────────────────────────────────────────────────────────────
+{
+  "Planting_Date": "2024-10-20",
+  "Harvesting_Date": "2025-07-05",
+  "Variety": "Co98014",
+  "Crop_Type": "Rabi",
+  "Soil_Type": "Sandy",
+  "Irrigation_Type": "Sprinkler",
+  "Fertilizer_Type": "Organic"
+}
+
+───────────────────────────────────────────────────────────────
+  TEST CASE 4: Minimal fields only (date + variety)
+───────────────────────────────────────────────────────────────
+{
+  "Planting_Date": "2024-02-10",
+  "Variety": "Co-0238"
+}
+
+───────────────────────────────────────────────────────────────
+  TEST CASE 5: Rich fields — all optional params included
+───────────────────────────────────────────────────────────────
+{
+  "Planting_Date": "2023-05-01",
+  "Harvesting_Date": "2024-02-28",
+  "Variety": "CoJ64",
+  "Crop_Type": "Kharif",
+  "Soil_Type": "Alluvial",
+  "Irrigation_Type": "Drip",
+  "Fertilizer_Type": "Urea",
+  "Fertilizer_Quantity": 250,
+  "Seed_Rate": 10.5,
+  "Row_Spacing_cm": 90,
+  "Cane_Height_cm": 280,
+  "Cane_Diameter_cm": 3.5,
+  "Brix_Value": 22.0
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  BATCH PREDICTION — JSON body for POST /predict/batch/{model}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Send to: POST http://localhost:8000/predict/batch/catboost
+
+{
+  "records": [
+    {
+      "Planting_Date": "2023-06-15",
+      "Harvesting_Date": "2024-01-10",
+      "Variety": "Co-0238",
+      "Crop_Type": "Autumn",
+      "Soil_Type": "Loamy",
+      "Irrigation_Type": "Drip",
+      "Fertilizer_Type": "Urea"
+    },
+    {
+      "Planting_Date": "2024-03-01",
+      "Harvesting_Date": "2024-11-15",
+      "Variety": "CoJ64",
+      "Crop_Type": "Spring",
+      "Soil_Type": "Clay",
+      "Irrigation_Type": "Flood",
+      "Fertilizer_Type": "DAP"
+    },
+    {
+      "Planting_Date": "2024-10-20",
+      "Harvesting_Date": "2025-07-05",
+      "Variety": "Co98014",
+      "Crop_Type": "Rabi",
+      "Soil_Type": "Sandy",
+      "Irrigation_Type": "Sprinkler",
+      "Fertilizer_Type": "Organic"
+    }
+  ]
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ENSEMBLE PREDICTION — POST /predict/ensemble
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+── Basic (equal weights) ──────────────────────────────────────
+POST http://localhost:8000/predict/ensemble
+{
+  "records": [
+    {
+      "Planting_Date": "2023-06-15",
+      "Harvesting_Date": "2024-01-10",
+      "Variety": "Co-0238",
+      "Crop_Type": "Autumn",
+      "Soil_Type": "Loamy",
+      "Irrigation_Type": "Drip",
+      "Fertilizer_Type": "Urea"
+    }
+  ]
+}
+
+── Custom weights (emphasize CatBoost) ────────────────────────
+POST http://localhost:8000/predict/ensemble
+{
+  "records": [
+    {
+      "Planting_Date": "2023-06-15",
+      "Harvesting_Date": "2024-01-10",
+      "Variety": "Co-0238",
+      "Crop_Type": "Autumn",
+      "Soil_Type": "Loamy",
+      "Irrigation_Type": "Drip",
+      "Fertilizer_Type": "Urea"
+    }
+  ],
+  "weights": {
+    "catboost": 0.4,
+    "xgboost": 0.25,
+    "random_forest": 0.2,
+    "linear_regression": 0.1,
+    "elastic_net": 0.05
+  }
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CURL COMMANDS — Quick copy-paste for terminal testing
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+── Health check ───────────────────────────────────────────────
+curl http://localhost:8000/health
+
+── List models ────────────────────────────────────────────────
+curl http://localhost:8000/models
+
+── Get CatBoost features ──────────────────────────────────────
+curl http://localhost:8000/features/catboost
+
+── Predict with CatBoost (single) ─────────────────────────────
+curl -X POST http://localhost:8000/predict/catboost ^
+  -H "Content-Type: application/json" ^
+  -d "{\"Planting_Date\":\"2023-06-15\",\"Harvesting_Date\":\"2024-01-10\",\"Variety\":\"Co-0238\",\"Crop_Type\":\"Autumn\",\"Soil_Type\":\"Loamy\",\"Irrigation_Type\":\"Drip\",\"Fertilizer_Type\":\"Urea\"}"
+
+── Auto-best model ────────────────────────────────────────────
+curl -X POST http://localhost:8000/predict ^
+  -H "Content-Type: application/json" ^
+  -d "{\"Planting_Date\":\"2024-03-01\",\"Variety\":\"CoJ64\"}"
+
+── Ensemble prediction ────────────────────────────────────────
+curl -X POST http://localhost:8000/predict/ensemble ^
+  -H "Content-Type: application/json" ^
+  -d "{\"records\":[{\"Planting_Date\":\"2023-06-15\",\"Variety\":\"Co-0238\",\"Soil_Type\":\"Loamy\"}]}"
+
+── Batch prediction (3 fields) ────────────────────────────────
+curl -X POST http://localhost:8000/predict/batch/catboost ^
+  -H "Content-Type: application/json" ^
+  -d "{\"records\":[{\"Planting_Date\":\"2023-06-15\",\"Variety\":\"Co-0238\"},{\"Planting_Date\":\"2024-03-01\",\"Variety\":\"CoJ64\"},{\"Planting_Date\":\"2024-10-20\",\"Variety\":\"Co98014\"}]}"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SAMPLE RESPONSES (what you should expect)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+── GET /health ────────────────────────────────────────────────
+{
+  "status": "ok",
+  "models_available": [
+    "catboost",
+    "xgboost",
+    "random_forest",
+    "linear_regression",
+    "elastic_net"
+  ],
+  "model_count": 5
+}
+
+── POST /predict (auto-best) ─────────────────────────────────
+{
+  "model": "catboost",
+  "predictions": [89.4521],
+  "metrics": {
+    "r2": 0.9094,
+    "mae": 18.23,
+    "rmse": 24.87
+  },
+  "features_used": [
+    "Planting_Year", "Planting_Month", "Planting_Day",
+    "Harvest_Year", "Harvest_Month", "Harvest_Day",
+    "Variety", "Soil_Type", "Irrigation_Type",
+    "Fertilizer_Type"
+  ],
+  "best_model": "catboost"
+}
+
+── POST /predict/ensemble ────────────────────────────────────
+{
+  "model": "ensemble",
+  "predictions": [87.3156],
+  "individual_predictions": {
+    "catboost": [89.4521],
+    "xgboost": [85.1234],
+    "random_forest": [82.6789],
+    "linear_regression": [79.4567],
+    "elastic_net": [80.2345]
+  },
+  "weights_used": {
+    "catboost": 0.2,
+    "xgboost": 0.2,
+    "random_forest": 0.2,
+    "linear_regression": 0.2,
+    "elastic_net": 0.2
+  }
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CSV FORMAT — For batch processing / training reference
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Below are 5 sample rows in the same CSV format as the training
+dataset (FINAL_SUGARCANE_DATASET.csv). You can use these to
+test the frontend Dashboard's model comparison features.
+
+───────────────────────────────────────────────────────────────
+Month,Temp_Min_C,Temp_Max_C,Temp_Avg_C,Rainfall_Total_mm,Rainfall_Seasonal_mm,Humidity_%,Solar_Radiation_MJ_m2_day,Sunshine_Hours_hh_mm,Wind_Speed_kmph,Evapotranspiration_mm_day,Dew_Point_C,Heat_Stress_Days,Frost_Days,Soil_Type,Soil_pH,EC,Organic_Carbon_%,Soil_Moisture_%,Sand_%,Silt_%,Clay_%,Soil_Depth_cm,Water_Holding_Capacity_%,Nitrogen_kg_per_acre,Phosphorus_kg_per_acre,Potassium_kg_per_acre,Zinc_mg_per_kg,Iron_mg_per_kg,Copper_mg_per_kg,Manganese_mg_per_kg,Sulfur_kg_per_acre,Irrigation_Frequency_Level,Water_Quantity_liters_per_acre,Irrigation_Method_Type,Groundwater_Level_meters,Water_Quality_Category,Planting_Date,Harvesting_Date,Crop_Duration_Days,Seed_Rate,Row_Spacing_cm,Row_Gap_cm,Plant_Density,Intercropping,Weed_Control,Soil_Condition_At_Planting,Planting_Method,Mulching,Fertilizer_Split,Drainage_Condition,Variety,Germination_%,Tillering_Count,Cane_Height_cm,Cane_Diameter_cm,Internode_Length_cm,Brix_Value,Disease_Type,Disease_Severity,Pest_Level,Pesticide_Usage,Fertilizer_Type,Fertilizer_Quantity,Application_Timing,Machinery_Use,Labor_Input,Latitude,Longitude,Altitude_m,State,District,Tehsil,Agro_Cluster,Khasra_No,Sugar_Mill,Region,Year,Season,Growth_Stage,Yield_Quintal_per_Acre
+Jun,28.5,35.2,31.8,1200.0,600.0,75.0,22.0,6:30,8.5,5.5,18.0,15,2,Loamy,7.2,1.2,0.8,25.0,35.0,30.0,25.0,150.0,40.0,120.0,60.0,80.0,3.5,5.0,1.5,4.0,20.0,Medium,1000.0,Drip,12.0,Good,2023-06-15,2024-01-10,209,8.0,90.0,75.0,100000.0,No,Manual,Dry,Straight Row,Yes,Split,Good,Co-0238,85.0,12,280.0,3.5,20.0,22.5,None,Low,Medium,5.0,Urea,200.0,Mid,Yes,30.0,29.95,78.08,320.0,Uttarakhand,Haridwar,Roorkee,Cluster_A,1001,Uttam Sugar Mills,Uttarakhand,2023,Kharif,Mid,95.0
+Mar,20.0,28.5,24.2,850.0,450.0,65.0,18.5,7:15,6.2,4.8,14.0,10,1,Clay,7.8,1.5,1.2,30.0,40.0,35.0,15.0,180.0,45.0,100.0,50.0,90.0,4.0,6.0,2.0,5.0,25.0,High,1200.0,Flood,8.0,Moderate,2023-03-01,2023-11-15,259,9.0,95.0,80.0,120000.0,Yes,Chemical,Moist,Paired Row,No,Single,Moderate,CoJ64,90.0,15,300.0,4.0,22.0,24.0,Red Rot,Low,Low,3.0,DAP,180.0,Early,No,25.0,29.85,77.95,280.0,Uttarakhand,Haridwar,Bhagwanpur,Cluster_B,1002,Uttam Sugar Mills,Uttarakhand,2023,Rabi,Early,110.0
+Oct,15.0,22.0,18.5,600.0,300.0,55.0,14.0,5:45,4.5,3.2,10.0,5,0,Sandy,6.5,0.8,0.5,20.0,55.0,25.0,10.0,100.0,35.0,80.0,40.0,60.0,2.5,3.0,1.0,3.0,15.0,Low,800.0,Sprinkler,14.0,Saline,2023-10-20,2024-07-05,259,7.0,85.0,70.0,80000.0,No,Manual,Dry,Circular,Yes,Split,Poor,Co98014,75.0,8,250.0,3.0,18.0,20.0,Smut,Medium,Medium,4.0,Organic,150.0,Late,Yes,20.0,30.05,78.15,300.0,Uttarakhand,Haridwar,Khanpur,Cluster_C,1003,Uttam Sugar Mills,Uttarakhand,2023,Kharif,Late,80.0
+Jan,7.0,14.0,10.5,400.0,200.0,60.0,12.0,4:30,3.0,2.5,8.0,2,3,Loamy,7.0,1.0,0.7,22.0,38.0,28.0,22.0,130.0,38.0,90.0,45.0,70.0,3.0,4.0,1.2,3.5,18.0,Medium,900.0,Flood,10.0,Good,2023-01-15,2023-10-01,259,8.5,88.0,72.0,95000.0,No,Chemical,Moist,Trench,No,Split,Good,Co-0238,80.0,10,260.0,3.2,19.0,21.0,Leaf Scald,Medium,High,6.0,Urea,160.0,Late,No,22.0,29.90,78.20,310.0,Uttarakhand,Haridwar,Laksar,Cluster_D,1004,Uttam Sugar Mills,Uttarakhand,2023,Rabi,Early,85.0
+Aug,25.0,32.0,28.5,1100.0,550.0,80.0,20.0,8:00,7.0,6.0,20.0,12,0,Clay,7.5,1.8,1.0,28.0,42.0,32.0,18.0,160.0,42.0,110.0,55.0,85.0,3.8,5.5,1.8,4.5,22.0,High,1100.0,Drip,9.0,Moderate,2023-08-01,2024-04-15,258,9.5,92.0,78.0,110000.0,Yes,Manual,Wet,Straight Row,Yes,Split,Moderate,CoJ64,88.0,14,290.0,3.8,21.0,23.0,None,Low,Medium,3.0,DAP,220.0,Mid,No,28.0,29.93,78.10,290.0,Uttarakhand,Haridwar,Roorkee,Cluster_E,1005,Uttam Sugar Mills,Uttarakhand,2023,Kharif,Mid,100.0
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  QUICK TEST USING PYTHON (if you have requests installed)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Save the following as test_api.py in the backend folder and run it:
+
+───────────────────────────────────────────────────────────────
+import requests
+import json
+
+BASE = "http://localhost:8000"
+
+# 1. Health check
+r = requests.get(f"{BASE}/health")
+print("Health:", r.json())
+
+# 2. List models
+r = requests.get(f"{BASE}/models")
+print("Models:", r.json()["count"], "available")
+
+# 3. Simple prediction
+payload = {
+    "Planting_Date": "2023-06-15",
+    "Variety": "Co-0238",
+    "Soil_Type": "Loamy"
+}
+r = requests.post(f"{BASE}/predict", json=payload)
+print("Auto-predict:", r.json())
+
+# 4. CatBoost prediction
+r = requests.post(f"{BASE}/predict/catboost", json={
+    "Planting_Date": "2023-06-15",
+    "Harvesting_Date": "2024-01-10",
+    "Variety": "Co-0238",
+    "Soil_Type": "Loamy",
+    "Irrigation_Type": "Drip",
+    "Fertilizer_Type": "Urea"
+})
+print("CatBoost:", r.json())
+
+# 5. Ensemble prediction
+r = requests.post(f"{BASE}/predict/ensemble", json={
+    "records": [{
+        "Planting_Date": "2023-06-15",
+        "Variety": "Co-0238",
+        "Soil_Type": "Loamy"
+    }]
+})
+print("Ensemble:", r.json())
+───────────────────────────────────────────────────────────────
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  FIELD DESCRIPTIONS — Feature reference for test data
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Planting_Date     : YYYY-MM-DD  (required for prediction)
+Harvesting_Date   : YYYY-MM-DD  (optional)
+Variety           : Co-0238, CoJ64, Co98014, Co-0118, etc.
+Crop_Type         : Kharif, Rabi, Spring, Autumn, Summer, Winter
+Soil_Type         : Loamy, Clay, Sandy, Alluvial, Black, Red
+Irrigation_Type   : Drip, Flood, Sprinkler, Furrow, None
+Fertilizer_Type   : Urea, DAP, Organic, NPK, MOP, SSP, None
+
+Available models  : catboost, xgboost, random_forest,
+                    linear_regression, elastic_net
+Best model (R²)   : CatBoost (0.909)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
