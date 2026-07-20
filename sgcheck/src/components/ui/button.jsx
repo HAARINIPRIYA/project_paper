@@ -5,6 +5,7 @@ import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const variantStyles = {
+  primary: "btn-primary",
   default: "btn-default",
   outline: "btn-outline",
   secondary: "btn-secondary",

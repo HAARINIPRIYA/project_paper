@@ -54,12 +54,12 @@ function UploadZone({ onImageUpload, uploadedImage }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-sm font-medium tracking-tight">Billet image</div>
-          <div className="text-xs text-muted-foreground">
+          <div style={{ fontSize: "13px", fontWeight: 500, letterSpacing: "-0.01em" }}>Billet image</div>
+          <div style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }}>
             Drop a photo of the seed billet for quality cues.
           </div>
         </div>
-        <Badge variant="secondary">Stage 1</Badge>
+        <Badge variant="secondary" className="text-[9px]">Stage 1</Badge>
       </div>
 
       <AnimatePresence mode="wait">
@@ -73,6 +73,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={"upload-dropzone" + (isDragging ? " dragging" : "")}
+            onClick={handleClick}
           >
             <input
               ref={fileInputRef}
@@ -80,6 +81,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
               accept="image/*"
               onChange={handleFileSelect}
               className="hidden"
+              style={{ display: "none" }}
             />
 
             <div className="flex items-start gap-3">
@@ -87,14 +89,14 @@ function UploadZone({ onImageUpload, uploadedImage }) {
                 <ImageUp className="size-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium">
+                <div style={{ fontSize: "13px", fontWeight: 500 }}>
                   {isDragging ? "Drop the image here" : "Drag & drop an image"}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div style={{ fontSize: "11px", color: "var(--aws-text-secondary)", marginTop: "1px" }}>
                   JPG / PNG / WEBP. Or choose a file.
                 </div>
-                <div className="mt-2 flex items-center gap-2">
-                  <Button type="button" variant="secondary" size="sm" onClick={handleClick}>
+                <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Button type="button" variant="default" size="sm" onClick={(e) => { e.stopPropagation(); handleClick() }}>
                     Choose file
                   </Button>
                 </div>
@@ -104,21 +106,19 @@ function UploadZone({ onImageUpload, uploadedImage }) {
         ) : (
           <motion.div
             key="preview"
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             className="flex flex-col gap-3"
           >
-            <div className="overflow-hidden rounded-xl border bg-muted">
+            <div style={{ overflow: "hidden", border: "1px solid var(--aws-card-border)", background: "var(--aws-bg)" }}>
               <img src={uploadedImage.preview} alt={uploadedImage.name} className="h-40 w-full object-cover" />
             </div>
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="truncate" style={{ maxWidth: "220px" }}>
-                  {uploadedImage.name}
-                </Badge>
-              </div>
-              <Button type="button" variant="outline" size="sm" onClick={handleClick}>
+              <Badge variant="secondary" className="truncate" style={{ maxWidth: "220px" }}>
+                {uploadedImage.name}
+              </Badge>
+              <Button type="button" variant="default" size="sm" onClick={handleClick}>
                 Replace
               </Button>
             </div>
