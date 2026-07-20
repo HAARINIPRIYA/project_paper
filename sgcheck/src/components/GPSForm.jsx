@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Loader2, MapPin, Radar } from "lucide-react"
+import { Calendar, ChevronRight, Loader2, MapPin, Radar, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,7 @@ const MODEL_OPTIONS = [
   { value: "random_forest", label: "Random Forest" },
   { value: "linear_regression", label: "Linear Regression" },
   { value: "elastic_net", label: "ElasticNet" },
+  { value: "ensemble", label: "Ensemble (All)" },
 ]
 
 function GPSForm({ onSubmit, gpsData, availableModels }) {
@@ -36,23 +37,19 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
 
   const validateForm = () => {
     const newErrors = {}
-
     if (!formData.latitude) {
       newErrors.latitude = 'Latitude is required'
     } else if (isNaN(formData.latitude) || formData.latitude < -90 || formData.latitude > 90) {
-      newErrors.latitude = 'Must be a valid latitude (-90 to 90)'
+      newErrors.latitude = 'Valid latitude: -90 to 90'
     }
-
     if (!formData.longitude) {
       newErrors.longitude = 'Longitude is required'
     } else if (isNaN(formData.longitude) || formData.longitude < -180 || formData.longitude > 180) {
-      newErrors.longitude = 'Must be a valid longitude (-180 to 180)'
+      newErrors.longitude = 'Valid longitude: -180 to 180'
     }
-
     if (!formData.plantingDate) {
       newErrors.plantingDate = 'Planting date is required'
     }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -68,9 +65,8 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validateForm()) return
-
     setIsSubmitting(true)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => setTimeout(resolve, 300))
     onSubmit(formData)
     setIsSubmitting(false)
   }
@@ -109,18 +105,8 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
 
   const fields = useMemo(
     () => [
-      {
-        name: "latitude",
-        label: "Latitude",
-        placeholder: "e.g., 23.8859",
-        icon: MapPin,
-      },
-      {
-        name: "longitude",
-        label: "Longitude",
-        placeholder: "e.g., 45.0792",
-        icon: MapPin,
-      },
+      { name: "latitude", label: "Latitude", placeholder: "e.g., 23.8859", icon: MapPin },
+      { name: "longitude", label: "Longitude", placeholder: "e.g., 45.0792", icon: MapPin },
     ],
     []
   )
@@ -135,26 +121,30 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
     []
   )
 
+  const activeModels = useMemo(
+    () => MODEL_OPTIONS.filter(
+      (m) => m.value === "auto" || m.value === "ensemble" || availableModels?.includes(m.value)
+    ),
+    [availableModels]
+  )
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="text-sm font-medium tracking-tight">Field context</div>
-          <div className="text-xs text-muted-foreground">
-            Coordinates and planting date help the model reason about growth conditions.
-          </div>
-        </div>
-        <Badge variant="secondary">Stage 2</Badge>
-      </div>
-
-      <Tabs defaultValue="inputs">
+      <Tabs defaultValue="inputs" className="w-full">
         <TabsList className="w-full justify-start">
-          <TabsTrigger value="inputs" style={{ flex: "1" }}>Inputs</TabsTrigger>
-          <TabsTrigger value="predict" style={{ flex: "1" }}>Predict</TabsTrigger>
+          <TabsTrigger value="inputs" style={{ flex: "1" }}>
+            <MapPin className="size-3" />
+            Inputs
+          </TabsTrigger>
+          <TabsTrigger value="predict" style={{ flex: "1" }}>
+            <Radar className="size-3" />
+            Predict
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="inputs" style={{ marginTop: "0.75rem" }}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            {/* Coordinates */}
             <div className="grid grid-cols-1 gap-3">
               {fields.map((f) => {
                 const Icon = f.icon
@@ -162,7 +152,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                 return (
                   <div key={f.name} className="field-section">
                     <div className="field-label-row">
-                      <Icon className="text-muted-foreground size-4" />
+                      <Icon className="text-muted-foreground size-3.5" />
                       <label className="field-label">{f.label}</label>
                     </div>
                     <Input
@@ -171,10 +161,10 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                       onChange={handleChange}
                       placeholder={f.placeholder}
                       aria-invalid={Boolean(err)}
-                      style={err ? { borderColor: "var(--destructive)", boxShadow: "0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent)" } : {}}
+                      className={err ? "border-destructive" : ""}
                     />
                     {err ? (
-                      <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-destructive">
+                      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-[11px] text-destructive">
                         {err}
                       </motion.div>
                     ) : null}
@@ -182,9 +172,10 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                 )
               })}
 
+              {/* Planting Date */}
               <div className="field-section">
                 <div className="field-label-row">
-                  <Calendar className="text-muted-foreground size-4" />
+                  <Calendar className="text-muted-foreground size-3.5" />
                   <label className="field-label">Planting date</label>
                 </div>
                 <Input
@@ -193,55 +184,77 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                   value={formData.plantingDate}
                   onChange={handleChange}
                   aria-invalid={Boolean(errors.plantingDate)}
-                  style={errors.plantingDate ? { borderColor: "var(--destructive)", boxShadow: "0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent)" } : {}}
+                  className={errors.plantingDate ? "border-destructive" : ""}
                 />
                 {errors.plantingDate ? (
-                  <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-destructive">
+                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-[11px] text-destructive">
                     {errors.plantingDate}
                   </motion.div>
                 ) : null}
               </div>
 
-              {/* Optional advanced fields */}
-              {extraFields.map((f) => (
-                <div key={f.name} className="field-section">
-                  <div className="field-label-row">
-                    <Radar className="text-muted-foreground size-4" />
-                    <label className="field-label">{f.label}</label>
-                  </div>
-                  <Input
-                    name={f.name}
-                    value={formData[f.name]}
-                    onChange={handleChange}
-                    placeholder={f.placeholder}
-                  />
+              {/* Optional fields */}
+              <details className="group">
+                <summary className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  <ChevronRight className="size-3 transition-transform group-open:rotate-90" />
+                  Advanced options ({extraFields.length})
+                </summary>
+                <div className="mt-3 flex flex-col gap-3">
+                  {extraFields.map((f) => (
+                    <div key={f.name} className="field-section">
+                      <div className="field-label-row">
+                        <Radar className="text-muted-foreground size-3.5" />
+                        <label className="field-label">{f.label}</label>
+                      </div>
+                      <Input
+                        name={f.name}
+                        value={formData[f.name]}
+                        onChange={handleChange}
+                        placeholder={f.placeholder}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </details>
             </div>
 
-            <Button type="submit" disabled={isSubmitting} className="mt-1">
-              {isSubmitting ? "Saving..." : "Save field details"}
+            <Button type="submit" disabled={isSubmitting} className="mt-1 w-full">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <MapPin className="size-3.5" />
+                  Save field details
+                </>
+              )}
             </Button>
 
             {gpsData ? (
-              <div className="text-xs text-muted-foreground">
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 px-3 py-2 text-[11px] text-emerald-700 dark:text-emerald-300"
+              >
+                <Sparkles className="size-3 shrink-0" />
                 Saved: {gpsData.latitude}, {gpsData.longitude} · {gpsData.plantingDate}
-              </div>
+              </motion.div>
             ) : null}
           </form>
         </TabsContent>
 
         <TabsContent value="predict" style={{ marginTop: "0.75rem" }}>
           <div className="flex flex-col gap-3">
+            {/* Model Selection */}
             <div className="field-section">
               <div className="field-label-row">
-                <Radar className="text-muted-foreground size-4" />
-                <label className="field-label">Select model</label>
+                <Radar className="text-muted-foreground size-3.5" />
+                <label className="field-label">Select Model</label>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {MODEL_OPTIONS.filter(
-                  (m) => m.value === "auto" || m.value === "ensemble" || availableModels?.includes(m.value)
-                ).map((m) => (
+                {activeModels.map((m) => (
                   <button
                     key={m.value}
                     type="button"
@@ -254,10 +267,12 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               </div>
             </div>
 
+            {/* Predict Button */}
             <Button
               type="button"
               onClick={handlePredictClick}
-              disabled={isPredicting || !formData.latitude || !formData.longitude}
+              disabled={isPredicting || !formData.latitude || !formData.longitude || !formData.plantingDate}
+              className="w-full gap-2"
             >
               {isPredicting ? (
                 <>
@@ -266,30 +281,44 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                 </>
               ) : (
                 <>
-                  <Radar className="size-4" />
+                  <Sparkles className="size-4" />
                   Run Prediction
                 </>
               )}
             </Button>
 
+            {/* Status Info */}
+            <div className="flex items-center gap-2 rounded-lg border border-border/40 bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground">
+              <span className="size-1.5 rounded-full bg-emerald-500" />
+              {gpsData
+                ? `Using field context: ${gpsData.latitude}, ${gpsData.longitude}`
+                : "Save field context first for best results"}
+            </div>
+
+            {/* Error display */}
             {predictionResult?.error ? (
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                 {predictionResult.error}
               </div>
             ) : null}
 
+            {/* Results */}
             {predictionResult && !predictionResult.error ? (
-              <ModelResults result={predictionResult} />
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <ModelResults result={predictionResult} />
+              </motion.div>
             ) : null}
 
             {ensembleResult ? (
-              <ModelResults result={ensembleResult} isEnsemble />
-            ) : null}
-
-            {gpsData ? (
-              <div className="rounded-lg border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-                Using saved field context: {gpsData.latitude}, {gpsData.longitude}
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <ModelResults result={ensembleResult} isEnsemble />
+              </motion.div>
             ) : null}
           </div>
         </TabsContent>

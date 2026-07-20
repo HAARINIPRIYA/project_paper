@@ -7,12 +7,11 @@ function App() {
   const [gpsData, setGpsData] = useState(null)
   const [predictionResult, setPredictionResult] = useState(null)
   const [ensembleResult, setEnsembleResult] = useState(null)
-  const [backendStatus, setBackendStatus] = useState("checking") // "checking" | "connected" | "error"
+  const [backendStatus, setBackendStatus] = useState("checking")
   const [availableModels, setAvailableModels] = useState([])
   const [modelMetrics, setModelMetrics] = useState({})
   const [backendError, setBackendError] = useState(null)
 
-  // Check backend health on mount
   useEffect(() => {
     let cancelled = false
     async function checkBackend() {
@@ -23,7 +22,6 @@ function App() {
         setAvailableModels(health.models_available || [])
         setBackendError(null)
 
-        // Also fetch model metrics
         const modelsData = await getModels()
         if (cancelled) return
         const metrics = {}
@@ -31,6 +29,7 @@ function App() {
         Object.entries(raw).forEach(([name, info]) => {
           if (!name.startsWith("_")) {
             metrics[name] = info.metrics || {}
+            metrics[name].features_count = info.features_count
           }
         })
         setModelMetrics(metrics)
