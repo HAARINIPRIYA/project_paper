@@ -30,25 +30,20 @@ const MODEL_OPTIONS = [
   { value: "ensemble", label: "Ensemble (All)" },
 ]
 
-// Exact backend field names and descriptions
 const FIELD_META = {
   Planting_Date: { label: "Planting Date", icon: Calendar, placeholder: "YYYY-MM-DD", type: "date", required: true },
   Harvesting_Date: { label: "Harvesting Date", icon: Trees, placeholder: "YYYY-MM-DD", type: "date", required: false },
   Variety: { label: "Variety", icon: Sprout, placeholder: "e.g., Co-0238", type: "text", required: false },
-  Crop_Type: { label: "Crop Type / Season", icon: Crop, placeholder: "e.g., Kharif, Rabi, Spring, Autumn", type: "text", required: false },
-  Soil_Type: { label: "Soil Type", icon: Tractor, placeholder: "e.g., Loamy, Clay, Sandy, Alluvial", type: "text", required: false },
+  Crop_Type: { label: "Crop Type / Season", icon: Crop, placeholder: "e.g., Kharif, Rabi, Spring", type: "text", required: false },
+  Soil_Type: { label: "Soil Type", icon: Tractor, placeholder: "e.g., Loamy, Clay, Sandy", type: "text", required: false },
   Irrigation_Type: { label: "Irrigation Type", icon: Droplets, placeholder: "e.g., Drip, Flood, Sprinkler", type: "text", required: false },
-  Fertilizer_Type: { label: "Fertilizer Type", icon: FlaskConical, placeholder: "e.g., Urea, DAP, Organic, NPK", type: "text", required: false },
+  Fertilizer_Type: { label: "Fertilizer Type", icon: FlaskConical, placeholder: "e.g., Urea, DAP, Organic", type: "text", required: false },
 }
 
-// Core fields that show by default
 const CORE_FIELDS = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type"]
-
-// Advanced fields hidden behind collapse
 const ADVANCED_FIELDS = ["Soil_Type", "Irrigation_Type", "Fertilizer_Type"]
 
 function GPSForm({ onSubmit, gpsData, availableModels }) {
-  // Initialize with backend-matching snake_case field names
   const [formData, setFormData] = useState({
     Planting_Date: '',
     Harvesting_Date: '',
@@ -68,9 +63,8 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
   const validateForm = () => {
     const newErrors = {}
     if (!formData.Planting_Date) {
-      newErrors.Planting_Date = 'Planting date is required for predictions'
+      newErrors.Planting_Date = 'Planting date is required'
     }
-    // Validate date format if provided
     if (formData.Harvesting_Date && !/^\d{4}-\d{2}-\d{2}$/.test(formData.Harvesting_Date)) {
       newErrors.Harvesting_Date = 'Use YYYY-MM-DD format'
     }
@@ -91,12 +85,10 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
     if (!validateForm()) return
     setIsSubmitting(true)
     await new Promise(resolve => setTimeout(resolve, 300))
-    // Pass data with exact backend field names
     onSubmit(formData)
     setIsSubmitting(false)
   }
 
-  /** Build the payload with exact backend field names, omitting empty values */
   const buildFieldPayload = () => {
     const payload = {}
     for (const key of Object.keys(FIELD_META)) {
@@ -140,7 +132,6 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
     [availableModels]
   )
 
-  // Summary of saved data for display
   const savedSummary = gpsData ? [
     gpsData.Planting_Date && `Planted: ${gpsData.Planting_Date}`,
     gpsData.Variety && ` · ${gpsData.Variety}`,
@@ -151,18 +142,18 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
   return (
     <div className="flex flex-col gap-4">
       <Tabs defaultValue="inputs" className="w-full">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="inputs" style={{ flex: "1" }}>
+        <TabsList className="w-full">
+          <TabsTrigger value="inputs">
             <Calendar className="size-3" />
             Inputs
           </TabsTrigger>
-          <TabsTrigger value="predict" style={{ flex: "1" }}>
+          <TabsTrigger value="predict">
             <Radar className="size-3" />
             Predict
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="inputs" style={{ marginTop: "0.75rem" }}>
+        <TabsContent value="inputs">
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             {/* Core Fields */}
             {CORE_FIELDS.map((fieldName) => {
@@ -172,10 +163,10 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               return (
                 <div key={fieldName} className="field-section">
                   <div className="field-label-row">
-                    <Icon className="text-muted-foreground size-3.5" />
+                    <Icon className="size-3.5" style={{ color: "var(--aws-text-secondary)" }} />
                     <label className="field-label">
                       {meta.label}
-                      {meta.required && <span className="text-destructive ml-0.5">*</span>}
+                      {meta.required && <span style={{ color: "var(--aws-red)", marginLeft: "2px" }}>*</span>}
                     </label>
                   </div>
                   <Input
@@ -185,10 +176,11 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                     onChange={handleChange}
                     placeholder={meta.placeholder}
                     aria-invalid={Boolean(err)}
-                    className={err ? "border-destructive" : ""}
+                    className={err ? "border-red" : ""}
                   />
                   {err ? (
-                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-[11px] text-destructive">
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+                      style={{ fontSize: "11px", color: "var(--aws-red)" }}>
                       {err}
                     </motion.div>
                   ) : null}
@@ -196,9 +188,19 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               )
             })}
 
-            {/* Advanced Fields (collapsible) */}
-            <details className="group">
-              <summary className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors py-1">
+            {/* Advanced Fields */}
+            <details className="group" style={{ marginTop: "4px" }}>
+              <summary style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "11px",
+                fontWeight: 500,
+                color: "var(--aws-text-secondary)",
+                cursor: "pointer",
+                padding: "6px 0",
+                transition: "color 120ms",
+              }}>
                 <ChevronRight className="size-3 transition-transform group-open:rotate-90" />
                 Advanced options ({ADVANCED_FIELDS.length})
               </summary>
@@ -209,7 +211,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                   return (
                     <div key={fieldName} className="field-section">
                       <div className="field-label-row">
-                        <Icon className="text-muted-foreground size-3.5" />
+                        <Icon className="size-3.5" style={{ color: "var(--aws-text-secondary)" }} />
                         <label className="field-label">{meta.label}</label>
                       </div>
                       <Input
@@ -225,17 +227,11 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               </div>
             </details>
 
-            <Button type="submit" disabled={isSubmitting} className="mt-1 w-full">
+            <Button type="submit" variant="primary" disabled={isSubmitting} className="mt-1 w-full">
               {isSubmitting ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" />
-                  Saving...
-                </>
+                <><Loader2 className="size-3.5 animate-spin" /> Saving...</>
               ) : (
-                <>
-                  <Sparkles className="size-3.5" />
-                  Save field details
-                </>
+                <><Sparkles className="size-3.5" /> Save field details</>
               )}
             </Button>
 
@@ -243,7 +239,17 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 px-3 py-2 text-[11px] text-emerald-700 dark:text-emerald-300"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 10px",
+                  border: "1px solid transparent",
+                  borderRadius: "2px",
+                  background: "var(--aws-green-light)",
+                  fontSize: "11px",
+                  color: "var(--aws-green)",
+                }}
               >
                 <Sparkles className="size-3 shrink-0" />
                 <span className="truncate">{savedSummary}</span>
@@ -252,12 +258,12 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
           </form>
         </TabsContent>
 
-        <TabsContent value="predict" style={{ marginTop: "0.75rem" }}>
+        <TabsContent value="predict">
           <div className="flex flex-col gap-3">
             {/* Model Selection */}
             <div className="field-section">
               <div className="field-label-row">
-                <Radar className="text-muted-foreground size-3.5" />
+                <Radar className="size-3.5" style={{ color: "var(--aws-text-secondary)" }} />
                 <label className="field-label">Select Model</label>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -277,27 +283,30 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
             {/* Predict Button */}
             <Button
               type="button"
+              variant="primary"
               onClick={handlePredictClick}
               disabled={isPredicting || !formData.Planting_Date}
               className="w-full gap-2"
             >
               {isPredicting ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Predicting...
-                </>
+                <><Loader2 className="size-4 animate-spin" /> Predicting...</>
               ) : (
-                <>
-                  <Sparkles className="size-4" />
-                  Run Prediction
-                </>
+                <><Radar className="size-4" /> Run Prediction</>
               )}
             </Button>
 
-            {/* Status / saved fields overview */}
-            <div className="flex flex-col gap-1.5 rounded-lg border border-border/40 bg-muted/20 px-3 py-2">
-              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+            {/* Status */}
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "6px",
+              padding: "8px 10px",
+              border: "1px solid var(--aws-card-border)",
+              borderRadius: "2px",
+              background: "var(--aws-bg)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", color: "var(--aws-text-secondary)" }}>
+                <span className="size-1.5 rounded-full" style={{ background: "var(--aws-green)", flexShrink: 0 }} />
                 <span>
                   {formData.Planting_Date
                     ? `Using ${Object.values(formData).filter(Boolean).length} field parameter(s)`
@@ -309,7 +318,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                   {Object.entries(formData)
                     .filter(([, v]) => v && v.trim() !== '')
                     .map(([key]) => (
-                      <Badge key={key} variant="secondary" className="text-[8px] h-3.5">
+                      <Badge key={key} variant="secondary" className="text-[8px]" style={{ height: "16px" }}>
                         {FIELD_META[key]?.label || key}
                       </Badge>
                     ))}
@@ -317,22 +326,29 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               )}
             </div>
 
-            {/* Error display */}
+            {/* Error */}
             {predictionResult?.error ? (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              <div style={{
+                padding: "8px 10px",
+                border: "1px solid transparent",
+                borderRadius: "2px",
+                background: "var(--aws-red-light)",
+                fontSize: "12px",
+                color: "var(--aws-red)",
+              }}>
                 {predictionResult.error}
               </div>
             ) : null}
 
             {/* Results */}
             {predictionResult && !predictionResult.error ? (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+              <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
                 <ModelResults result={predictionResult} />
               </motion.div>
             ) : null}
 
             {ensembleResult ? (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+              <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
                 <ModelResults result={ensembleResult} isEnsemble />
               </motion.div>
             ) : null}

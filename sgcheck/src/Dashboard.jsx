@@ -17,6 +17,12 @@ import {
   SlidersHorizontal,
   Sparkles,
   TrendingUp,
+  ChevronDown,
+  Bell,
+  Settings,
+  HelpCircle,
+  User,
+  LogOut,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -90,34 +96,30 @@ function Dashboard({
     []
   )
 
-  // Status indicators for header
   const hasFieldData = gpsData !== null
   const hasImage = uploadedImage !== null
   const isBackendReady = backendStatus === "connected"
 
   const toolPanel = (
     <div className="flex flex-col gap-5">
-      {/* Backend Status */}
-      <div className="flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/25 px-3.5 py-2.5">
+      {/* Backend Status — AWS Console style */}
+      <div className="flex items-center gap-3" style={{ border: "1px solid var(--aws-card-border)", padding: "10px 12px" }}>
         {backendStatus === "connected" ? (
-          <span className="relative flex size-2.5">
-            <span className="absolute inset-0 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="relative inline-block size-2.5 rounded-full bg-emerald-500" />
-          </span>
+          <span className="status-dot connected" />
         ) : backendStatus === "checking" ? (
-          <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+          <Loader2 className="size-3 animate-spin" style={{ color: "var(--aws-text-secondary)" }} />
         ) : (
-          <span className="size-2.5 rounded-full bg-destructive" />
+          <span className="status-dot disconnected" />
         )}
         <div className="min-w-0">
-          <div className="text-xs font-medium">
+          <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--aws-text)" }}>
             {backendStatus === "connected"
               ? `${availableModels.length} models ready`
               : backendStatus === "checking"
                 ? "Connecting..."
                 : "Backend offline"}
           </div>
-          <div className="text-[10px] text-muted-foreground leading-tight">
+          <div style={{ fontSize: "10px", color: "var(--aws-text-secondary)" }}>
             {backendStatus === "connected"
               ? "All systems operational"
               : backendStatus === "checking"
@@ -127,64 +129,69 @@ function Dashboard({
         </div>
       </div>
 
-      {/* Section: Input Data */}
+      {/* Input Data */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">Input Data</div>
-          <Badge variant="secondary" className="text-[9px] tracking-wider">Required</Badge>
+          <span className="divider-label-text">Input Data</span>
+          <Badge variant="outline" className="text-[9px]">Required</Badge>
         </div>
         <UploadZone onImageUpload={onImageUpload} uploadedImage={uploadedImage} />
       </div>
 
-      {/* Section: Field Details */}
+      {/* Field Details */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">Field Details</div>
-          <Badge variant="secondary" className="text-[9px] tracking-wider">Optional</Badge>
+          <span className="divider-label-text">Field Details</span>
+          <Badge variant="outline" className="text-[9px]">Optional</Badge>
         </div>
         <GPSForm onSubmit={onGPSSubmit} gpsData={gpsData} availableModels={availableModels} />
       </div>
 
-      {/* Section: Model Performance */}
+      {/* Model Performance */}
       {isBackendReady && availableModels.length > 0 && (
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">Models</div>
-            <Badge variant="emerald" className="text-[9px]">{availableModels.length} deployed</Badge>
+            <span className="divider-label-text">Models</span>
+            <Badge variant="green" className="text-[9px]">{availableModels.length} deployed</Badge>
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1">
             {[...availableModels]
               .sort((a, b) => (modelMetrics[b]?.r2 || 0) - (modelMetrics[a]?.r2 || 0))
               .map((name, idx) => {
                 const m = modelMetrics[name] || {}
                 const isBest = idx === 0
                 const colors = {
-                  catboost: "var(--color-emerald-500)",
-                  xgboost: "var(--color-blue-500)",
-                  random_forest: "var(--color-amber-500)",
-                  linear_regression: "var(--color-purple-500)",
-                  elastic_net: "var(--color-red-500)",
+                  catboost: "var(--aws-green)",
+                  xgboost: "var(--aws-blue)",
+                  random_forest: "var(--aws-orange)",
+                  linear_regression: "#7c3aed",
+                  elastic_net: "var(--aws-red)",
                 }
                 return (
                   <div
                     key={name}
-                    className="group/card flex items-center justify-between gap-2 rounded-lg border border-border/50 bg-card/50 px-2.5 py-1.5 transition-all hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "6px 8px",
+                      border: "1px solid var(--aws-card-border)",
+                      borderRadius: "2px",
+                      transition: "background 120ms",
+                      cursor: "default",
+                    }}
+                    className="hover:bg-muted"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="size-2 shrink-0 rounded-full"
-                        style={{ background: colors[name] || "var(--muted-fg)" }}
-                      />
-                      <span className="text-xs font-medium capitalize truncate">{name.replace(/_/g, " ")}</span>
-                    </div>
+                    <span className="size-2 shrink-0 rounded-full" style={{ background: colors[name] || "var(--aws-text-secondary)" }} />
+                    <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, minWidth: 0 }} className="truncate capitalize">
+                      {name.replace(/_/g, " ")}
+                    </span>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-[10px] font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+                      <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--aws-green)" }}>
                         R² {m.r2 ? m.r2.toFixed(3) : "—"}
                       </span>
                       {isBest && (
-                        <Badge variant="outline" className="text-[8px] h-3.5 px-1 border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
-                          Best
-                        </Badge>
+                        <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
                       )}
                     </div>
                   </div>
@@ -194,30 +201,14 @@ function Dashboard({
         </div>
       )}
 
-      {/* Quick actions */}
+      {/* Quick Actions */}
       <div className="flex flex-col gap-2 pt-1">
-        <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">Quick Actions</div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full justify-start gap-2"
-          onClick={() => {
-            setView("dashboard")
-            setShowChat(false)
-          }}
-        >
+        <span className="divider-label-text">Quick Actions</span>
+        <Button variant="default" size="sm" className="w-full justify-start gap-2" onClick={() => { setView("dashboard"); setShowChat(false) }}>
           <TrendingUp className="size-3.5" />
           View Model Performance
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full justify-start gap-2"
-          onClick={() => {
-            setView("analysis")
-            setShowChat(true)
-          }}
-        >
+        <Button variant="default" size="sm" className="w-full justify-start gap-2" onClick={() => { setView("analysis"); setShowChat(true) }}>
           <Bot className="size-3.5" />
           Open AI Chat
         </Button>
@@ -229,11 +220,8 @@ function Dashboard({
     const text = composer.trim()
     if (!text || isPredicting) return
 
-    // Switch to analysis view and show chat
     setView("analysis")
     setShowChat(true)
-
-    // Add user message
     setMessages((prev) => [...prev, { id: `${Date.now()}-u`, role: "user", content: text }])
     setComposer("")
     setIsPredicting(true)
@@ -242,7 +230,6 @@ function Dashboard({
 
     try {
       if (isPredictionQuery && gpsData) {
-        // Pass ALL field data with exact backend field names, omit empty values
         const fieldData = {}
         const backendFields = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type", "Soil_Type", "Irrigation_Type", "Fertilizer_Type"]
         for (const key of backendFields) {
@@ -310,39 +297,26 @@ function Dashboard({
     }
   }, [composer, gpsData, isPredicting, availableModels, onPredictionResult, onEnsembleResult])
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.05 },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 8 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } },
-  }
-
   return (
-    <div className="h-screen w-full overflow-hidden">
+    <div className="h-screen w-full overflow-hidden" style={{ background: "var(--aws-bg)" }}>
       {/* Desktop Layout */}
       <div className="app-grid hidden md:flex">
-        {/* Sidebar */}
-        <aside className="sidebar" style={{ overflow: "hidden" }}>
-          <div className="px-4 py-4">
+        {/* Sidebar - AWS Console Style */}
+        <aside className="sidebar">
+          {/* Brand header */}
+          <div className="sidebar-header">
             <div className="sidebar-brand">
-              <div className="sidebar-logo">
-                <span>CS</span>
-              </div>
+              <div className="sidebar-logo">CS</div>
               <div className="leading-tight">
-                <div className="sidebar-name">CaneSense</div>
-                <div className="sidebar-subtitle">Yield Prediction</div>
+                <div className="sidebar-service-name">CaneSense</div>
+                <div className="sidebar-service-subtitle">Yield Prediction</div>
               </div>
             </div>
           </div>
 
+          {/* Navigation */}
           <div className="sidebar-section-label">Navigation</div>
-          <div className="flex flex-col gap-0.5 px-1 pb-3">
+          <div className="sidebar-nav-items">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon
               return (
@@ -359,16 +333,17 @@ function Dashboard({
             })}
           </div>
 
+          {/* Chat history (analysis view) */}
           {view === "analysis" && (
             <>
               <div className="sidebar-section-label">Chat History</div>
               <div className="sidebar-search-wrap">
-                <Search className="sidebar-search-icon" />
-                <Input className="pl-9" placeholder="Search chats…" />
+                <Search className="sidebar-search-icon" size={14} />
+                <input placeholder="Search chats…" />
               </div>
-              <Separator className="opacity-40" />
+              <Separator style={{ background: "rgba(255,255,255,0.06)", opacity: 1 }} />
               <ScrollArea className="flex-1">
-                <div className="flex flex-col gap-1 p-2">
+                <div className="flex flex-col" style={{ padding: "4px 0" }}>
                   {chats.map((c) => (
                     <button
                       key={c.id}
@@ -385,24 +360,26 @@ function Dashboard({
             </>
           )}
 
+          {/* Dashboard view filler */}
           {view === "dashboard" && (
             <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-              <BarChart3 className="size-8 text-muted-foreground/20 mb-3" />
-              <div className="text-xs text-muted-foreground/60 leading-relaxed">
+              <BarChart3 className="size-8" style={{ opacity: 0.2, color: "var(--aws-nav-text)", marginBottom: "12px" }} />
+              <div style={{ fontSize: "12px", color: "var(--aws-nav-text)", opacity: 0.4, lineHeight: 1.6 }}>
                 Dashboard active<br />
-                <span className="text-[10px]">Switch to Analysis for chat</span>
+                <span style={{ fontSize: "10px" }}>Switch to Analysis for chat</span>
               </div>
             </div>
           )}
 
+          {/* User area */}
           <div className="sidebar-user">
             <div className="sidebar-user-inner">
               <Avatar size="sm">
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarFallback style={{ background: "rgba(255,255,255,0.1)", color: "#d5dbe3" }}>U</AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium leading-tight">You</div>
-                <div className="truncate sidebar-subtitle">CaneSense workspace</div>
+                <div className="sidebar-user-name">You</div>
+                <div className="sidebar-user-subtitle">CaneSense workspace</div>
               </div>
             </div>
           </div>
@@ -410,67 +387,42 @@ function Dashboard({
 
         {/* Main Content */}
         <main className="main-area">
-          {/* Header */}
+          {/* Header — AWS Console Top Bar */}
           <div className="main-header">
-            <div className="min-w-0">
-              <div className="main-header-title">
-                {view === "dashboard" ? "Dashboard" : showChat ? "CaneSense AI" : "Dashboard"}
-              </div>
-              <div className="main-header-subtitle">
-                {view === "dashboard"
-                  ? "Model comparison, field data & prediction insights"
-                  : showChat
-                    ? "Ask questions, run predictions, and analyze results"
-                    : "Overview of your sugarcane yield prediction setup"}
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="main-header-breadcrumb">
+                <span onClick={() => setView("dashboard")}>CaneSense</span>
+                <ChevronRight className="chevron" size={12} />
+                <span style={{ color: "var(--aws-text)", cursor: "default" }}>
+                  {view === "dashboard" ? "Dashboard" : showChat ? "AI Assistant" : "Dashboard"}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Status indicators */}
-              <div className="flex items-center gap-1.5 mr-1">
-                {hasImage && (
-                  <Badge variant="secondary" className="text-[9px] h-4 gap-1">
-                    <span className="status-dot ready" />
-                    Image
-                  </Badge>
-                )}
-                {hasFieldData && (
-                  <Badge variant="secondary" className="text-[9px] h-4 gap-1">
-                    <span className="status-dot ready" />
-                    Field
-                  </Badge>
-                )}
-                {isBackendReady && (
-                  <Badge variant="emerald" className="text-[9px] h-4 gap-1">
-                    <Sparkles className="size-2.5" />
-                    Live
-                  </Badge>
-                )}
-              </div>
+            <div className="main-header-actions">
+              {/* Status badges */}
+              {hasImage && <Badge variant="blue" className="text-[10px]"><span className="status-dot connected" style={{ width: "6px", height: "6px", marginRight: "2px" }} /> Image</Badge>}
+              {hasFieldData && <Badge variant="blue" className="text-[10px]"><span className="status-dot connected" style={{ width: "6px", height: "6px", marginRight: "2px" }} /> Field</Badge>}
+              {isBackendReady && (
+                <Badge variant="green" className="text-[10px]">
+                  <Sparkles className="size-2.5" />
+                  Live
+                </Badge>
+              )}
 
               {view === "analysis" ? (
-                <Button variant="outline" size="icon-sm" aria-label="New chat" onClick={() => {
+                <Button variant="default" size="icon-sm" aria-label="New chat" onClick={() => {
                   setActiveChatId("new")
-                  setMessages([
-                    {
-                      id: "m1",
-                      role: "assistant",
-                      content: "Hi — I'm **CaneSense**. Ask me anything about sugarcane yield prediction!",
-                    },
-                  ])
+                  setMessages([{
+                    id: "m1",
+                    role: "assistant",
+                    content: "Hi — I'm **CaneSense**. Ask me anything about sugarcane yield prediction!",
+                  }])
                 }}>
                   <Plus className="size-4" />
                 </Button>
               ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => {
-                    setView("analysis")
-                    setShowChat(true)
-                  }}
-                >
+                <Button variant="primary" size="sm" className="gap-1.5" onClick={() => { setView("analysis"); setShowChat(true) }}>
                   <MessageSquareText className="size-3.5" />
                   Ask AI
                 </Button>
@@ -479,7 +431,7 @@ function Dashboard({
           </div>
 
           {/* Content Area */}
-          <ScrollArea className="flex-1 relative z-[1]">
+          <ScrollArea className="flex-1">
             <AnimatePresence mode="wait">
               {view === "dashboard" ? (
                 <motion.div
@@ -487,9 +439,9 @@ function Dashboard({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  <div className="mx-auto w-full px-6 py-6 max-w-[1400px]">
+                  <div className="main-content">
                     <DashboardPage
                       uploadedImage={uploadedImage}
                       gpsData={gpsData}
@@ -507,34 +459,29 @@ function Dashboard({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  {/* Hybrid: Show chat + prediction results side by side */}
-                  <div style={{ margin: "0 auto", maxWidth: "800px", display: "flex", flexDirection: "column", gap: "0.75rem", padding: "1.5rem 1rem" }}>
-                    {/* Prediction results summary at top if available */}
+                  <div className="main-content" style={{ maxWidth: "800px", margin: "0 auto", padding: "24px 20px" }}>
+                    {/* Prediction results summary at top */}
                     {(predictionResult || ensembleResult) && (
                       <motion.div
-                        initial={{ opacity: 0, y: -8 }}
+                        initial={{ opacity: 0, y: -6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="glass-card rounded-xl p-3 flex items-center justify-between"
+                        className="aws-card"
+                        style={{ padding: "12px 16px", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}
                       >
                         <div className="flex items-center gap-2.5">
-                          <div className="size-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                            <TrendingUp className="size-4 text-emerald-600" />
+                          <div style={{ width: "28px", height: "28px", borderRadius: "2px", background: "var(--aws-green-light)", display: "grid", placeItems: "center" }}>
+                            <TrendingUp className="size-3.5" style={{ color: "var(--aws-green)" }} />
                           </div>
                           <div>
-                            <div className="text-sm font-medium">Latest Prediction Available</div>
-                            <div className="text-xs text-muted-foreground">
+                            <div style={{ fontSize: "13px", fontWeight: 600 }}>Latest Prediction Available</div>
+                            <div style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }}>
                               {ensembleResult ? "Ensemble (all models)" : `Using ${predictionResult?.model || "auto"} model`}
                             </div>
                           </div>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setView("dashboard")}
-                          className="gap-1"
-                        >
+                        <Button variant="default" size="sm" onClick={() => setView("dashboard")} className="gap-1">
                           <BarChart3 className="size-3.5" />
                           View Details
                         </Button>
@@ -547,47 +494,43 @@ function Dashboard({
                       return (
                         <motion.div
                           key={m.id}
-                          initial={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.22, delay: Math.min(0.02 * idx, 0.18) }}
+                          transition={{ duration: 0.2, delay: Math.min(0.02 * idx, 0.15) }}
                           className={"message-row" + (isUser ? " user" : " assistant")}
+                          style={{ marginBottom: "8px" }}
                         >
                           {!isUser ? (
                             <Avatar>
-                              <AvatarFallback style={{ background: "linear-gradient(135deg, var(--color-emerald-600), var(--color-emerald-700))", color: "#fff" }}>
-                                CS
-                              </AvatarFallback>
+                              <AvatarFallback style={{ background: "var(--aws-blue)", color: "#fff" }}>CS</AvatarFallback>
                             </Avatar>
                           ) : null}
-
                           <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
                             {m.content}
                           </div>
-
                           {isUser ? (
                             <Avatar size="sm">
-                              <AvatarFallback>U</AvatarFallback>
+                              <AvatarFallback style={{ background: "var(--aws-bg)" }}>U</AvatarFallback>
                             </Avatar>
                           ) : null}
                         </motion.div>
                       )
                     })}
 
-                    {/* Prediction loading */}
+                    {/* Loading */}
                     {isPredicting && (
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="message-row assistant"
+                        style={{ marginBottom: "8px" }}
                       >
                         <Avatar>
-                          <AvatarFallback style={{ background: "linear-gradient(135deg, var(--color-emerald-600), var(--color-emerald-700))", color: "#fff" }}>
-                            CS
-                          </AvatarFallback>
+                          <AvatarFallback style={{ background: "var(--aws-blue)", color: "#fff" }}>CS</AvatarFallback>
                         </Avatar>
                         <div className="message-bubble assistant flex items-center gap-2.5">
-                          <Loader2 className="size-4 animate-spin text-emerald-600" />
-                          <span className="text-sm text-muted-foreground">Running prediction across models...</span>
+                          <Loader2 className="size-4 animate-spin" style={{ color: "var(--aws-blue)" }} />
+                          <span style={{ fontSize: "13px", color: "var(--aws-text-secondary)" }}>Running prediction across models...</span>
                         </div>
                       </motion.div>
                     )}
@@ -597,43 +540,32 @@ function Dashboard({
             </AnimatePresence>
           </ScrollArea>
 
-          {/* Composer - only in analysis view */}
+          {/* Composer */}
           {view === "analysis" && (
-            <div className="composer-wrap relative z-[1]">
-              <div className="composer-inner">
-                <div className="composer-box">
-                  <div className="composer-flex">
-                    <div className="composer-input-wrap">
-                      <Textarea
-                        value={composer}
-                        onChange={(e) => setComposer(e.target.value)}
-                        placeholder="Ask about predictions, yield, or field analysis…"
-                        style={{ minHeight: "40px", border: "none", background: "transparent", padding: "0.625rem 0.75rem", fontSize: "0.875rem", boxShadow: "none" }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault()
-                            onSend()
-                          }
-                        }}
-                      />
-                    </div>
-                    <Button
-                      size="icon"
-                      aria-label="Send"
-                      onClick={onSend}
-                      disabled={!composer.trim() || isPredicting}
-                      style={{ marginBottom: "3px" }}
-                    >
-                      <Send className="size-4" />
-                    </Button>
+            <div className="composer-wrap">
+              <div className="composer-box">
+                <div className="composer-flex" style={{ padding: "6px" }}>
+                  <div className="composer-input-wrap">
+                    <Textarea
+                      value={composer}
+                      onChange={(e) => setComposer(e.target.value)}
+                      placeholder="Ask about predictions, yield, or field analysis…"
+                      style={{ minHeight: "36px", border: "none", background: "transparent", padding: "4px 8px", fontSize: "13px", boxShadow: "none", borderRadius: 0 }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend() }
+                      }}
+                    />
                   </div>
-                  <div className="composer-footer">
-                    <div className="composer-hint">Shift + Enter for new line</div>
-                    <div className="composer-status">
-                      {hasImage && <Badge variant="secondary" className="text-[9px] h-3.5">Image loaded</Badge>}
-                      {hasFieldData && <Badge variant="secondary" className="text-[9px] h-3.5">Field ready</Badge>}
-                      {!gpsData && <Badge variant="outline" className="text-[9px] h-3.5">No field data</Badge>}
-                    </div>
+                  <Button variant="primary" size="icon" aria-label="Send" onClick={onSend} disabled={!composer.trim() || isPredicting}>
+                    <Send className="size-3.5" />
+                  </Button>
+                </div>
+                <div className="composer-footer">
+                  <div className="composer-hint">Shift + Enter for new line</div>
+                  <div className="composer-status">
+                    {hasImage && <Badge variant="outline" className="text-[9px]" style={{ height: "18px" }}>Image loaded</Badge>}
+                    {hasFieldData && <Badge variant="outline" className="text-[9px]" style={{ height: "18px" }}>Field ready</Badge>}
+                    {!gpsData && <Badge variant="outline" className="text-[9px]" style={{ height: "18px" }}>No field data</Badge>}
                   </div>
                 </div>
               </div>
@@ -641,20 +573,15 @@ function Dashboard({
           )}
         </main>
 
-        {/* Right Tools Panel */}
-        <aside className="flex h-full flex-col border-l border-border/50" style={{ background: "color-mix(in srgb, var(--bg) 70%, transparent)", backdropFilter: "blur(8px)", overflow: "hidden" }}>
-          <div className="tools-panel">
-            <div className="flex items-center justify-between px-4 pt-3 pb-1">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal className="size-3.5 text-muted-foreground" />
-                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">Tools & Data</span>
-              </div>
-              <Badge variant="outline" className="text-[9px]">v1.0</Badge>
-            </div>
-            <div className="tools-scroll">
-              <div className="tools-card">
-                {toolPanel}
-              </div>
+        {/* Right Tools Panel — AWS Console Style */}
+        <aside className="tools-panel">
+          <div className="tools-header">
+            <div className="tools-header-title">Tools & Data</div>
+            <Badge variant="outline" className="text-[9px]">v1.0</Badge>
+          </div>
+          <div className="tools-scroll">
+            <div className="tools-card">
+              {toolPanel}
             </div>
           </div>
         </aside>
@@ -662,27 +589,33 @@ function Dashboard({
 
       {/* Mobile Layout */}
       <div className="flex h-full flex-col md:hidden">
-        <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 py-3 glass relative z-10">
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "12px",
+          padding: "10px 16px",
+          borderBottom: "1px solid var(--aws-topbar-border)",
+          background: "var(--aws-card)",
+          flexShrink: 0,
+        }}>
           <div className="min-w-0">
-            <div className="truncate text-sm font-medium tracking-tight">
-              {view === "analysis" ? "CaneSense" : "Dashboard"}
-            </div>
-            <div className="truncate text-xs text-muted-foreground">
-              {view === "analysis" ? "AI Chat & Tools" : "Model Overview"}
+            <div className="truncate" style={{ fontSize: "14px", fontWeight: 600 }}>CaneSense</div>
+            <div className="truncate" style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }}>
+              {view === "analysis" ? "AI Chat" : "Dashboard"}
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Status dots */}
             <div className="flex items-center gap-1">
-              {hasImage && <span className="status-dot ready" title="Image loaded" />}
-              {hasFieldData && <span className="status-dot ready" title="Field data ready" />}
-              {isBackendReady && <span className="status-dot ready" title="Backend connected" />}
+              {hasImage && <span className="status-dot connected" />}
+              {hasFieldData && <span className="status-dot connected" />}
+              {isBackendReady && <span className="status-dot connected" />}
             </div>
 
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon-sm" aria-label="Menu">
+                <Button variant="default" size="icon-sm" aria-label="Menu">
                   <Menu className="size-4" />
                 </Button>
               </SheetTrigger>
@@ -690,19 +623,12 @@ function Dashboard({
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
-                <div className="mt-4 flex flex-col gap-4">
+                <div className="mt-4 flex flex-col gap-4 px-4">
                   <div className="nav-btn-grid">
                     {NAV_ITEMS.map((item) => {
                       const Icon = item.icon
                       return (
-                        <Button
-                          key={item.id}
-                          type="button"
-                          variant={view === item.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setView(item.id)}
-                          className="gap-1.5"
-                        >
+                        <Button key={item.id} variant={view === item.id ? "primary" : "default"} size="sm" onClick={() => setView(item.id)} className="gap-1.5">
                           <Icon className="size-3.5" />
                           {item.label}
                         </Button>
@@ -713,14 +639,11 @@ function Dashboard({
                   {view === "analysis" && (
                     <div className="flex flex-col gap-1">
                       {chats.map((c) => (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => setActiveChatId(c.id)}
+                        <button key={c.id} type="button" onClick={() => setActiveChatId(c.id)}
                           className={"chat-item" + (activeChatId === c.id ? " active" : "")}
-                        >
+                          style={{ color: "var(--aws-text)", padding: "8px 12px", borderRadius: "2px" }}>
                           <div className="chat-item-title">{c.title}</div>
-                          <div className="chat-item-subtitle">{c.subtitle}</div>
+                          <div className="chat-item-subtitle" style={{ color: "var(--aws-text-secondary)" }}>{c.subtitle}</div>
                         </button>
                       ))}
                     </div>
@@ -731,16 +654,16 @@ function Dashboard({
 
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5">
+                <Button variant="default" size="sm" className="gap-1.5">
                   <SlidersHorizontal className="size-3.5" />
                   Tools
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="sm:w-[420px]">
+              <SheetContent side="right">
                 <SheetHeader>
                   <SheetTitle>Tools & Data</SheetTitle>
                 </SheetHeader>
-                <div className="mt-4">{toolPanel}</div>
+                <div className="mt-4 px-4">{toolPanel}</div>
               </SheetContent>
             </Sheet>
           </div>
@@ -748,7 +671,7 @@ function Dashboard({
 
         <ScrollArea className="flex-1">
           {view === "dashboard" ? (
-            <div className="mx-auto w-full px-4 py-6">
+            <div className="px-4 py-5">
               <DashboardPage
                 uploadedImage={uploadedImage}
                 gpsData={gpsData}
@@ -760,25 +683,24 @@ function Dashboard({
               />
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "1.5rem 1rem" }}>
+            <div style={{ padding: "20px 16px" }}>
               {messages.map((m, idx) => {
                 const isUser = m.role === "user"
                 return (
                   <motion.div
                     key={m.id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.22, delay: Math.min(0.02 * idx, 0.18) }}
+                    transition={{ duration: 0.2, delay: Math.min(0.02 * idx, 0.15) }}
                     className={"message-row" + (isUser ? " user" : " assistant")}
+                    style={{ marginBottom: "8px" }}
                   >
                     {!isUser ? (
                       <Avatar>
-                        <AvatarFallback style={{ background: "linear-gradient(135deg, var(--color-emerald-600), var(--color-emerald-700))", color: "#fff" }}>
-                          CS
-                        </AvatarFallback>
+                        <AvatarFallback style={{ background: "var(--aws-blue)", color: "#fff" }}>CS</AvatarFallback>
                       </Avatar>
                     ) : null}
-                    <div className={"message-bubble" + (isUser ? " user" : " assistant")} style={{ maxWidth: "min(85%, 480px)" }}>
+                    <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
                       {m.content}
                     </div>
                     {isUser ? (
@@ -791,8 +713,8 @@ function Dashboard({
               })}
               {isPredicting && (
                 <div className="flex items-center justify-center gap-2 py-3">
-                  <Loader2 className="size-4 animate-spin text-emerald-600" />
-                  <span className="text-xs text-muted-foreground">Running prediction...</span>
+                  <Loader2 className="size-4 animate-spin" style={{ color: "var(--aws-blue)" }} />
+                  <span style={{ fontSize: "12px", color: "var(--aws-text-secondary)" }}>Running prediction...</span>
                 </div>
               )}
             </div>
@@ -800,35 +722,21 @@ function Dashboard({
         </ScrollArea>
 
         {view === "analysis" && (
-          <div className="composer-wrap">
-            <div className="px-4 py-3">
-              <div className="composer-box">
-                <div className="composer-flex">
-                  <div className="composer-input-wrap">
-                    <Textarea
-                      value={composer}
-                      onChange={(e) => setComposer(e.target.value)}
-                      placeholder="Message CaneSense…"
-                      style={{ minHeight: "40px", border: "none", background: "transparent", padding: "0.625rem 0.75rem", fontSize: "0.875rem", boxShadow: "none" }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault()
-                          onSend()
-                        }
-                      }}
-                    />
-                  </div>
-                  <Button size="icon" aria-label="Send" onClick={onSend} disabled={!composer.trim() || isPredicting} style={{ marginBottom: "3px" }}>
-                    <Send className="size-4" />
-                  </Button>
+          <div className="composer-wrap" style={{ padding: "10px 12px" }}>
+            <div className="composer-box">
+              <div className="composer-flex" style={{ padding: "4px" }}>
+                <div className="composer-input-wrap">
+                  <Textarea
+                    value={composer}
+                    onChange={(e) => setComposer(e.target.value)}
+                    placeholder="Message CaneSense…"
+                    style={{ minHeight: "36px", border: "none", background: "transparent", padding: "4px 8px", fontSize: "13px", boxShadow: "none", borderRadius: 0 }}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend() } }}
+                  />
                 </div>
-                <div className="composer-footer">
-                  <div className="composer-hint">Shift + Enter for new line</div>
-                  <div className="composer-status">
-                    {hasImage && <Badge variant="secondary" className="text-[9px] h-3.5">Image</Badge>}
-                    {hasFieldData && <Badge variant="secondary" className="text-[9px] h-3.5">Field</Badge>}
-                  </div>
-                </div>
+                <Button variant="primary" size="icon" aria-label="Send" onClick={onSend} disabled={!composer.trim() || isPredicting}>
+                  <Send className="size-3.5" />
+                </Button>
               </div>
             </div>
           </div>
