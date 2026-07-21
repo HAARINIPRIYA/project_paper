@@ -44,57 +44,57 @@
   font-display: swap;
 }
 
-/* ----- Black, Dark Green & White Theme ----- */
+/* ----- Black, Soft Green & Off-White Theme (Easy on Eyes) ----- */
 :root {
-  /* Deep Black Core Colors */
-  --bg-deep: #000000;
-  --bg-surface: #050504;
-  --bg-elevated: #0D0D0B;
-  --bg-card: #080807;
-  --bg-card-hover: #11110E;
-  --bg-input: #020201;
+  /* Black Core Colors */
+  --bg-deep: #0A0A0A;
+  --bg-surface: #111111;
+  --bg-elevated: #1A1A1A;
+  --bg-card: #141414;
+  --bg-card-hover: #1E1E1E;
+  --bg-input: #0D0D0D;
 
-  /* Dark Borders */
-  --border-subtle: #1A1A13;
-  --border-default: #2A2A20;
-  --border-strong: #1B5E20;
+  /* Muted Borders */
+  --border-subtle: #1E1E1E;
+  --border-default: #2A2A2A;
+  --border-strong: #2E7D32;
 
-  /* White text for black background */
-  --text-primary: #FFFFFF;
-  --text-secondary: #C8E6C9;
-  --text-muted: #66BB6A;
-  --text-placeholder: #4CAF50;
+  /* Readable text - good contrast */
+  --text-primary: #E8E8E8;
+  --text-secondary: #C0C8B8;
+  --text-muted: #8AAA8A;
+  --text-placeholder: #5A7A5A;
 
-  /* Primary Accent - Dark Green */
-  --accent-blue: #1B5E20;
-  --accent-blue-hover: #2E7D32;
-  --accent-blue-bg: rgba(27, 94, 32, 0.2);
-  --accent-blue-border: rgba(27, 94, 32, 0.4);
+  /* Primary Accent - Soft Dark Green */
+  --accent-blue: #2E7D32;
+  --accent-blue-hover: #388E3C;
+  --accent-blue-bg: rgba(46, 125, 50, 0.15);
+  --accent-blue-border: rgba(46, 125, 50, 0.35);
 
-  --accent-green: #1B5E20;
-  --accent-green-hover: #2E7D32;
-  --accent-green-bg: rgba(27, 94, 32, 0.2);
-  --accent-green-border: rgba(27, 94, 32, 0.4);
+  --accent-green: #2E7D32;
+  --accent-green-hover: #388E3C;
+  --accent-green-bg: rgba(46, 125, 50, 0.15);
+  --accent-green-border: rgba(46, 125, 50, 0.35);
   
-  --accent-red: #FF5252;
-  --accent-red-hover: #FF1744;
-  --accent-red-bg: rgba(255, 82, 82, 0.12);
-  --accent-red-border: rgba(255, 82, 82, 0.3);
+  --accent-red: #E57373;
+  --accent-red-hover: #EF5350;
+  --accent-red-bg: rgba(229, 115, 115, 0.12);
+  --accent-red-border: rgba(229, 115, 115, 0.3);
   
-  --accent-orange: #FFD600;
-  --accent-orange-hover: #FFEA00;
-  --accent-orange-bg: rgba(255, 214, 0, 0.15);
-  --accent-orange-border: rgba(255, 214, 0, 0.35);
+  --accent-orange: #FFB74D;
+  --accent-orange-hover: #FFA726;
+  --accent-orange-bg: rgba(255, 183, 77, 0.12);
+  --accent-orange-border: rgba(255, 183, 77, 0.3);
 
-  --accent-purple: #1B5E20;
-  --accent-purple-bg: rgba(27, 94, 32, 0.25);
+  --accent-purple: #2E7D32;
+  --accent-purple-bg: rgba(46, 125, 50, 0.2);
 
-  /* Rich Dark Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.7);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.8);
-  --shadow-glow-blue: 0 0 20px rgba(27, 94, 32, 0.4);
-  --shadow-glow-green: 0 0 20px rgba(27, 94, 32, 0.3);
+  /* Soft Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-glow-blue: 0 0 20px rgba(46, 125, 50, 0.3);
+  --shadow-glow-green: 0 0 20px rgba(46, 125, 50, 0.2);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -114,12 +114,12 @@
   --topbar-height: 56px;
 
   /* Sugarcane accents */
-  --cane-green: #1B5E20;
-  --cane-green-bg: rgba(27, 94, 32, 0.2);
-  --cane-green-border: rgba(27, 94, 32, 0.45);
-  --cane-gold: #FFD600;
-  --cane-gold-bg: rgba(255, 214, 0, 0.15);
-  --cane-gold-border: rgba(255, 214, 0, 0.4);
+  --cane-green: #2E7D32;
+  --cane-green-bg: rgba(46, 125, 50, 0.15);
+  --cane-green-border: rgba(46, 125, 50, 0.4);
+  --cane-gold: #FFB74D;
+  --cane-gold-bg: rgba(255, 183, 77, 0.12);
+  --cane-gold-border: rgba(255, 183, 77, 0.35);
 }
 
 /* ============================================
