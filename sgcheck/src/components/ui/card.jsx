@@ -6,7 +6,7 @@ function Card({ className, ...props }) {
   return (
     <div
       data-slot="card"
-      className={cn("cane-card", className)}
+      className={cn("gcp-card", className)}
       {...props} />
   );
 }
@@ -15,7 +15,7 @@ function CardHeader({ className, ...props }) {
   return (
     <div
       data-slot="card-header"
-      className={cn("cane-card-header", className)}
+      className={cn("gcp-card-header", className)}
       {...props} />
   );
 }
@@ -24,7 +24,7 @@ function CardTitle({ className, ...props }) {
   return (
     <div
       data-slot="card-title"
-      className={cn("cane-card-title", className)}
+      className={cn("gcp-card-title", className)}
       {...props} />
   );
 }
@@ -33,7 +33,7 @@ function CardDescription({ className, ...props }) {
   return (
     <div
       data-slot="card-description"
-      className={cn("cane-card-desc", className)}
+      className={cn("gcp-card-desc", className)}
       {...props} />
   );
 }
@@ -51,7 +51,7 @@ function CardContent({ className, ...props }) {
   return (
     <div
       data-slot="card-content"
-      className={cn("cane-card-content", className)}
+      className={cn("gcp-card-content", className)}
       {...props} />
   );
 }
@@ -60,7 +60,7 @@ function CardFooter({ className, ...props }) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center cane-card-content", className)}
+      className={cn("flex items-center gcp-card-content", className)}
       {...props} />
   );
 }

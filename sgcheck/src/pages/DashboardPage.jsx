@@ -26,19 +26,19 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS = {
-  catboost: "var(--aws-green)",
-  xgboost: "var(--aws-blue)",
-  random_forest: "var(--aws-orange)",
-  linear_regression: "#7c3aed",
-  elastic_net: "var(--aws-red)",
+  catboost: "var(--accent-green)",
+  xgboost: "var(--accent-blue)",
+  random_forest: "var(--accent-orange)",
+  linear_regression: "var(--accent-purple)",
+  elastic_net: "var(--accent-red)",
 }
 
 const MODEL_GRADIENTS = {
-  catboost: "linear-gradient(90deg, #1d8102, #2ea310)",
-  xgboost: "linear-gradient(90deg, #0073bb, #1890ff)",
-  random_forest: "linear-gradient(90deg, #e68a00, #ffb900)",
-  linear_regression: "linear-gradient(90deg, #7c3aed, #a855f7)",
-  elastic_net: "linear-gradient(90deg, #d13212, #ef4444)",
+  catboost: "linear-gradient(90deg, #00CC66, #00994D)",
+  xgboost: "linear-gradient(90deg, #00E676, #00CC66)",
+  random_forest: "linear-gradient(90deg, #FFD600, #FFEA00)",
+  linear_regression: "linear-gradient(90deg, #006030, #004D26)",
+  elastic_net: "linear-gradient(90deg, #FF5252, #FF1744)",
 }
 
 function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, backendStatus, predictionResult, ensembleResult }) {
@@ -117,21 +117,21 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
             <div style={{
               width: "28px", height: "28px",
-              background: "linear-gradient(135deg, var(--aws-blue), #005f9e)",
+              background: "linear-gradient(135deg, #00CC66, #004D26)",
               borderRadius: "2px",
               display: "grid", placeItems: "center",
               flexShrink: 0,
             }}>
               <Sparkles className="size-3.5" style={{ color: "#fff" }} />
             </div>
-            <h1 style={{ fontSize: "18px", fontWeight: 600, margin: 0, color: "var(--aws-text)" }}>Dashboard</h1>
+            <h1 style={{ fontSize: "18px", fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>Dashboard</h1>
           </div>
-          <p style={{ fontSize: "13px", color: "var(--aws-text-secondary)", margin: 0, marginLeft: "36px" }}>
+          <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, marginLeft: "36px" }}>
             Model performance, field data & prediction overview
           </p>
         </div>
         <Badge variant={backendStatus === "connected" ? "green" : "outline"} className="shrink-0 text-[10px] tracking-wide py-1">
-          <span className="status-dot" style={{ background: backendStatus === "connected" ? "var(--aws-green)" : "var(--aws-text-secondary)", marginRight: "6px", display: "inline-block" }} />
+          <span className="status-dot" style={{ background: backendStatus === "connected" ? "var(--accent-green)" : "var(--text-secondary)", marginRight: "6px", display: "inline-block" }} />
           {backendStatus === "connected" ? "System Online" : "Offline"}
         </Badge>
       </motion.div>
@@ -172,7 +172,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
                   <div className="aws-card-title">
-                    <BrainCircuit className="size-4" style={{ color: "var(--aws-blue)" }} />
+                    <BrainCircuit className="size-4" style={{ color: "var(--accent-blue)" }} />
                     Model Performance
                   </div>
                   <div className="aws-card-subtitle">
@@ -185,15 +185,15 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
             <div className="aws-card-body">
               {backendStatus !== "connected" ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "40px 0", textAlign: "center" }}>
-                  <Cpu className="size-10" style={{ opacity: 0.2, color: "var(--aws-text-secondary)" }} />
-                  <div style={{ fontSize: "13px", color: "var(--aws-text-secondary)" }}>
+                  <Cpu className="size-10" style={{ opacity: 0.2, color: "var(--text-secondary)" }} />
+                  <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
                     Backend not connected. Run the API server to see model performance.
                   </div>
                 </div>
               ) : sortedModels.length === 0 ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "40px 0", textAlign: "center" }}>
-                  <BarChart3 className="size-10" style={{ opacity: 0.2, color: "var(--aws-text-secondary)" }} />
-                  <div style={{ fontSize: "13px", color: "var(--aws-text-secondary)" }}>
+                  <BarChart3 className="size-10" style={{ opacity: 0.2, color: "var(--text-secondary)" }} />
+                  <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
                     No trained models found. Run training first.
                   </div>
                 </div>
@@ -219,7 +219,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                       <div key={model.name} className={"model-rank-item" + (isBest ? " best" : "")}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100px", flexShrink: 0 }}>
                           <div className="model-rank-badge">{idx + 1}</div>
-                          <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--aws-text-secondary)" }} />
+                          <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
                           <span className="truncate" style={{ fontSize: "13px", fontWeight: 500 }}>
                             {MODEL_LABELS[model.name] || model.name}
                           </span>
@@ -238,7 +238,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                           </span>
                         </div>
                         <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
-                          <span style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }} className="tabular-nums">
+                          <span style={{ fontSize: "11px", color: "var(--text-secondary)" }} className="tabular-nums">
                             {model.rmse ? model.rmse.toFixed(1) : "—"}
                           </span>
                         </div>
@@ -260,7 +260,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
             <div className="aws-card-header">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div className="aws-card-title">
-                  <Activity className="size-4" style={{ color: "var(--aws-blue)" }} />
+                  <Activity className="size-4" style={{ color: "var(--accent-blue)" }} />
                   Recent Activity
                 </div>
                 <Badge variant="secondary" className="text-[9px]">Updates</Badge>
@@ -274,7 +274,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                       <span className={"activity-dot " + (a.tag === "Running" ? "running" : "success")} />
                       <div className="min-w-0">
                         <div className="truncate" style={{ fontSize: "13px", fontWeight: 500 }}>{a.title}</div>
-                        <div className="truncate" style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }}>{a.meta}</div>
+                        <div className="truncate" style={{ fontSize: "11px", color: "var(--text-secondary)" }}>{a.meta}</div>
                       </div>
                     </div>
                     <Badge variant={a.tag === "Running" ? "blue" : "secondary"} className="shrink-0 text-[9px]" style={{ height: "18px" }}>
@@ -300,7 +300,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
           <div className="aws-card">
             <div className="aws-card-header">
               <div className="aws-card-title">
-                <FileSpreadsheet className="size-4" style={{ color: "var(--aws-blue)" }} />
+                <FileSpreadsheet className="size-4" style={{ color: "var(--accent-blue)" }} />
                 Session Summary
               </div>
               <div className="aws-card-subtitle">Current input state</div>
@@ -311,10 +311,10 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 <div className="info-card-label">Billet Image</div>
                 <div className="info-card-value flex items-center gap-2">
                   {uploadedImage ? (
-                    <><span className="size-1.5 rounded-full" style={{ background: "var(--aws-green)" }} />
+                    <><span className="size-1.5 rounded-full" style={{ background: "var(--accent-green)" }} />
                       <span className="truncate" style={{ fontSize: "12px" }}>{uploadedImage.name}</span></>
                   ) : (
-                    <span style={{ fontStyle: "italic", fontSize: "12px", opacity: 0.5, color: "var(--aws-text-secondary)" }}>
+                    <span style={{ fontStyle: "italic", fontSize: "12px", opacity: 0.5, color: "var(--text-secondary)" }}>
                       Not uploaded
                     </span>
                   )}
@@ -334,15 +334,15 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                         </div>
                       )}
                       <div className="flex flex-wrap gap-1">
-                        {gpsData.Variety && <span style={{ fontSize: "10px", background: "var(--aws-bg)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Variety}</span>}
-                        {gpsData.Crop_Type && <span style={{ fontSize: "10px", background: "var(--aws-bg)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Crop_Type}</span>}
-                        {gpsData.Soil_Type && <span style={{ fontSize: "10px", background: "var(--aws-bg)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Soil_Type}</span>}
-                        {gpsData.Irrigation_Type && <span style={{ fontSize: "10px", background: "var(--aws-bg)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Irrigation_Type}</span>}
-                        {gpsData.Fertilizer_Type && <span style={{ fontSize: "10px", background: "var(--aws-bg)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Fertilizer_Type}</span>}
+                        {gpsData.Variety && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Variety}</span>}
+                        {gpsData.Crop_Type && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Crop_Type}</span>}
+                        {gpsData.Soil_Type && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Soil_Type}</span>}
+                        {gpsData.Irrigation_Type && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Irrigation_Type}</span>}
+                        {gpsData.Fertilizer_Type && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Fertilizer_Type}</span>}
                       </div>
                     </div>
                   ) : (
-                    <span style={{ fontStyle: "italic", fontSize: "12px", opacity: 0.5, color: "var(--aws-text-secondary)" }}>
+                    <span style={{ fontStyle: "italic", fontSize: "12px", opacity: 0.5, color: "var(--text-secondary)" }}>
                       Not configured
                     </span>
                   )}
@@ -356,7 +356,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 <div className="mini-card">
                   <div className="mini-card-label">Stage</div>
                   <div className="mini-card-value flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full" style={{ background: "var(--aws-green)" }} />
+                    <span className="size-1.5 rounded-full" style={{ background: "var(--accent-green)" }} />
                     Input Collection
                   </div>
                 </div>
@@ -382,11 +382,11 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "8px 12px",
-                  border: "1px dashed var(--aws-border-secondary)",
+                  border: "1px dashed var(--border-default)",
                   borderRadius: "2px",
                   background: "transparent",
                   fontSize: "13px",
-                  color: "var(--aws-text-secondary)",
+                  color: "var(--text-secondary)",
                   cursor: "pointer",
                   transition: "all 120ms",
                   marginTop: "4px",
@@ -408,7 +408,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
             <div className="aws-card">
               <div className="aws-card-header">
                 <div className="aws-card-title">
-                  <BarChart3 className="size-4" style={{ color: "var(--aws-blue)" }} />
+                  <BarChart3 className="size-4" style={{ color: "var(--accent-blue)" }} />
                   Model Details
                 </div>
                 <div className="aws-card-subtitle">Individual model specifications</div>
@@ -425,13 +425,13 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     transition: "background 120ms",
                   }} className="hover:bg-muted">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--aws-text-secondary)" }} />
+                      <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
                       <span style={{ fontSize: "12px", fontWeight: 500 }} className="truncate">
                         {MODEL_LABELS[model.name] || model.name}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span style={{ fontSize: "10px", color: "var(--aws-text-secondary)" }} className="tabular-nums">
+                      <span style={{ fontSize: "10px", color: "var(--text-secondary)" }} className="tabular-nums">
                         Features: {model.features_count || "—"}
                       </span>
                       <span style={{ fontSize: "11px", fontWeight: 600 }} className="tabular-nums">

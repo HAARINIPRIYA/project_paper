@@ -103,23 +103,23 @@ function Dashboard({
   const toolPanel = (
     <div className="flex flex-col gap-5">
       {/* Backend Status — AWS Console style */}
-      <div className="flex items-center gap-3" style={{ border: "1px solid var(--aws-card-border)", padding: "10px 12px" }}>
+      <div className="flex items-center gap-3" style={{ border: "1px solid var(--border-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)" }}>
         {backendStatus === "connected" ? (
           <span className="status-dot connected" />
         ) : backendStatus === "checking" ? (
-          <Loader2 className="size-3 animate-spin" style={{ color: "var(--aws-text-secondary)" }} />
+          <Loader2 className="size-3 animate-spin" style={{ color: "var(--text-secondary)" }} />
         ) : (
           <span className="status-dot disconnected" />
         )}
         <div className="min-w-0">
-          <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--aws-text)" }}>
+          <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>
             {backendStatus === "connected"
               ? `${availableModels.length} models ready`
               : backendStatus === "checking"
                 ? "Connecting..."
                 : "Backend offline"}
           </div>
-          <div style={{ fontSize: "10px", color: "var(--aws-text-secondary)" }}>
+          <div style={{ fontSize: "10px", color: "var(--text-secondary)" }}>
             {backendStatus === "connected"
               ? "All systems operational"
               : backendStatus === "checking"
@@ -161,11 +161,11 @@ function Dashboard({
                 const m = modelMetrics[name] || {}
                 const isBest = idx === 0
                 const colors = {
-                  catboost: "var(--aws-green)",
-                  xgboost: "var(--aws-blue)",
-                  random_forest: "var(--aws-orange)",
+                  catboost: "var(--accent-green)",
+                  xgboost: "var(--accent-blue)",
+                  random_forest: "var(--accent-orange)",
                   linear_regression: "#7c3aed",
-                  elastic_net: "var(--aws-red)",
+                  elastic_net: "var(--accent-red)",
                 }
                 return (
                   <div
@@ -174,20 +174,20 @@ function Dashboard({
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
-                      padding: "6px 8px",
-                      border: "1px solid var(--aws-card-border)",
-                      borderRadius: "2px",
+                      padding: "8px 10px",
+                      border: "1px solid var(--border-subtle)",
+                      borderRadius: "var(--radius-sm)",
                       transition: "background 120ms",
                       cursor: "default",
                     }}
                     className="hover:bg-muted"
                   >
-                    <span className="size-2 shrink-0 rounded-full" style={{ background: colors[name] || "var(--aws-text-secondary)" }} />
+                    <span className="size-2 shrink-0 rounded-full" style={{ background: colors[name] || "var(--text-secondary)" }} />
                     <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, minWidth: 0 }} className="truncate capitalize">
                       {name.replace(/_/g, " ")}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--aws-green)" }}>
+                      <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--accent-green)" }}>
                         R² {m.r2 ? m.r2.toFixed(3) : "—"}
                       </span>
                       {isBest && (
@@ -202,7 +202,7 @@ function Dashboard({
       )}
 
       {/* Quick Actions */}
-      <div className="flex flex-col gap-2 pt-1">
+      <div className="flex flex-col gap-2">
         <span className="divider-label-text">Quick Actions</span>
         <Button variant="default" size="sm" className="w-full justify-start gap-2" onClick={() => { setView("dashboard"); setShowChat(false) }}>
           <TrendingUp className="size-3.5" />
@@ -298,7 +298,7 @@ function Dashboard({
   }, [composer, gpsData, isPredicting, availableModels, onPredictionResult, onEnsembleResult])
 
   return (
-    <div className="h-screen w-full overflow-hidden" style={{ background: "var(--aws-bg)" }}>
+    <div className="h-screen w-full overflow-hidden" style={{ background: "var(--bg-deep)" }}>
       {/* Desktop Layout */}
       <div className="app-grid hidden md:flex">
         {/* Sidebar - AWS Console Style */}
@@ -340,8 +340,7 @@ function Dashboard({
               <div className="sidebar-search-wrap">
                 <Search className="sidebar-search-icon" size={14} />
                 <input placeholder="Search chats…" />
-              </div>
-              <Separator style={{ background: "rgba(255,255,255,0.06)", opacity: 1 }} />
+              </div>                          <Separator style={{ background: "var(--border-subtle)", opacity: 0.6 }} />
               <ScrollArea className="flex-1">
                 <div className="flex flex-col" style={{ padding: "4px 0" }}>
                   {chats.map((c) => (
@@ -363,8 +362,8 @@ function Dashboard({
           {/* Dashboard view filler */}
           {view === "dashboard" && (
             <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-              <BarChart3 className="size-8" style={{ opacity: 0.2, color: "var(--aws-nav-text)", marginBottom: "12px" }} />
-              <div style={{ fontSize: "12px", color: "var(--aws-nav-text)", opacity: 0.4, lineHeight: 1.6 }}>
+              <BarChart3 className="size-8" style={{ opacity: 0.5, color: "var(--text-secondary)", marginBottom: "12px" }} />
+              <div style={{ fontSize: "12px", color: "var(--text-secondary)", opacity: 0.6, lineHeight: 1.6 }}>
                 Dashboard active<br />
                 <span style={{ fontSize: "10px" }}>Switch to Analysis for chat</span>
               </div>
@@ -373,10 +372,9 @@ function Dashboard({
 
           {/* User area */}
           <div className="sidebar-user">
-            <div className="sidebar-user-inner">
-              <Avatar size="sm">
-                <AvatarFallback style={{ background: "rgba(255,255,255,0.1)", color: "#d5dbe3" }}>U</AvatarFallback>
-              </Avatar>
+            <div className="sidebar-user-inner">                          <Avatar size="sm">
+                            <AvatarFallback style={{ background: "var(--accent-blue-bg)", color: "var(--accent-blue)" }}>U</AvatarFallback>
+                          </Avatar>
               <div className="min-w-0">
                 <div className="sidebar-user-name">You</div>
                 <div className="sidebar-user-subtitle">CaneSense workspace</div>
@@ -393,7 +391,7 @@ function Dashboard({
               <div className="main-header-breadcrumb">
                 <span onClick={() => setView("dashboard")}>CaneSense</span>
                 <ChevronRight className="chevron" size={12} />
-                <span style={{ color: "var(--aws-text)", cursor: "default" }}>
+                <span style={{ color: "var(--text-primary)", cursor: "default" }}>
                   {view === "dashboard" ? "Dashboard" : showChat ? "AI Assistant" : "Dashboard"}
                 </span>
               </div>
@@ -471,12 +469,12 @@ function Dashboard({
                         style={{ padding: "12px 16px", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}
                       >
                         <div className="flex items-center gap-2.5">
-                          <div style={{ width: "28px", height: "28px", borderRadius: "2px", background: "var(--aws-green-light)", display: "grid", placeItems: "center" }}>
-                            <TrendingUp className="size-3.5" style={{ color: "var(--aws-green)" }} />
+                          <div style={{ width: "28px", height: "28px", borderRadius: "2px", background: "var(--accent-green-bg)", display: "grid", placeItems: "center" }}>
+                            <TrendingUp className="size-3.5" style={{ color: "var(--accent-green)" }} />
                           </div>
                           <div>
                             <div style={{ fontSize: "13px", fontWeight: 600 }}>Latest Prediction Available</div>
-                            <div style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }}>
+                            <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
                               {ensembleResult ? "Ensemble (all models)" : `Using ${predictionResult?.model || "auto"} model`}
                             </div>
                           </div>
@@ -502,16 +500,16 @@ function Dashboard({
                         >
                           {!isUser ? (
                             <Avatar>
-                              <AvatarFallback style={{ background: "var(--aws-blue)", color: "#fff" }}>CS</AvatarFallback>
+                              <AvatarFallback style={{ background: "var(--accent-blue)", color: "#fff" }}>CS</AvatarFallback>
                             </Avatar>
                           ) : null}
                           <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
                             {m.content}
                           </div>
                           {isUser ? (
-                            <Avatar size="sm">
-                              <AvatarFallback style={{ background: "var(--aws-bg)" }}>U</AvatarFallback>
-                            </Avatar>
+                    <Avatar size="sm">
+                      <AvatarFallback style={{ background: "var(--accent-blue-bg)", color: "var(--accent-blue)" }}>U</AvatarFallback>
+                    </Avatar>
                           ) : null}
                         </motion.div>
                       )
@@ -526,11 +524,11 @@ function Dashboard({
                         style={{ marginBottom: "8px" }}
                       >
                         <Avatar>
-                          <AvatarFallback style={{ background: "var(--aws-blue)", color: "#fff" }}>CS</AvatarFallback>
+                          <AvatarFallback style={{ background: "var(--accent-blue)", color: "#fff" }}>CS</AvatarFallback>
                         </Avatar>
                         <div className="message-bubble assistant flex items-center gap-2.5">
-                          <Loader2 className="size-4 animate-spin" style={{ color: "var(--aws-blue)" }} />
-                          <span style={{ fontSize: "13px", color: "var(--aws-text-secondary)" }}>Running prediction across models...</span>
+                          <Loader2 className="size-4 animate-spin" style={{ color: "var(--accent-blue)" }} />
+                          <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Running prediction across models...</span>
                         </div>
                       </motion.div>
                     )}
@@ -595,13 +593,13 @@ function Dashboard({
           justifyContent: "space-between",
           gap: "12px",
           padding: "10px 16px",
-          borderBottom: "1px solid var(--aws-topbar-border)",
-          background: "var(--aws-card)",
+          borderBottom: "1px solid var(--border-subtle)",
+          background: "var(--bg-card)",
           flexShrink: 0,
         }}>
           <div className="min-w-0">
             <div className="truncate" style={{ fontSize: "14px", fontWeight: 600 }}>CaneSense</div>
-            <div className="truncate" style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }}>
+            <div className="truncate" style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
               {view === "analysis" ? "AI Chat" : "Dashboard"}
             </div>
           </div>
@@ -641,9 +639,9 @@ function Dashboard({
                       {chats.map((c) => (
                         <button key={c.id} type="button" onClick={() => setActiveChatId(c.id)}
                           className={"chat-item" + (activeChatId === c.id ? " active" : "")}
-                          style={{ color: "var(--aws-text)", padding: "8px 12px", borderRadius: "2px" }}>
+                          style={{ color: "var(--text-primary)", padding: "8px 12px", borderRadius: "2px" }}>
                           <div className="chat-item-title">{c.title}</div>
-                          <div className="chat-item-subtitle" style={{ color: "var(--aws-text-secondary)" }}>{c.subtitle}</div>
+                          <div className="chat-item-subtitle" style={{ color: "var(--text-secondary)" }}>{c.subtitle}</div>
                         </button>
                       ))}
                     </div>
@@ -697,7 +695,7 @@ function Dashboard({
                   >
                     {!isUser ? (
                       <Avatar>
-                        <AvatarFallback style={{ background: "var(--aws-blue)", color: "#fff" }}>CS</AvatarFallback>
+                        <AvatarFallback style={{ background: "var(--accent-blue)", color: "#fff" }}>CS</AvatarFallback>
                       </Avatar>
                     ) : null}
                     <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
@@ -713,8 +711,8 @@ function Dashboard({
               })}
               {isPredicting && (
                 <div className="flex items-center justify-center gap-2 py-3">
-                  <Loader2 className="size-4 animate-spin" style={{ color: "var(--aws-blue)" }} />
-                  <span style={{ fontSize: "12px", color: "var(--aws-text-secondary)" }}>Running prediction...</span>
+                  <Loader2 className="size-4 animate-spin" style={{ color: "var(--accent-blue)" }} />
+                  <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Running prediction...</span>
                 </div>
               )}
             </div>
