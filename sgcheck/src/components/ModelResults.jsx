@@ -17,11 +17,11 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS_MAP = {
-  catboost: "#1d8102",
-  xgboost: "#0073bb",
-  random_forest: "#e68a00",
-  linear_regression: "#7c3aed",
-  elastic_net: "#d13212",
+  catboost: "#00CC66",
+  xgboost: "#00E676",
+  random_forest: "#FFD600",
+  linear_regression: "#006030",
+  elastic_net: "#FF5252",
 }
 
 function ModelRow({ name, prediction, metric, isEnsemble = false, isBest = false, compact = false }) {
@@ -33,24 +33,24 @@ function ModelRow({ name, prediction, metric, isEnsemble = false, isBest = false
         justifyContent: "space-between",
         gap: "12px",
         padding: "6px 8px",
-        border: "1px solid var(--aws-card-border)",
+        border: "1px solid var(--border-subtle)",
         borderRadius: "2px",
-        background: isEnsemble ? "var(--aws-green-light)" : "var(--aws-bg)",
+        background: isEnsemble ? "var(--accent-green-bg)" : "var(--bg-deep)",
         transition: "background 120ms",
       }}
     >
       <div className="flex items-center gap-2 min-w-0">
         <span
           className="size-2 shrink-0 rounded-full"
-          style={{ background: MODEL_COLORS_MAP[name] || "var(--aws-text-secondary)" }}
+          style={{ background: MODEL_COLORS_MAP[name] || "var(--text-secondary)" }}
         />
         <span style={{ fontSize: compact ? "12px" : "13px", fontWeight: 500 }} className="truncate">
           {MODEL_LABELS[name] || name}
-          {isEnsemble && <span style={{ color: "var(--aws-green)", marginLeft: "4px" }}>(Ensemble)</span>}
+          {isEnsemble && <span style={{ color: "var(--accent-green)", marginLeft: "4px" }}>(Ensemble)</span>}
         </span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span style={{ fontSize: compact ? "12px" : "13px", fontWeight: 600, color: isEnsemble ? "var(--aws-green)" : undefined }} className="tabular-nums">
+        <span style={{ fontSize: compact ? "12px" : "13px", fontWeight: 600, color: isEnsemble ? "var(--accent-green)" : undefined }} className="tabular-nums">
           {prediction !== null && prediction !== undefined
             ? `${Number(prediction).toFixed(1)}`
             : "—"}
@@ -87,11 +87,11 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
       >
         {/* Hero Result — AWS Console Style */}
         <div className="aws-card">
-          <div style={{ padding: "16px", borderBottom: "1px solid var(--aws-card-border)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+          <div style={{ padding: "16px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
             <div className="flex items-center gap-2.5">
               <div style={{
                 width: "28px", height: "28px",
-                background: "var(--aws-green)",
+                background: "var(--accent-green)",
                 borderRadius: "2px",
                 display: "grid", placeItems: "center",
               }}>
@@ -103,7 +103,7 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
                     ? "Ensemble Prediction"
                     : `${MODEL_LABELS[model] || model} Prediction`}
                 </div>
-                <div style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }}>
+                <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
                   {isEnsemble || model === "ensemble"
                     ? "Weighted average across all models"
                     : "Single model prediction"}
@@ -125,7 +125,7 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
             </div>
             {metrics && (
               <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingBottom: "4px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", color: "var(--aws-text-secondary)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", color: "var(--text-secondary)" }}>
                   <span>MAE: {metrics.mae?.toFixed(2) || "—"}</span>
                   <span style={{ opacity: 0.3 }}>|</span>
                   <span>RMSE: {metrics.rmse?.toFixed(2) || "—"}</span>
@@ -144,7 +144,7 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
             <div className="aws-card-header">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div className="aws-card-title" style={{ fontSize: "13px" }}>
-                  <BarChart3 className="size-3.5" style={{ color: "var(--aws-blue)" }} />
+                  <BarChart3 className="size-3.5" style={{ color: "var(--accent-blue)" }} />
                   Model Breakdown
                 </div>
                 <Badge variant="secondary" className="text-[9px]">{sortedIndividual.length} models</Badge>
@@ -167,12 +167,12 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
             alignItems: "center",
             gap: "12px",
             padding: "8px 12px",
-            border: "1px solid var(--aws-card-border)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: "2px",
-            background: "var(--aws-bg)",
+            background: "var(--bg-deep)",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "var(--aws-text-secondary)", flexWrap: "wrap" }}>
-              <span style={{ fontWeight: 600, color: "var(--aws-text)" }}>Metrics</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "var(--text-secondary)", flexWrap: "wrap" }}>
+              <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>Metrics</span>
               <span style={{ opacity: 0.3 }}>|</span>
               <span>R²: <strong>{metrics.r2?.toFixed(4) || "—"}</strong></span>
               <span style={{ opacity: 0.3 }}>|</span>

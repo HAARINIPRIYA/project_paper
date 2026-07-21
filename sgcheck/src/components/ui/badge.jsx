@@ -10,6 +10,10 @@ const badgeStyles = {
   destructive: "badge-destructive",
   outline: "badge-outline",
   emerald: "badge-emerald",
+  green: "badge-green",
+  blue: "badge-blue",
+  red: "badge-red",
+  orange: "badge-orange",
   ghost: "",
   link: "",
 }

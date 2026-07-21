@@ -55,7 +55,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div style={{ fontSize: "13px", fontWeight: 500, letterSpacing: "-0.01em" }}>Billet image</div>
-          <div style={{ fontSize: "11px", color: "var(--aws-text-secondary)" }}>
+          <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
             Drop a photo of the seed billet for quality cues.
           </div>
         </div>
@@ -92,7 +92,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
                 <div style={{ fontSize: "13px", fontWeight: 500 }}>
                   {isDragging ? "Drop the image here" : "Drag & drop an image"}
                 </div>
-                <div style={{ fontSize: "11px", color: "var(--aws-text-secondary)", marginTop: "1px" }}>
+                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "1px" }}>
                   JPG / PNG / WEBP. Or choose a file.
                 </div>
                 <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -111,7 +111,7 @@ function UploadZone({ onImageUpload, uploadedImage }) {
             exit={{ opacity: 0, scale: 0.95 }}
             className="flex flex-col gap-3"
           >
-            <div style={{ overflow: "hidden", border: "1px solid var(--aws-card-border)", background: "var(--aws-bg)" }}>
+            <div style={{ overflow: "hidden", border: "1px solid var(--border-subtle)", background: "var(--bg-deep)" }}>
               <img src={uploadedImage.preview} alt={uploadedImage.name} className="h-40 w-full object-cover" />
             </div>
             <div className="flex items-center justify-between gap-3">
