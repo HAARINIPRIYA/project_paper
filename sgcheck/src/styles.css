@@ -44,37 +44,37 @@
   font-display: swap;
 }
 
-/* ----- Black & Green Theme Design Tokens ----- */
+/* ----- Black, Dark Green & White Theme ----- */
 :root {
   /* Deep Black Core Colors */
-  --bg-deep: #0A0A0A;
-  --bg-surface: #111111;
-  --bg-elevated: #1A1A1A;
-  --bg-card: #141414;
-  --bg-card-hover: #1E1E1E;
-  --bg-input: #0D0D0D;
+  --bg-deep: #000000;
+  --bg-surface: #050504;
+  --bg-elevated: #0D0D0B;
+  --bg-card: #080807;
+  --bg-card-hover: #11110E;
+  --bg-input: #020201;
 
   /* Dark Borders */
-  --border-subtle: #1E1E1E;
-  --border-default: #2A2A2A;
-  --border-strong: #00CC66;
+  --border-subtle: #1A1A13;
+  --border-default: #2A2A20;
+  --border-strong: #1B5E20;
 
-  /* Light text for dark background */
-  --text-primary: #E8F5E9;
-  --text-secondary: #A5D6A7;
-  --text-muted: #5A8A5F;
-  --text-placeholder: #3A5A3F;
+  /* White text for black background */
+  --text-primary: #FFFFFF;
+  --text-secondary: #C8E6C9;
+  --text-muted: #66BB6A;
+  --text-placeholder: #4CAF50;
 
-  /* Primary Accent - Green */
-  --accent-blue: #00CC66;
-  --accent-blue-hover: #00E676;
-  --accent-blue-bg: rgba(0, 204, 102, 0.15);
-  --accent-blue-border: rgba(0, 204, 102, 0.35);
+  /* Primary Accent - Dark Green */
+  --accent-blue: #1B5E20;
+  --accent-blue-hover: #2E7D32;
+  --accent-blue-bg: rgba(27, 94, 32, 0.2);
+  --accent-blue-border: rgba(27, 94, 32, 0.4);
 
-  --accent-green: #00CC66;
-  --accent-green-hover: #00E676;
-  --accent-green-bg: rgba(0, 204, 102, 0.15);
-  --accent-green-border: rgba(0, 204, 102, 0.35);
+  --accent-green: #1B5E20;
+  --accent-green-hover: #2E7D32;
+  --accent-green-bg: rgba(27, 94, 32, 0.2);
+  --accent-green-border: rgba(27, 94, 32, 0.4);
   
   --accent-red: #FF5252;
   --accent-red-hover: #FF1744;
@@ -86,15 +86,15 @@
   --accent-orange-bg: rgba(255, 214, 0, 0.15);
   --accent-orange-border: rgba(255, 214, 0, 0.35);
 
-  --accent-purple: #006030;
-  --accent-purple-bg: rgba(0, 96, 48, 0.25);
+  --accent-purple: #1B5E20;
+  --accent-purple-bg: rgba(27, 94, 32, 0.25);
 
   /* Rich Dark Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
-  --shadow-glow-blue: 0 0 20px rgba(0, 204, 102, 0.3);
-  --shadow-glow-green: 0 0 20px rgba(0, 204, 102, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.8);
+  --shadow-glow-blue: 0 0 20px rgba(27, 94, 32, 0.4);
+  --shadow-glow-green: 0 0 20px rgba(27, 94, 32, 0.3);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -114,9 +114,9 @@
   --topbar-height: 56px;
 
   /* Sugarcane accents */
-  --cane-green: #00CC66;
-  --cane-green-bg: rgba(0, 204, 102, 0.15);
-  --cane-green-border: rgba(0, 204, 102, 0.4);
+  --cane-green: #1B5E20;
+  --cane-green-bg: rgba(27, 94, 32, 0.2);
+  --cane-green-border: rgba(27, 94, 32, 0.45);
   --cane-gold: #FFD600;
   --cane-gold-bg: rgba(255, 214, 0, 0.15);
   --cane-gold-border: rgba(255, 214, 0, 0.4);
