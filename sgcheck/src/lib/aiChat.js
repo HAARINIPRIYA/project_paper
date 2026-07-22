@@ -1,84 +1,80 @@
 /**
  * CaneSense AI Chat Service
- * Connects to OpenAI-compatible API for chat-based predictions.
+ * Uses OpenAI SDK to connect to the ByNara AI router API.
+ *
+ * Important:
+ * - In development (Vite), requests go through the Vite proxy at /api/ai
+ *   to avoid CORS issues. The proxy is configured in vite.config.js.
+ * - In production, you need a reverse proxy (e.g., Nginx) to forward
+ *   /api/ai/* → https://router.bynara.id/v1/*
  */
 
-// Use Vite proxy in dev mode to avoid CORS issues; fallback to direct URL for production builds
-const AI_API_BASE = "/api/ai"
-const AI_MODEL = "glm-5.2-free"
-const AI_API_KEY = "sk-nry-0owqr3ZoGCv_O7CwdTUmBiaMZw37kPqvAKPM7gwxeU4"
+import OpenAI from "openai"
+
+const AI_API_BASE = import.meta.env.VITE_AI_API_BASE || "/api/ai"
+const AI_MODEL = import.meta.env.VITE_AI_MODEL || "auto/bynara"
+const AI_API_KEY = import.meta.env.VITE_AI_API_KEY || ""
+
+if (!AI_API_KEY) {
+  console.error(
+    "[CaneSense] AI API key is missing. " +
+    "Create a .env file with VITE_AI_API_KEY=sk-your-key or " +
+    "set the environment variable before starting the dev server."
+  )
+}
+
+// OpenAI SDK requires an absolute URL for baseURL.
+// Dynamically build it from window.location.origin so it works on any port.
+const fullBaseURL = typeof window !== "undefined"
+  ? window.location.origin + AI_API_BASE
+  : AI_API_BASE
+
+const client = new OpenAI({
+  baseURL: fullBaseURL,
+  apiKey: AI_API_KEY,
+  dangerouslyAllowBrowser: true, // Required for browser usage (SDK defaults to Node.js)
+  timeout: 60000,
+  maxRetries: 0,
+})
 
 /**
- * Send a chat completion request to the AI API.
+ * Send a chat completion request with streaming.
+ * Calls onToken callback for each content chunk as it arrives.
+ *
  * @param {Array} messages - Array of { role, content } objects
  * @param {Object} options - { temperature, max_tokens, signal }
- * @returns {Promise<Response>} - The fetch Response object (for streaming)
+ * @returns {Promise<string>} - The full assembled response content
  */
 export async function sendChatMessage(messages, options = {}) {
-  const { temperature = 0.7, max_tokens = 2048, signal } = options
+  const { temperature = 0.7, max_tokens = 4096, signal } = options
 
-  const response = await fetch(`${AI_API_BASE}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${AI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages,
-      temperature,
-      max_tokens,
-      stream: true,
-    }),
-    signal,
-  })
+  const stream = await client.chat.completions.create({
+    model: AI_MODEL,
+    messages,
+    temperature,
+    max_tokens,
+    stream: true,
+  }, { signal })
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.error?.message || `API request failed: ${response.status}`)
-  }
-
-  return response
+  return stream
 }
 
 /**
  * Parse a streaming response from the AI API.
  * Calls onToken callback for each content chunk.
- * @param {Response} response - The streaming fetch Response
+ *
+ * @param {AsyncIterable} stream - The streaming response from OpenAI SDK
  * @param {Function} onToken - Callback with (token: string) => void
  * @returns {Promise<string>} - The full assembled content
  */
-export async function parseStreamingResponse(response, onToken) {
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
+export async function parseStreamingResponse(stream, onToken) {
   let fullContent = ""
-  let buffer = ""
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split("\n")
-    buffer = lines.pop() || ""
-
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed || !trimmed.startsWith("data: ")) continue
-
-      const data = trimmed.slice(6)
-      if (data === "[DONE]") break
-
-      try {
-        const parsed = JSON.parse(data)
-        const content = parsed.choices?.[0]?.delta?.content || ""
-        if (content) {
-          fullContent += content
-          onToken(content)
-        }
-      } catch {
-        // Skip malformed JSON chunks
-      }
+  for await (const chunk of stream) {
+    const content = chunk.choices?.[0]?.delta?.content || ""
+    if (content) {
+      fullContent += content
+      onToken(content)
     }
   }
 
