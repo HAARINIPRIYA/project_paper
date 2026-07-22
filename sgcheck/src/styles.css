@@ -47,79 +47,81 @@
 /* ----- Black, Soft Green & Off-White Theme (Easy on Eyes) ----- */
 :root {
   /* Black Core Colors */
-  --bg-deep: #0A0A0A;
-  --bg-surface: #111111;
-  --bg-elevated: #1A1A1A;
-  --bg-card: #141414;
-  --bg-card-hover: #1E1E1E;
-  --bg-input: #0D0D0D;
+  --bg-deep: #08090A;
+  --bg-surface: #0F1113;
+  --bg-elevated: #181B1E;
+  --bg-card: #121518;
+  --bg-card-hover: #1A1D21;
+  --bg-input: #0A0C0E;
 
   /* Muted Borders */
-  --border-subtle: #1E1E1E;
-  --border-default: #2A2A2A;
-  --border-strong: #2E7D32;
+  --border-subtle: #1E2226;
+  --border-default: #282D33;
+  --border-strong: #00D68F;
 
-  /* Readable text - good contrast */
-  --text-primary: #E8E8E8;
-  --text-secondary: #C0C8B8;
-  --text-muted: #8AAA8A;
-  --text-placeholder: #5A7A5A;
+  /* Readable text - high contrast */
+  --text-primary: #F0F4F8;
+  --text-secondary: #A8B5C4;
+  --text-muted: #5E6B7A;
+  --text-placeholder: #3D4752;
 
-  /* Primary Accent - Soft Dark Green */
-  --accent-blue: #2E7D32;
-  --accent-blue-hover: #388E3C;
-  --accent-blue-bg: rgba(46, 125, 50, 0.15);
-  --accent-blue-border: rgba(46, 125, 50, 0.35);
+  /* Primary Accent - Bright Emerald */
+  --accent-blue: #00D68F;
+  --accent-blue-hover: #00F5A0;
+  --accent-blue-bg: rgba(0, 214, 143, 0.12);
+  --accent-blue-border: rgba(0, 214, 143, 0.3);
 
-  --accent-green: #2E7D32;
-  --accent-green-hover: #388E3C;
-  --accent-green-bg: rgba(46, 125, 50, 0.15);
-  --accent-green-border: rgba(46, 125, 50, 0.35);
+  --accent-green: #00D68F;
+  --accent-green-hover: #00F5A0;
+  --accent-green-bg: rgba(0, 214, 143, 0.12);
+  --accent-green-border: rgba(0, 214, 143, 0.3);
   
-  --accent-red: #E57373;
-  --accent-red-hover: #EF5350;
-  --accent-red-bg: rgba(229, 115, 115, 0.12);
-  --accent-red-border: rgba(229, 115, 115, 0.3);
+  --accent-red: #FF6B6B;
+  --accent-red-hover: #FF5252;
+  --accent-red-bg: rgba(255, 107, 107, 0.12);
+  --accent-red-border: rgba(255, 107, 107, 0.3);
   
-  --accent-orange: #FFB74D;
-  --accent-orange-hover: #FFA726;
-  --accent-orange-bg: rgba(255, 183, 77, 0.12);
-  --accent-orange-border: rgba(255, 183, 77, 0.3);
+  --accent-orange: #FFB547;
+  --accent-orange-hover: #FFC233;
+  --accent-orange-bg: rgba(255, 181, 71, 0.12);
+  --accent-orange-border: rgba(255, 181, 71, 0.3);
 
-  --accent-purple: #2E7D32;
-  --accent-purple-bg: rgba(46, 125, 50, 0.2);
+  --accent-purple: #7C5CFC;
+  --accent-purple-bg: rgba(124, 92, 252, 0.12);
+  
+  --accent-cyan: #00C9DB;
+  --accent-cyan-bg: rgba(0, 201, 219, 0.12);
 
-  /* Soft Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
-  --shadow-glow-blue: 0 0 20px rgba(46, 125, 50, 0.3);
-  --shadow-glow-green: 0 0 20px rgba(46, 125, 50, 0.2);
+  /* Soft Shadows with glow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 6px 10px rgba(0, 0, 0, 0.3);
+  --shadow-glow-green: 0 0 20px rgba(0, 214, 143, 0.25);
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-input: 10px;
-  --radius-button: 10px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-input: 8px;
+  --radius-button: 8px;
   --radius-pill: 9999px;
 
   /* Typography */
   --font-heading: "GROBOLD", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-body: "ClashDisplay", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "SF Mono", "Roboto Mono", Consolas, monospace;
+  --font-mono: "SF Mono", "Fira Code", "Roboto Mono", Consolas, monospace;
 
   /* Spacing */
   --sidebar-width: 280px;
   --topbar-height: 56px;
 
   /* Sugarcane accents */
-  --cane-green: #2E7D32;
-  --cane-green-bg: rgba(46, 125, 50, 0.15);
-  --cane-green-border: rgba(46, 125, 50, 0.4);
-  --cane-gold: #FFB74D;
-  --cane-gold-bg: rgba(255, 183, 77, 0.12);
-  --cane-gold-border: rgba(255, 183, 77, 0.35);
+  --cane-green: #00D68F;
+  --cane-green-bg: rgba(0, 214, 143, 0.12);
+  --cane-green-border: rgba(0, 214, 143, 0.35);
+  --cane-gold: #FFB547;
+  --cane-gold-bg: rgba(255, 181, 71, 0.12);
+  --cane-gold-border: rgba(255, 181, 71, 0.35);
 }
 
 /* ============================================
@@ -450,6 +452,27 @@ h1, h2, h3, h4, h5, h6 {
   50% { box-shadow: 0 0 24px rgba(0, 204, 102, 0.6); }
 }
 .animate-glow { animation: glow 2s ease-in-out infinite; }
+
+/* Prediction Hero shimmer / gradient sweep */
+@keyframes heroShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes heroValueGlow {
+  0%, 100% { text-shadow: 0 0 40px rgba(0, 214, 143, 0.5), 0 0 80px rgba(0, 214, 143, 0.2), 0 4px 12px rgba(0,0,0,0.4); }
+  50% { text-shadow: 0 0 60px rgba(0, 214, 143, 0.7), 0 0 100px rgba(0, 214, 143, 0.3), 0 4px 12px rgba(0,0,0,0.4); }
+}
+
+.prediction-hero-value {
+  animation: heroValueGlow 3s ease-in-out infinite !important;
+}
+
+.prediction-hero-border {
+  animation: heroShimmer 6s ease-in-out infinite;
+  background-size: 200% 200% !important;
+}
 
 /* ============================================
    APP LAYOUT
@@ -1217,12 +1240,13 @@ h1, h2, h3, h4, h5, h6 {
   gap: 6px;
 }
 .result-highlight-value {
-  font-size: 44px;
+  font-size: 52px;
   font-weight: 700;
   font-family: var(--font-heading);
   letter-spacing: -0.02em;
   line-height: 1;
-  color: var(--accent-green);
+  color: var(--accent-green-hover);
+  text-shadow: 0 0 30px rgba(0, 214, 143, 0.4), 0 0 60px rgba(0, 214, 143, 0.15);
 }
 .result-highlight-unit {
   font-size: 14px;
@@ -1230,6 +1254,26 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-body);
   color: var(--text-muted);
   letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+
+/* Prediction Hero Card - glowing result container */
+.prediction-hero {
+  position: relative;
+  overflow: hidden;
+}
+.prediction-hero::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(0, 214, 143, 0.3), transparent 40%, transparent 60%, rgba(0, 214, 143, 0.15));
+  pointer-events: none;
+  z-index: 0;
+}
+.prediction-hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ----- Confidence Indicator ----- */

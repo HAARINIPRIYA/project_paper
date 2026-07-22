@@ -85,20 +85,21 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
         transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
         className="flex flex-col gap-4"
       >
-        {/* Hero Result — AWS Console Style */}
-        <div className="aws-card">
-          <div style={{ padding: "16px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
-            <div className="flex items-center gap-2.5">
+        {/* Hero Result — Glowing Emerald Card */}
+        <div className="aws-card prediction-hero" style={{ borderColor: "rgba(0, 214, 143, 0.25)", boxShadow: "0 0 30px rgba(0, 214, 143, 0.08), inset 0 1px 0 rgba(0, 214, 143, 0.06)" }}>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(0, 214, 143, 0.12)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+            <div className="flex items-center gap-3">
               <div style={{
-                width: "28px", height: "28px",
-                background: "var(--accent-green)",
-                borderRadius: "2px",
+                width: "32px", height: "32px",
+                background: "linear-gradient(135deg, #00D68F, #00F5A0)",
+                borderRadius: "6px",
                 display: "grid", placeItems: "center",
+                boxShadow: "0 0 16px rgba(0, 214, 143, 0.35)",
               }}>
-                <TrendingUp className="size-3.5" style={{ color: "#fff" }} />
+                <TrendingUp className="size-4" style={{ color: "#08090A" }} />
               </div>
               <div>
-                <div style={{ fontSize: "14px", fontWeight: 600 }}>
+                <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--text-primary)" }}>
                   {isEnsemble || model === "ensemble"
                     ? "Ensemble Prediction"
                     : `${MODEL_LABELS[model] || model} Prediction`}
@@ -110,28 +111,34 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
                 </div>
               </div>
             </div>
-            <Badge variant="green" className="text-[9px]">
-              {metrics?.r2 ? `R² ${metrics.r2.toFixed(3)}` : isEnsemble ? "Combined" : best_model ? "Best" : "Result"}
+            <Badge variant="green" className="text-[10px]" style={{ fontWeight: 600, padding: "2px 12px" }}>
+              {metrics?.r2 ? `R² ${metrics.r2.toFixed(3)}` : isEnsemble ? "Combined" : best_model ? "★ Best" : "Result"}
             </Badge>
           </div>
-          <div style={{ padding: "16px", display: "flex", alignItems: "flex-end", gap: "12px" }}>
+          <div style={{ padding: "16px 20px 20px", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "16px" }}>
             <div className="result-highlight">
               <span className="result-highlight-value">
                 {predValue !== null && predValue !== undefined
                   ? `${Number(predValue).toFixed(1)}`
                   : "—"}
               </span>
-              <span className="result-highlight-unit">Quintal per Acre</span>
+              <span className="result-highlight-unit" style={{ fontSize: "15px", color: "var(--text-secondary)", fontWeight: 500 }}>Quintal per Acre</span>
             </div>
             {metrics && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingBottom: "4px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", color: "var(--text-secondary)" }}>
-                  <span>MAE: {metrics.mae?.toFixed(2) || "—"}</span>
-                  <span style={{ opacity: 0.3 }}>|</span>
-                  <span>RMSE: {metrics.rmse?.toFixed(2) || "—"}</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", paddingBottom: "4px", alignItems: "flex-end" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "var(--text-secondary)" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span style={{ color: "var(--text-muted)", fontSize: "10px" }}>MAE</span>
+                    <strong style={{ color: "var(--text-primary)" }}>{metrics.mae?.toFixed(1) || "—"}</strong>
+                  </span>
+                  <span style={{ opacity: 0.2, fontSize: "10px" }}>|</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span style={{ color: "var(--text-muted)", fontSize: "10px" }}>RMSE</span>
+                    <strong style={{ color: "var(--text-primary)" }}>{metrics.rmse?.toFixed(1) || "—"}</strong>
+                  </span>
                 </div>
                 {bestModel && (
-                  <Badge variant="green" className="text-[9px] w-fit">Best model selected</Badge>
+                  <Badge variant="green" className="text-[10px]" style={{ fontWeight: 600 }}>★ Best Model Selected</Badge>
                 )}
               </div>
             )}
