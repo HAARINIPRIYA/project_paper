@@ -163,10 +163,10 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               return (
                 <div key={fieldName} className="field-section">
                   <div className="field-label-row">
-                    <Icon className="size-3.5" style={{ color: "var(--aws-text-secondary)" }} />
+                    <Icon className="size-3.5" style={{ color: "var(--text-secondary)" }} />
                     <label className="field-label">
                       {meta.label}
-                      {meta.required && <span style={{ color: "var(--aws-red)", marginLeft: "2px" }}>*</span>}
+                      {meta.required && <span style={{ color: "var(--accent-red)", marginLeft: "2px" }}>*</span>}
                     </label>
                   </div>
                   <Input
@@ -180,7 +180,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                   />
                   {err ? (
                     <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
-                      style={{ fontSize: "11px", color: "var(--aws-red)" }}>
+                      style={{ fontSize: "11px", color: "var(--accent-red)" }}>
                       {err}
                     </motion.div>
                   ) : null}
@@ -196,7 +196,8 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                 gap: "6px",
                 fontSize: "11px",
                 fontWeight: 500,
-                color: "var(--aws-text-secondary)",
+                fontFamily: "var(--font-body)",
+                color: "var(--text-secondary)",
                 cursor: "pointer",
                 padding: "6px 0",
                 transition: "color 120ms",
@@ -211,7 +212,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                   return (
                     <div key={fieldName} className="field-section">
                       <div className="field-label-row">
-                        <Icon className="size-3.5" style={{ color: "var(--aws-text-secondary)" }} />
+                        <Icon className="size-3.5" style={{ color: "var(--text-secondary)" }} />
                         <label className="field-label">{meta.label}</label>
                       </div>
                       <Input
@@ -246,9 +247,9 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                   padding: "8px 10px",
                   border: "1px solid transparent",
                   borderRadius: "2px",
-                  background: "var(--aws-green-light)",
+                  background: "var(--accent-green-bg)",
                   fontSize: "11px",
-                  color: "var(--aws-green)",
+                  color: "var(--accent-green)",
                 }}
               >
                 <Sparkles className="size-3 shrink-0" />
@@ -263,7 +264,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
             {/* Model Selection */}
             <div className="field-section">
               <div className="field-label-row">
-                <Radar className="size-3.5" style={{ color: "var(--aws-text-secondary)" }} />
+                <Radar className="size-3.5" style={{ color: "var(--text-secondary)" }} />
                 <label className="field-label">Select Model</label>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -301,12 +302,12 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               flexDirection: "column",
               gap: "6px",
               padding: "8px 10px",
-              border: "1px solid var(--aws-card-border)",
+              border: "1px solid var(--border-subtle)",
               borderRadius: "2px",
-              background: "var(--aws-bg)",
+              background: "var(--bg-deep)",
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", color: "var(--aws-text-secondary)" }}>
-                <span className="size-1.5 rounded-full" style={{ background: "var(--aws-green)", flexShrink: 0 }} />
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", color: "var(--text-secondary)" }}>
+                <span className="size-1.5 rounded-full" style={{ background: "var(--accent-green)", flexShrink: 0 }} />
                 <span>
                   {formData.Planting_Date
                     ? `Using ${Object.values(formData).filter(Boolean).length} field parameter(s)`
@@ -332,9 +333,9 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                 padding: "8px 10px",
                 border: "1px solid transparent",
                 borderRadius: "2px",
-                background: "var(--aws-red-light)",
+                background: "var(--accent-red-bg)",
                 fontSize: "12px",
-                color: "var(--aws-red)",
+                color: "var(--accent-red)",
               }}>
                 {predictionResult.error}
               </div>

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CaneSense Dashboard Redesign - Design Canvas</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+    
+    .canvas-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    
+    .canvas-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .canvas-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    
+    .canvas-subtitle {
+      font-size: 16px;
+      color: #64748b;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .variations-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-top: 48px;
+    }
+    
+    @media (max-width: 1200px) {
+      .variations-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .variations-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .variation-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    
+    .variation-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+    
+    .variation-card.selected {
+      border-color: #00CC66;
+      box-shadow: 0 12px 40px rgba(0, 204, 102, 0.2);
+    }
+    
+    .variation-preview {
+      height: 400px;
+      overflow: hidden;
+      position: relative;
+      background: #f1f5f9;
+    }
+    
+    .variation-content {
+      padding: 24px;
+    }
+    
+    .variation-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+    }
+    
+    .variation-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    
+    .variation-description {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    
+    .variation-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .variation-tag {
+      padding: 4px 10px;
+      background: #f1f5f9;
+      border-radius: 100px;
+      font-size: 12px;
+      color: #475569;
+    }
+    
+    /* Style 1: Refined Professional */
+    .style1-preview {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .style1-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    
+    .style1-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .style1-logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #00CC66, #004D26);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    
+    .style1-logo-text {
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .style1-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    
+    .style1-stat {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    .style1-stat-label {
+      font-size: 11px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    
+    .style1-stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #00CC66;
+    }
+    
+    .style1-card {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+      flex: 1;
+    }
+    
+    .style1-card-title {
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    
+    .style1-bar {
+      height: 8px;
+      background: #2a2a2a;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .style1-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #00CC66, #00E676);
+    }
+    
+    /* Style 2: Modern SaaS */
+    .style2-preview {
+      background: #ffffff;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .style2-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .style2-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .style2-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: #0f172a;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    
+    .style2-logo-text {
+      color: #0f172a;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .style2-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    
+    .style2-stat {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    
+    .style2-stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    
+    .style2-stat-label {
+      font-size: 12px;
+      color: #64748b;
+    }
+    
+    .style2-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      flex: 1;
+    }
+    
+    .style2-card-title {
+      color: #0f172a;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    
+    .style2-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 80px;
+    }
+    
+    .style2-bar {
+      flex: 1;
+      background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+      border-radius: 4px 4px 0 0;
+    }
+    
+    /* Style 3: Agricultural Tech */
+    .style3-preview {
+      background: linear-gradient(180deg, #052e16 0%, #064e3b 50%, #065f46 100%);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .style3-preview::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    
+    .style3-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .style3-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .style3-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+    }
+    
+    .style3-logo-text {
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .style3-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .style3-stat {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    
+    .style3-stat-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    
+    .style3-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #10b981;
+      margin-bottom: 4px;
+    }
+    
+    .style3-stat-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .style3-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 20px;
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .style3-card-title {
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    
+    .style3-growth {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .style3-growth-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #10b981;
+    }
+    
+    .style3-growth-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .style3-growth-icon {
+      font-size: 48px;
+    }
+  </style>
+</head>
+<body>
+  <div class="canvas-container">
+    <div class="canvas-header">
+      <h1 class="canvas-title">CaneSense Dashboard Redesign</h1>
+      <p class="canvas-subtitle">Three design directions for the agricultural researchers' dashboard. Each addresses visual hierarchy, action discoverability, and mobile experience.</p>
+    </div>
+    
+    <div class="variations-grid">
+      <!-- Style 1: Refined Professional -->
+      <div class="variation-card" id="style1">
+        <div class="variation-preview style1-preview">
+          <div class="style1-header">
+            <div class="style1-logo">
+              <div class="style1-logo-icon">CS</div>
+              <div class="style1-logo-text">CaneSense</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <div style="width: 8px; height: 8px; background: #00CC66; border-radius: 50%;"></div>
+              <span style="color: #6b7280; font-size: 12px;">Online</span>
+            </div>
+          </div>
+          
+          <div class="style1-stats">
+            <div class="style1-stat">
+              <div class="style1-stat-label">Models</div>
+              <div class="style1-stat-value">5</div>
+            </div>
+            <div class="style1-stat">
+              <div class="style1-stat-label">Accuracy</div>
+              <div class="style1-stat-value">90.9%</div>
+            </div>
+            <div class="style1-stat">
+              <div class="style1-stat-label">Predictions</div>
+              <div class="style1-stat-value">1,247</div>
+            </div>
+          </div>
+          
+          <div class="style1-card">
+            <div class="style1-card-title">Model Performance</div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="color: #9ca3af; font-size: 12px;">CatBoost</span>
+              <span style="color: #00CC66; font-size: 12px; font-weight: 600;">90.9%</span>
+            </div>
+            <div class="style1-bar">
+              <div class="style1-bar-fill" style="width: 90.9%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="color: #9ca3af; font-size: 12px;">XGBoost</span>
+              <span style="color: #00CC66; font-size: 12px; font-weight: 600;">83.6%</span>
+            </div>
+            <div class="style1-bar">
+              <div class="style1-bar-fill" style="width: 83.6%;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="variation-content">
+          <div class="variation-badge" style="background: #00CC66; color: white;">Recommended</div>
+          <h3 class="variation-title">Refined Professional</h3>
+          <p class="variation-description">Evolution of the current AWS Console style. Cleaner hierarchy, better spacing, and refined interactions while maintaining familiarity.</p>
+          <div class="variation-tags">
+            <span class="variation-tag">Dark theme</span>
+            <span class="variation-tag">High contrast</span>
+            <span class="variation-tag">Data-focused</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Style 2: Modern SaaS -->
+      <div class="variation-card" id="style2">
+        <div class="variation-preview style2-preview">
+          <div class="style2-header">
+            <div class="style2-logo">
+              <div class="style2-logo-icon">CS</div>
+              <div class="style2-logo-text">CaneSense</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+              <span style="color: #64748b; font-size: 12px;">Connected</span>
+            </div>
+          </div>
+          
+          <div class="style2-stats">
+            <div class="style2-stat">
+              <div class="style2-stat-value">5</div>
+              <div class="style2-stat-label">Models</div>
+            </div>
+            <div class="style2-stat">
+              <div class="style2-stat-value">90.9%</div>
+              <div class="style2-stat-label">Accuracy</div>
+            </div>
+            <div class="style2-stat">
+              <div class="style2-stat-value">1.2k</div>
+              <div class="style2-stat-label">Predictions</div>
+            </div>
+            <div class="style2-stat">
+              <div class="style2-stat-value">24ms</div>
+              <div class="style2-stat-label">Latency</div>
+            </div>
+          </div>
+          
+          <div class="style2-card">
+            <div class="style2-card-title">Model Comparison</div>
+            <div class="style2-chart">
+              <div class="style2-bar" style="height: 90%;"></div>
+              <div class="style2-bar" style="height: 83%;"></div>
+              <div class="style2-bar" style="height: 78%;"></div>
+              <div class="style2-bar" style="height: 65%;"></div>
+              <div class="style2-bar" style="height: 58%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 12px;">
+              <span style="color: #94a3b8; font-size: 11px;">CatBoost</span>
+              <span style="color: #94a3b8; font-size: 11px;">XGBoost</span>
+              <span style="color: #94a3b8; font-size: 11px;">RF</span>
+              <span style="color: #94a3b8; font-size: 11px;">Linear</span>
+              <span style="color: #94a3b8; font-size: 11px;">Elastic</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="variation-content">
+          <div class="variation-badge" style="background: #3b82f6; color: white;">Clean</div>
+          <h3 class="variation-title">Modern SaaS</h3>
+          <p class="variation-description">Clean, contemporary design inspired by Linear and Vercel. Light theme with clear visual hierarchy and micro-interactions.</p>
+          <div class="variation-tags">
+            <span class="variation-tag">Light theme</span>
+            <span class="variation-tag">Minimalist</span>
+            <span class="variation-tag">Accessible</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Style 3: Agricultural Tech -->
+      <div class="variation-card" id="style3">
+        <div class="variation-preview style3-preview">
+          <div class="style3-header">
+            <div class="style3-logo">
+              <div class="style3-logo-icon">🌾</div>
+              <div class="style3-logo-text">CaneSense</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></div>
+              <span style="color: rgba(255, 255, 255, 0.7); font-size: 12px;">Live</span>
+            </div>
+          </div>
+          
+          <div class="style3-stats">
+            <div class="style3-stat">
+              <div class="style3-stat-icon">🌱</div>
+              <div class="style3-stat-value">5</div>
+              <div class="style3-stat-label">Active Models</div>
+            </div>
+            <div class="style3-stat">
+              <div class="style3-stat-icon">📊</div>
+              <div class="style3-stat-value">90.9%</div>
+              <div class="style3-stat-label">R² Score</div>
+            </div>
+            <div class="style3-stat">
+              <div class="style3-stat-icon">🎯</div>
+              <div class="style3-stat-value">1.2k</div>
+              <div class="style3-stat-label">Predictions</div>
+            </div>
+          </div>
+          
+          <div class="style3-card">
+            <div class="style3-card-title">Growth Prediction</div>
+            <div class="style3-growth">
+              <div>
+                <div class="style3-growth-value">+23.5%</div>
+                <div class="style3-growth-label">Expected Yield Increase</div>
+              </div>
+              <div class="style3-growth-icon">📈</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="variation-content">
+          <div class="variation-badge" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">Unique</div>
+          <h3 class="variation-title">Agricultural Tech Fusion</h3>
+          <p class="variation-description">Blends natural agricultural aesthetics with modern tech. Glassmorphism, organic gradients, and nature-inspired color palette.</p>
+          <div class="variation-tags">
+            <span class="variation-tag">Organic</span>
+            <span class="variation-tag">Glassmorphism</span>
+            <span class="variation-tag">Nature-tech</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 48px; padding: 24px; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);">
+      <p style="color: #64748b; font-size: 14px;">Click on a design direction to select it, then I'll implement the full interactive prototype.</p>
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 8px;">Each design addresses: visual hierarchy, action discoverability, mobile responsiveness, and information density.</p>
+    </div>
+  </div>
+  
+  <script>
+    // Simple selection logic
+    document.querySelectorAll('.variation-card').forEach(card => {
+      card.addEventListener('click', function() {
+        document.querySelectorAll('.variation-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    });
+  </script>
+</body>
+</html>
