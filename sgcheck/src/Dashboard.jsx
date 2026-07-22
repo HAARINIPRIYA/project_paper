@@ -19,6 +19,12 @@ import {
   CheckCircle2,
   XCircle,
   BrainCircuit,
+  Trophy,
+  GitCompare,
+  Target,
+  BarChartHorizontal,
+  BookOpen,
+  Sprout,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -31,8 +37,10 @@ import { Textarea } from "@/components/ui/textarea"
 import GPSForm from "./components/GPSForm"
 import UploadZone from "./components/UploadZone"
 import DashboardPage from "./pages/DashboardPage"
+import PredictionHero from "./components/PredictionHero"
 import { predictAuto, predictEnsemble } from "./lib/api"
-import { sendChatMessage, parseStreamingResponse, SYSTEM_PROMPT } from "./lib/aiChat"
+import { sendChatMessage, parseStreamingResponse, SYSTEM_PROMPT, extractFieldData } from "./lib/aiChat"
+import MarkdownRenderer from "./components/MarkdownRenderer"
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -40,6 +48,16 @@ const NAV_ITEMS = [
 ]
 
 const STORAGE_KEY = "canesense_conversations"
+
+// --- Quick Suggestions ---
+const SUGGESTIONS = [
+  { icon: Trophy, label: "Which model is best?", query: "Which model is best?", color: "var(--accent-green)" },
+  { icon: GitCompare, label: "Compare CatBoost vs XGBoost", query: "Compare CatBoost and XGBoost", color: "var(--accent-blue)" },
+  { icon: Target, label: "What should I choose?", query: "What model should I choose?", color: "var(--accent-orange)" },
+  { icon: BarChartHorizontal, label: "Show all metrics", query: "Show me all model metrics", color: "#7c3aed" },
+  { icon: BookOpen, label: "What is R²?", query: "What does R² mean?", color: "#06b6d4" },
+  { icon: Sprout, label: "Predict my yield", query: "Predict my yield", color: "var(--accent-green)" },
+]
 
 // --- Helpers ---
 function loadConversations() {
@@ -119,6 +137,7 @@ function Dashboard({
   const messagesEndRef = useRef(null)
   const composerRef = useRef("")
   const scrollTimeoutRef = useRef(null)
+  const sendingRef = useRef(false)
   const gpsDataRef = useRef(gpsData)
   const activeChatIdRef = useRef(activeChatId)
   const conversationsRef = useRef(conversations)
@@ -258,6 +277,14 @@ To get started, enter your field details in the **Tools** panel (right side), th
     onSendRef.current()
   }, [])
 
+  function handleSuggestionClick(query) {
+    if (isPredicting || sendingRef.current) return
+    sendingRef.current = true
+    setComposer(query)
+    composerRef.current = query
+    onSendRef.current()
+  }
+
   useEffect(() => {
     onSendRef.current = async () => {
       const text = composerRef.current.trim()
@@ -368,14 +395,24 @@ To get started, enter your field details in the **Tools** panel (right side), th
         setStreamingContent("")
         setAiStatus("complete")
 
+        // Also detect structured field data (JSON with field params) in the user message
+        const hasFieldDataInMsg = /"Planting_Date"|Planting_Date\s*[:=]/i.test(text)
         const isPredictionQuery = /predict|yield|cane|forecast|estimate|run|production|analysis|recommend/i.test(text)
-        if (isPredictionQuery && currentGps) {
+        if ((isPredictionQuery || hasFieldDataInMsg) && (currentGps || hasFieldDataInMsg)) {
           const fieldData = {}
           const backendFields = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type", "Soil_Type", "Irrigation_Type", "Fertilizer_Type"]
-          for (const key of backendFields) {
-            if (currentGps[key] && currentGps[key].trim() !== "") {
-              fieldData[key] = currentGps[key]
+          // First try saved gpsData
+          if (currentGps) {
+            for (const key of backendFields) {
+              if (currentGps[key] && currentGps[key].trim() !== "") {
+                fieldData[key] = currentGps[key]
+              }
             }
+          }
+          // If no saved data, parse field data from the user's chat message using shared helper
+          if (Object.keys(fieldData).length === 0 && hasFieldDataInMsg) {
+            const extracted = extractFieldData(text)
+            if (extracted) Object.assign(fieldData, extracted)
           }
           if (Object.keys(fieldData).length > 0) {
             try {
@@ -415,6 +452,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
         }))
       } finally {
         setIsPredicting(false)
+        sendingRef.current = false
         abortRef.current = null
       }
     }
@@ -453,19 +491,19 @@ To get started, enter your field details in the **Tools** panel (right side), th
       <div className="flex items-center gap-3" style={{ border: "1px solid var(--border-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)" }}>
         {aiStatus === "streaming" || aiStatus === "connecting" ? (
           <Loader2 className="size-3 animate-spin" style={{ color: "var(--accent-green)" }} />
-        ) : aiStatus === "complete" ? (
-          <CheckCircle2 className="size-3" style={{ color: "var(--accent-green)" }} />
         ) : aiStatus === "error" ? (
           <XCircle className="size-3" style={{ color: "var(--accent-red)" }} />
+        ) : aiStatus === "complete" ? (
+          <CheckCircle2 className="size-3" style={{ color: "var(--accent-green)" }} />
         ) : (
-          <BrainCircuit className="size-3" style={{ color: "var(--text-secondary)" }} />
+          <BrainCircuit className="size-3" style={{ color: "var(--accent-green)" }} />
         )}
         <div className="min-w-0">
           <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>
-            {aiStatus === "streaming" ? "AI Responding..." : aiStatus === "connecting" ? "Connecting to AI..." : aiStatus === "complete" ? "Response Complete" : aiStatus === "error" ? "Connection Error" : "AI Assistant Ready"}
+            {aiStatus === "streaming" ? "AI Responding..." : aiStatus === "connecting" ? "Analyzing models..." : aiStatus === "complete" ? "Response Complete" : aiStatus === "error" ? "Chat Error" : "Local AI Ready"}
           </div>
           <div style={{ fontSize: "10px", color: "var(--text-secondary)" }}>
-            {aiStatus === "streaming" ? "Generating response..." : aiStatus === "connecting" ? "Sending request..." : aiStatus === "complete" ? "Ready for next question" : aiStatus === "error" ? "Check API connection" : "glm-5.2-free · via router"}
+            {aiStatus === "streaming" ? "Generating response from model data..." : aiStatus === "connecting" ? "Fetching model metrics..." : aiStatus === "complete" ? "Ready for next question" : aiStatus === "error" ? "Try again or check backend" : "Local AI · Model-based answers"}
           </div>
         </div>
       </div>
@@ -636,7 +674,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                   )}
                 </div>
               </ScrollArea>
-              <style>{`.chat-item:hover .chat-delete-btn { opacity: 0.6 !important; } .chat-delete-btn:hover { opacity: 1 !important; color: var(--accent-red) !important; }`}</style>
+              <style>{`.chat-item:hover .chat-delete-btn { opacity: 0.6 !important; } .chat-delete-btn:hover { opacity: 1 !important; color: var(--accent-red) !important; } .suggestion-chip:hover { border-color: var(--accent-green) !important; background: var(--accent-green-bg) !important; }`}</style>
             </>
           )}
           {view === "dashboard" && (
@@ -702,22 +740,24 @@ To get started, enter your field details in the **Tools** panel (right side), th
               ) : (
                 <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                   <div className="main-content" style={{ maxWidth: "800px", margin: "0 auto", padding: "24px 20px" }}>
-                    {(predictionResult || ensembleResult) && (
-                      <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="aws-card" style={{ padding: "12px 16px", marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div className="flex items-center gap-2.5">
-                          <div style={{ width: "28px", height: "28px", borderRadius: "2px", background: "var(--accent-green-bg)", display: "grid", placeItems: "center" }}>
-                            <TrendingUp className="size-3.5" style={{ color: "var(--accent-green)" }} />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: "13px", fontWeight: 600 }}>Latest Prediction Available</div>
-                            <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>{ensembleResult ? "Ensemble (all models)" : `Using ${predictionResult?.model || "auto"} model`}</div>
-                          </div>
-                        </div>
-                        <Button variant="default" size="sm" onClick={() => setView("dashboard")} className="gap-1">
-                          <BarChart3 className="size-3.5" /> View Details
-                        </Button>
-                      </motion.div>
-                    )}
+                    <AnimatePresence>
+                      {predictionResult && (
+                        <PredictionHero
+                          key="single"
+                          result={predictionResult}
+                          gpsData={gpsData}
+                          onDismiss={() => onPredictionResult(null)}
+                        />
+                      )}
+                      {ensembleResult && !predictionResult && (
+                        <PredictionHero
+                          key="ensemble"
+                          result={ensembleResult}
+                          gpsData={gpsData}
+                          onDismiss={() => onEnsembleResult(null)}
+                        />
+                      )}
+                    </AnimatePresence>
                     {activeConversation && (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", padding: "0 4px" }}>
                         <div style={{ fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -741,16 +781,66 @@ To get started, enter your field details in the **Tools** panel (right side), th
                         <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: Math.min(0.02 * idx, 0.15) }}
                           className={"message-row" + (isUser ? " user" : " assistant")} style={{ marginBottom: "8px" }}>
                           {!isUser ? (<Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>) : null}
-                          <div className={"message-bubble" + (isUser ? " user" : " assistant")}>{m.content}</div>
+                          <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
+                            {isUser ? m.content : <MarkdownRenderer content={m.content} />}
+                          </div>
                           {isUser ? (<Avatar size="sm"><AvatarFallback style={{ background: "var(--accent-blue-bg)", color: "var(--accent-blue)" }}>U</AvatarFallback></Avatar>) : null}
                         </motion.div>
                       )
                     })}
+                    {/* Suggestion Chips — shown when conversation is fresh */}
+                    {messages.length === 1 && messages[0]?.id === "sys_welcome" && !isPredicting && !streamingContent && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                        style={{ marginLeft: "44px", marginTop: "4px", marginBottom: "16px" }}
+                      >
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "10px", fontWeight: 500, letterSpacing: "0.02em" }}>
+                          Try asking:
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                          {SUGGESTIONS.map((s, i) => {
+                            const Icon = s.icon
+                            return (
+                              <motion.button
+                                key={s.query}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.25, delay: 0.4 + i * 0.06 }}
+                                whileHover={{ scale: 1.04, y: -1 }}
+                                whileTap={{ scale: 0.97 }}
+                                onClick={() => handleSuggestionClick(s.query)}
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  padding: "6px 12px",
+                                  border: "1px solid var(--border-subtle)",
+                                  borderRadius: "20px",
+                                  background: "var(--bg-card)",
+                                  color: "var(--text-primary)",
+                                  fontSize: "12px",
+                                  fontWeight: 500,
+                                  cursor: "pointer",
+                                  transition: "all 180ms",
+                                  boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                                }}
+                                className="suggestion-chip hover:border-green"
+                              >
+                                <Icon className="size-3.5" style={{ color: s.color }} />
+                                <span>{s.label}</span>
+                              </motion.button>
+                            )
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
                     {streamingContent && (
                       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
                         <Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>
                         <div className="message-bubble assistant">
-                          {streamingContent}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-green)" }}>▌</span>
+                          {streamingContent ? <MarkdownRenderer content={streamingContent} /> : ''}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-green)" }}>▌</span>
                         </div>
                       </motion.div>
                     )}
@@ -882,15 +972,60 @@ To get started, enter your field details in the **Tools** panel (right side), th
                   <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: Math.min(0.02 * idx, 0.15) }}
                     className={"message-row" + (isUser ? " user" : " assistant")} style={{ marginBottom: "8px" }}>
                     {!isUser ? (<Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>) : null}
-                    <div className={"message-bubble" + (isUser ? " user" : " assistant")}>{m.content}</div>
+                    <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
+                      {isUser ? m.content : <MarkdownRenderer content={m.content} />}
+                    </div>
                     {isUser ? (<Avatar size="sm"><AvatarFallback>U</AvatarFallback></Avatar>) : null}
                   </motion.div>
                 )
               })}
+              {/* Suggestion Chips — mobile */}
+              {messages.length === 1 && messages[0]?.id === "sys_welcome" && !isPredicting && !streamingContent && (
+                <div style={{ marginTop: "4px", marginBottom: "12px" }}>
+                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px", fontWeight: 500 }}>
+                    Try asking:
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                    {SUGGESTIONS.map((s, i) => {
+                      const Icon = s.icon
+                      return (
+                        <motion.button
+                          key={s.query}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.25, delay: i * 0.04 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => handleSuggestionClick(s.query)}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            padding: "5px 10px",
+                            border: "1px solid var(--border-subtle)",
+                            borderRadius: "20px",
+                            background: "var(--bg-card)",
+                            color: "var(--text-primary)",
+                            fontSize: "11px",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            transition: "all 150ms",
+                          }}
+                          className="suggestion-chip"
+                        >
+                          <Icon className="size-3" style={{ color: s.color }} />
+                          <span>{s.label}</span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
               {streamingContent && (
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
                   <Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>
-                  <div className="message-bubble assistant">{streamingContent}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-green)" }}>▌</span></div>
+                  <div className="message-bubble assistant">
+                    {streamingContent ? <MarkdownRenderer content={streamingContent} /> : ''}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-green)" }}>▌</span>
+                  </div>
                 </motion.div>
               )}
               {isPredicting && !streamingContent && (

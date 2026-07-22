@@ -13,13 +13,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    proxy: {
-      "/api/ai": {
-        target: "https://router.bynara.id/v1",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/ai/, ""),
-      },
-    },
-  },
 })
