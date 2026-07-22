@@ -394,7 +394,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
           }
         }
       } catch (err) {
-        if (err.name === "AbortError") {
+        if (err.name === "AbortError" || err.message?.includes("abort") || err.message?.includes("cancel")) {
           setAiStatus("idle")
           return
         }
