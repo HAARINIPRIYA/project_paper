@@ -47,6 +47,7 @@ function formatFieldValue(key, value) {
 // ─── Color helpers ────────────────────────────────────────────────────────
 function modelColor(name) {
   const map = {
+    cane_sugar:        "#FF6B35",
     catboost:          "#00D68F",
     xgboost:           "#5B8DEF",
     random_forest:     "#FFB547",
@@ -59,6 +60,7 @@ function modelColor(name) {
 
 function modelLabel(name) {
   const map = {
+    cane_sugar:        "🍬 CaneSugar",
     catboost:          "CatBoost",
     xgboost:           "XGBoost",
     random_forest:     "Random Forest",

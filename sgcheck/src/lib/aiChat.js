@@ -20,6 +20,22 @@ import { getModels, predictAuto, predictEnsemble } from "./api"
 // ---------------------------------------------------------------------------
 
 const MODEL_DESCRIPTIONS = {
+  cane_sugar: {
+    name: "CaneSugar",
+    fullName: "CaneSugar Custom Stacking Ensemble",
+    color: "orange",
+    algorithm: "Stacking Ensemble: CatBoost + XGBoost + RandomForest → Ridge meta-learner with Yeo-Johnson target transformation",
+    advantages: [
+      "Custom-built for sugarcane yield prediction — engineered for this specific dataset",
+      "Combines the strengths of 3 top models (CatBoost, XGBoost, RandomForest) into one",
+      "Advanced feature engineering: interactions, ratios, polynomials, and log transforms",
+      "Yeo-Johnson target transformation reduces skew for better predictions",
+      "5-fold cross-validation stacking prevents overfitting",
+      "Feature importance selection eliminates noise columns",
+    ],
+    bestFor: "The ultimate model for this dataset. Use CaneSugar when you want the best possible accuracy with all advanced techniques applied automatically.",
+    whenToChoose: "Choose CaneSugar as your default model — it's custom-optimized for sugarcane yield prediction and combines the best of all other models.",
+  },
   catboost: {
     name: "CatBoost",
     fullName: "CatBoost Regressor",
@@ -182,7 +198,7 @@ function detectIntent(text) {
   // Comparison between models
   if (
     /\b(compare|difference|vs|versus|better than|worse than|how does)\b/.test(lower) &&
-    /\b(catboost|xgboost|random.?forest|linear.?regression|elastic.?net)\b/.test(lower)
+    /\b(cane.?sugar|catboost|xgboost|random.?forest|linear.?regression|elastic.?net)\b/.test(lower)
   ) {
     return "compare_models"
   }
@@ -191,7 +207,7 @@ function detectIntent(text) {
   if (
     /\b(why|reason|explain|how is|what makes)\b/.test(lower) &&
     /\b(best|better|good)\b/.test(lower) &&
-    /\b(model|catboost|xgboost|rf|random.?forest|linear|elastic)\b/.test(lower)
+    /\b(model|cane.?sugar|catboost|xgboost|rf|random.?forest|linear|elastic)\b/.test(lower)
   ) {
     return "why_best"
   }
@@ -204,13 +220,13 @@ function detectIntent(text) {
   }
 
   // Tell me about a specific model
-  const modelMatch = lower.match(/\b(catboost|xgboost|random.?forest|linear.?regression|elastic.?net)\b/)
+  const modelMatch = lower.match(/\b(cane.?sugar|catboost|xgboost|random.?forest|linear.?regression|elastic.?net)\b/)
   if (modelMatch && /\b(tell|about|explain|describe|what is|how does|details)\b/.test(lower)) {
     return "model_info"
   }
 
   // Specific metric for a specific model — e.g. "what is the RMSE of Random Forest?"
-  const modelNameInText = lower.match(/\b(catboost|xgboost|random.?forest|linear.?regression|elastic.?net|rf)\b/)
+  const modelNameInText = lower.match(/\b(cane.?sugar|catboost|xgboost|random.?forest|linear.?regression|elastic.?net|rf)\b/)
   if (modelNameInText && /\b(r2|r²|rmse|mae|metric|value|score)\b/.test(lower) &&
       /\b(of|for|is|does|what|show|get|tell)\b/.test(lower)) {
     return "specific_metric"
@@ -296,6 +312,7 @@ function isHigherBetter(metric) {
 
 function getModelKey(text) {
   const lower = text.toLowerCase()
+  if (lower.includes("cane sugar") || lower.includes("cane_sugar") || lower.includes("canesugar")) return "cane_sugar"
   if (lower.includes("catboost")) return "catboost"
   if (lower.includes("xgboost")) return "xgboost"
   if (lower.includes("random forest") || lower.includes("random_forest") || lower.includes("rf")) return "random_forest"
