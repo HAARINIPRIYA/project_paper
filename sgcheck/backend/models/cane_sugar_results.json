@@ -1,0 +1,12 @@
+{
+  "CaneSugar v2 (transformed target)": {
+    "r2": 0.2884,
+    "mae": 52.8742,
+    "rmse": 64.5953
+  },
+  "CaneSugar (orig. scale)": {
+    "r2": 0.2878,
+    "mae": 73.4455,
+    "rmse": 89.9514
+  }
+}

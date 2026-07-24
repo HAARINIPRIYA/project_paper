@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator"
 import ModelResults from "@/components/ModelResults"
 
 const MODEL_LABELS = {
+  cane_sugar: "CaneSugar",
   catboost: "CatBoost",
   xgboost: "XGBoost",
   random_forest: "Random Forest",
@@ -26,23 +27,24 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS = {
-  catboost: "var(--color-emerald-500)",
-  xgboost: "var(--color-blue-500)",
-  random_forest: "var(--color-amber-500)",
-  linear_regression: "var(--color-purple-500)",
-  elastic_net: "var(--color-red-500)",
+  cane_sugar: "#FF6B35",
+  catboost: "var(--accent-green)",
+  xgboost: "var(--accent-blue)",
+  random_forest: "var(--accent-orange)",
+  linear_regression: "var(--accent-purple)",
+  elastic_net: "var(--accent-red)",
 }
 
 const MODEL_GRADIENTS = {
-  catboost: "linear-gradient(90deg, #059669, #10b981)",
-  xgboost: "linear-gradient(90deg, #2563eb, #3b82f6)",
-  random_forest: "linear-gradient(90deg, #d97706, #f59e0b)",
-  linear_regression: "linear-gradient(90deg, #7c3aed, #8b5cf6)",
-  elastic_net: "linear-gradient(90deg, #dc2626, #ef4444)",
+  cane_sugar: "linear-gradient(90deg, #FF6B35, #E85D26)",
+  catboost: "linear-gradient(90deg, #00CC66, #00994D)",
+  xgboost: "linear-gradient(90deg, #00E676, #00CC66)",
+  random_forest: "linear-gradient(90deg, #FFD600, #FFEA00)",
+  linear_regression: "linear-gradient(90deg, #006030, #004D26)",
+  elastic_net: "linear-gradient(90deg, #FF5252, #FF1744)",
 }
 
 function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, backendStatus, predictionResult, ensembleResult }) {
-  // Compute sorted models by R²
   const sortedModels = useMemo(() => {
     if (!availableModels || !modelMetrics) return []
     return [...availableModels]
@@ -53,24 +55,21 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
   const bestModel = sortedModels[0]
   const maxR2 = sortedModels.length > 0 ? Math.max(...sortedModels.map((m) => m.r2 || 0), 0.1) : 1
 
-  // Stats cards data
   const stats = useMemo(() => [
     {
       label: "Models Deployed",
       value: backendStatus === "connected" ? (availableModels?.length || 0) : "—",
       meta: backendStatus === "connected" ? "Trained & production-ready" : "Backend offline",
       icon: Cpu,
-      gradient: "from-emerald-600 to-emerald-700",
       badge: backendStatus === "connected" ? "Active" : "Offline",
-      badgeVariant: backendStatus === "connected" ? "emerald" : "secondary",
+      badgeVariant: backendStatus === "connected" ? "green" : "outline",
     },
     {
       label: "Best Model (R²)",
       value: bestModel ? MODEL_LABELS[bestModel.name] || bestModel.name : "—",
       meta: bestModel ? `R² ${bestModel.r2?.toFixed(4) || "—"}` : "No data",
       icon: TrendingUp,
-      gradient: "from-blue-500 to-blue-600",
-      badge: bestModel ? `Score ${bestModel.r2?.toFixed(2) || ""}` : null,
+      badge: bestModel ? bestModel.r2?.toFixed(2) || "" : null,
       badgeVariant: "secondary",
     },
     {
@@ -80,9 +79,8 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
         ? `${gpsData.Planting_Date || gpsData.Variety || "Parameters saved"}`
         : "Add in Tools panel",
       icon: MapPinned,
-      gradient: gpsData ? "from-amber-400 to-amber-500" : "",
       badge: gpsData ? "Ready" : "Required",
-      badgeVariant: gpsData ? "emerald" : "outline",
+      badgeVariant: gpsData ? "green" : "outline",
     },
     {
       label: "Prediction Status",
@@ -93,73 +91,72 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
           ? "Start backend first"
           : "Add field data",
       icon: GaugeCircle,
-      gradient: gpsData && backendStatus === "connected" ? "from-emerald-600 to-emerald-700" : "",
       badge: gpsData && backendStatus === "connected" ? "Go" : "Pending",
-      badgeVariant: gpsData && backendStatus === "connected" ? "emerald" : "secondary",
+      badgeVariant: gpsData && backendStatus === "connected" ? "green" : "secondary",
     },
   ], [backendStatus, availableModels, gpsData, bestModel])
 
   const container = {
     hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.06, delayChildren: 0.08 },
-    },
+    show: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.06 } },
   }
 
   const itemAnim = {
-    hidden: { opacity: 0, y: 16 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } },
+    hidden: { opacity: 0, y: 12 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] } },
   }
 
-  // Recent activity
   const activities = [
-    { title: "Field A-12 Analysis", meta: "2 hours ago", tag: "Complete", r2: "0.909" },
-    { title: "Ensemble Training", meta: "Yesterday", tag: "Complete", r2: "—" },
-    { title: "Data Pipeline", meta: "3 days ago", tag: "Complete", r2: "—" },
+    { title: "Field A-12 Analysis", meta: "2 hours ago", tag: "Complete" },
+    { title: "Ensemble Training", meta: "Yesterday", tag: "Complete" },
+    { title: "Data Pipeline", meta: "3 days ago", tag: "Complete" },
   ]
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-6">
-      {/* Header */}
+      {/* Page Header — AWS Console style */}
       <motion.div variants={itemAnim} className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-2.5">
-            <div className="size-8 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 flex items-center justify-center shadow-sm">
-              <Sparkles className="size-4 text-white" />
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+            <div style={{
+              width: "28px", height: "28px",
+              background: "linear-gradient(135deg, #00CC66, #004D26)",
+              borderRadius: "2px",
+              display: "grid", placeItems: "center",
+              flexShrink: 0,
+            }}>
+              <Sparkles className="size-3.5" style={{ color: "#fff" }} />
             </div>
-            <div>
-              <div className="text-xl font-semibold tracking-tight">Dashboard</div>
-              <div className="text-sm text-muted-foreground">
-                Model performance, field data & prediction overview
-              </div>
-            </div>
+            <h1 style={{ fontSize: "18px", fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>Dashboard</h1>
           </div>
+          <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, marginLeft: "36px" }}>
+            Model performance, field data & prediction overview
+          </p>
         </div>
-        <Badge variant="outline" className="shrink-0 text-[10px] tracking-wide py-1">
-          <span className="size-1.5 rounded-full bg-emerald-500 mr-1.5 inline-block" />
+        <Badge variant={backendStatus === "connected" ? "green" : "outline"} className="shrink-0 text-[10px] tracking-wide py-1">
+          <span className="status-dot" style={{ background: backendStatus === "connected" ? "var(--accent-green)" : "var(--text-secondary)", marginRight: "6px", display: "inline-block" }} />
           {backendStatus === "connected" ? "System Online" : "Offline"}
         </Badge>
       </motion.div>
 
-      {/* Stats Cards */}
+      {/* AWS Console Style Stat Cards */}
       <motion.div variants={itemAnim} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((s) => {
           const Icon = s.icon
           return (
-            <div key={s.label} className="stat-card group/card">
+            <div key={s.label} className="stat-card">
               <div className="stat-card-header">
-                <div className="space-y-1">
-                  <div className="text-xs font-medium text-muted-foreground">{s.label}</div>
+                <div>
+                  <div className="stat-card-label">{s.label}</div>
                   <div className="stat-value">{typeof s.value === "number" ? s.value : s.value}</div>
                 </div>
-                <div className="stat-card-icon-wrap">
+                <div className="stat-card-icon">
                   <Icon className="size-4" />
                 </div>
               </div>
-              <div className="flex items-center justify-between">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div className="stat-meta">{s.meta}</div>
-                <Badge variant={s.badgeVariant || "secondary"} className="text-[9px] h-3.5">
+                <Badge variant={s.badgeVariant || "secondary"} className="text-[9px]" style={{ height: "18px" }}>
                   {s.badge}
                 </Badge>
               </div>
@@ -168,160 +165,133 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
         })}
       </motion.div>
 
-      {/* Main Content: Model Performance + Prediction Flow */}
+      {/* Main Content Grid */}
       <motion.div variants={itemAnim} className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-        {/* Model Performance (Left - spans 2 columns) */}
-        <div className="flex flex-col gap-4 xl:col-span-2">
-          {/* Model Comparison Chart */}
-          <Card className="border-border/50 shadow-sm">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                  <BrainCircuit className="size-4 text-emerald-600" />
-                  Model Performance Comparison
-                </CardTitle>
-                <Badge variant="emerald" className="text-[9px]">
-                  {sortedModels.length} models
-                </Badge>
+        {/* Left Column */}
+        <div className="flex flex-col gap-5 xl:col-span-2">
+          {/* Model Performance Card */}
+          <div className="aws-card">
+            <div className="aws-card-header">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div>
+                  <div className="aws-card-title">
+                    <BrainCircuit className="size-4" style={{ color: "var(--accent-blue)" }} />
+                    Model Performance
+                  </div>
+                  <div className="aws-card-subtitle">
+                    All models trained on sugarcane field & spectral data — sorted by R² score
+                  </div>
+                </div>
+                <Badge variant="blue" className="text-[9px]">{sortedModels.length} models</Badge>
               </div>
-              <CardDescription>
-                All models trained on sugarcane field & spectral data — sorted by R² score
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="aws-card-body">
               {backendStatus !== "connected" ? (
-                <div className="flex flex-col items-center gap-3 py-10 text-center">
-                  <Cpu className="size-10 text-muted-foreground/20" />
-                  <div className="text-sm text-muted-foreground">
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "40px 0", textAlign: "center" }}>
+                  <Cpu className="size-10" style={{ opacity: 0.2, color: "var(--text-secondary)" }} />
+                  <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
                     Backend not connected. Run the API server to see model performance.
                   </div>
                 </div>
               ) : sortedModels.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-10 text-center">
-                  <BarChart3 className="size-10 text-muted-foreground/20" />
-                  <div className="text-sm text-muted-foreground">
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "40px 0", textAlign: "center" }}>
+                  <BarChart3 className="size-10" style={{ opacity: 0.2, color: "var(--text-secondary)" }} />
+                  <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
                     No trained models found. Run training first.
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col gap-1.5 pt-1">
+                <div className="flex flex-col" style={{ gap: "2px" }}>
                   {/* Header */}
-                  <div className="flex items-center gap-2 px-1 pb-2">
-                    <div className="w-[6.5rem] shrink-0" />
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 8px 8px" }}>
+                    <div style={{ width: "100px", flexShrink: 0 }} />
                     <div className="flex-1" />
-                    <div className="w-[3.5rem] shrink-0 text-right">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">R²</span>
+                    <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
+                      <span className="divider-label-text">R²</span>
                     </div>
-                    <div className="w-[3.5rem] shrink-0 text-right">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">RMSE</span>
+                    <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
+                      <span className="divider-label-text">RMSE</span>
                     </div>
                   </div>
 
-                  {/* Model Bars */}
+                  {/* Bars */}
                   {sortedModels.map((model, idx) => {
                     const widthPct = Math.max(((model.r2 || 0) / maxR2) * 100, 5)
                     const isBest = idx === 0
                     return (
-                      <div
-                        key={model.name}
-                        className={`model-rank-item ${isBest ? "best" : ""}`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0" style={{ width: "6.5rem", flexShrink: 0 }}>
+                      <div key={model.name} className={"model-rank-item" + (isBest ? " best" : "")}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100px", flexShrink: 0 }}>
                           <div className="model-rank-badge">{idx + 1}</div>
-                          <span
-                            className="size-2 shrink-0 rounded-full"
-                            style={{ background: MODEL_COLORS[model.name] || "var(--muted-fg)" }}
-                          />
-                          <span className="truncate text-sm font-medium">
+                          <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
+                          <span className="truncate" style={{ fontSize: "13px", fontWeight: 500 }}>
                             {MODEL_LABELS[model.name] || model.name}
                           </span>
                         </div>
-
-                        {/* Bar Chart */}
                         <div className="flex-1 flex items-center">
                           <div className="model-bar-track">
-                            <div
-                              className="model-bar-fill"
-                              style={{
-                                width: `${widthPct}%`,
-                                background: MODEL_GRADIENTS[model.name] || MODEL_COLORS[model.name],
-                              }}
-                            />
+                            <div className="model-bar-fill" style={{
+                              width: `${widthPct}%`,
+                              background: MODEL_GRADIENTS[model.name] || MODEL_COLORS[model.name],
+                            }} />
                           </div>
                         </div>
-
-                        {/* R² Value */}
-                        <div className="w-[3.5rem] shrink-0 text-right">
-                          <span className="text-xs font-semibold tabular-nums">
+                        <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
+                          <span style={{ fontSize: "12px", fontWeight: 600 }} className="tabular-nums">
                             {model.r2 ? model.r2.toFixed(3) : "—"}
                           </span>
                         </div>
-
-                        {/* RMSE Value */}
-                        <div className="w-[3.5rem] shrink-0 text-right">
-                          <span className="text-[11px] text-muted-foreground tabular-nums">
+                        <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
+                          <span style={{ fontSize: "11px", color: "var(--text-secondary)" }} className="tabular-nums">
                             {model.rmse ? model.rmse.toFixed(1) : "—"}
                           </span>
                         </div>
-
-                        {/* Best badge */}
                         {isBest && (
-                          <div className="w-10 shrink-0 flex justify-center">
-                            <Badge variant="emerald" className="text-[8px] h-3.5 px-1">
-                              Best
-                            </Badge>
+                          <div style={{ width: "40px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
+                            <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
                           </div>
                         )}
                       </div>
                     )
                   })}
-
-                  {/* Legend */}
-                  <div className="flex items-center gap-4 pt-3 px-1">
-                    <span className="text-[10px] text-muted-foreground">
-                      <span className="inline-block size-1.5 rounded-full bg-emerald-500 mr-1" />
-                      Gradient Boosting wins on structured tabular data
-                    </span>
-                  </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Recent Activity */}
-          <Card className="border-border/50 shadow-sm">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                  <Activity className="size-4 text-emerald-600" />
+          <div className="aws-card">
+            <div className="aws-card-header">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div className="aws-card-title">
+                  <Activity className="size-4" style={{ color: "var(--accent-blue)" }} />
                   Recent Activity
-                </CardTitle>
+                </div>
                 <Badge variant="secondary" className="text-[9px]">Updates</Badge>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-2">
+            </div>
+            <div className="aws-card-body compact">
+              <div className="flex flex-col" style={{ gap: "4px" }}>
                 {activities.map((a) => (
-                  <div key={a.title} className="activity-item group/activity">
+                  <div key={a.title} className="activity-item">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className={"activity-dot " + (a.tag === "Running" ? "running" : "done")} />
+                      <span className={"activity-dot " + (a.tag === "Running" ? "running" : "success")} />
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-medium">{a.title}</div>
-                        <div className="truncate text-xs text-muted-foreground">{a.meta}</div>
+                        <div className="truncate" style={{ fontSize: "13px", fontWeight: 500 }}>{a.title}</div>
+                        <div className="truncate" style={{ fontSize: "11px", color: "var(--text-secondary)" }}>{a.meta}</div>
                       </div>
                     </div>
-                    <Badge variant={a.tag === "Running" ? "default" : "secondary"} className="shrink-0 text-[9px] h-4">
+                    <Badge variant={a.tag === "Running" ? "blue" : "secondary"} className="shrink-0 text-[9px]" style={{ height: "18px" }}>
                       {a.tag}
                     </Badge>
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
-        {/* Right Column: Summary + Prediction Results */}
-        <div className="flex flex-col gap-4">
+        {/* Right Column */}
+        <div className="flex flex-col gap-5">
           {/* Prediction Results */}
           {(predictionResult || ensembleResult) && (
             <div className="animate-slide-up">
@@ -329,27 +299,25 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
             </div>
           )}
 
-          {/* Quick Summary */}
-          <Card className="border-border/50 shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                <FileSpreadsheet className="size-4 text-emerald-600" />
+          {/* Session Summary */}
+          <div className="aws-card">
+            <div className="aws-card-header">
+              <div className="aws-card-title">
+                <FileSpreadsheet className="size-4" style={{ color: "var(--accent-blue)" }} />
                 Session Summary
-              </CardTitle>
-              <CardDescription>Current input state</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
+              </div>
+              <div className="aws-card-subtitle">Current input state</div>
+            </div>
+            <div className="aws-card-body" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {/* Billet Image */}
               <div className="info-card">
                 <div className="info-card-label">Billet Image</div>
                 <div className="info-card-value flex items-center gap-2">
                   {uploadedImage ? (
-                    <>
-                      <span className="size-1.5 rounded-full bg-emerald-500" />
-                      <span className="truncate text-xs">{uploadedImage.name}</span>
-                    </>
+                    <><span className="size-1.5 rounded-full" style={{ background: "var(--accent-green)" }} />
+                      <span className="truncate" style={{ fontSize: "12px" }}>{uploadedImage.name}</span></>
                   ) : (
-                    <span className="italic text-muted-foreground text-xs" style={{ opacity: 0.5 }}>
+                    <span style={{ fontStyle: "italic", fontSize: "12px", opacity: 0.5, color: "var(--text-secondary)" }}>
                       Not uploaded
                     </span>
                   )}
@@ -361,37 +329,37 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 <div className="info-card-label">Field Details</div>
                 <div className="info-card-value">
                   {gpsData ? (
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col" style={{ gap: "4px" }}>
                       {gpsData.Planting_Date && (
-                        <div className="text-xs">
-                          <span className="font-medium">Planted:</span> {gpsData.Planting_Date}
+                        <div style={{ fontSize: "12px" }}>
+                          <span style={{ fontWeight: 500 }}>Planted:</span> {gpsData.Planting_Date}
                           {gpsData.Harvesting_Date && ` · Harvest: ${gpsData.Harvesting_Date}`}
                         </div>
                       )}
                       <div className="flex flex-wrap gap-1">
-                        {gpsData.Variety && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Variety}</span>}
-                        {gpsData.Crop_Type && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Crop_Type}</span>}
-                        {gpsData.Soil_Type && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Soil_Type}</span>}
-                        {gpsData.Irrigation_Type && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Irrigation_Type}</span>}
-                        {gpsData.Fertilizer_Type && <span className="text-[10px] bg-muted/40 px-1.5 py-0.5 rounded">{gpsData.Fertilizer_Type}</span>}
+                        {gpsData.Variety && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Variety}</span>}
+                        {gpsData.Crop_Type && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Crop_Type}</span>}
+                        {gpsData.Soil_Type && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Soil_Type}</span>}
+                        {gpsData.Irrigation_Type && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Irrigation_Type}</span>}
+                        {gpsData.Fertilizer_Type && <span style={{ fontSize: "10px", background: "var(--bg-deep)", padding: "1px 6px", borderRadius: "2px" }}>{gpsData.Fertilizer_Type}</span>}
                       </div>
                     </div>
                   ) : (
-                    <span className="italic text-muted-foreground text-xs" style={{ opacity: 0.5 }}>
+                    <span style={{ fontStyle: "italic", fontSize: "12px", opacity: 0.5, color: "var(--text-secondary)" }}>
                       Not configured
                     </span>
                   )}
                 </div>
               </div>
 
-              <Separator className="opacity-50" />
+              <Separator style={{ opacity: 0.5 }} />
 
               {/* Mini Status */}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <div className="mini-card">
                   <div className="mini-card-label">Stage</div>
                   <div className="mini-card-value flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-emerald-500" />
+                    <span className="size-1.5 rounded-full" style={{ background: "var(--accent-green)" }} />
                     Input Collection
                   </div>
                 </div>
@@ -410,59 +378,73 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 </div>
               </div>
 
-              {/* Quick Action */}
+              {/* Quick action */}
               {!predictionResult && !ensembleResult && (
-                <button
-                  type="button"
-                  className="flex items-center justify-between rounded-lg border border-dashed border-border/60 bg-muted/20 px-3 py-2.5 text-sm text-muted-foreground transition-all hover:border-emerald-500/30 hover:bg-emerald-50/30 hover:text-emerald-700 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-400 mt-1"
-                  onClick={() => {
-                    // This would navigate to prediction mode
-                  }}
-                >
+                <button type="button" style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "8px 12px",
+                  border: "1px dashed var(--border-default)",
+                  borderRadius: "2px",
+                  background: "transparent",
+                  fontSize: "13px",
+                  color: "var(--text-secondary)",
+                  cursor: "pointer",
+                  transition: "all 120ms",
+                  marginTop: "4px",
+                }}
+                  className="hover:border-blue hover:text-blue"
+                  onClick={() => {}}>
                   <span className="flex items-center gap-2">
                     <TrendingUp className="size-3.5" />
                     Run a prediction to see results
                   </span>
-                  <ChevronRight className="size-3.5 opacity-50" />
+                  <ChevronRight className="size-3.5" style={{ opacity: 0.5 }} />
                 </button>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Model Details */}
           {sortedModels.length > 0 && (
-            <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                  <BarChart3 className="size-4 text-emerald-600" />
+            <div className="aws-card">
+              <div className="aws-card-header">
+                <div className="aws-card-title">
+                  <BarChart3 className="size-4" style={{ color: "var(--accent-blue)" }} />
                   Model Details
-                </CardTitle>
-                <CardDescription>Individual model specifications</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2">
+                </div>
+                <div className="aws-card-subtitle">Individual model specifications</div>
+              </div>
+              <div className="aws-card-body" style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 {sortedModels.map((model) => (
-                  <div key={model.name} className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-muted/20 px-3 py-2 transition-colors hover:bg-muted/40">
+                  <div key={model.name} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    padding: "6px 10px",
+                    borderRadius: "2px",
+                    transition: "background 120ms",
+                  }} className="hover:bg-muted">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="size-2 shrink-0 rounded-full"
-                        style={{ background: MODEL_COLORS[model.name] || "var(--muted-fg)" }}
-                      />
-                      <span className="text-xs font-medium truncate">
+                      <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
+                      <span style={{ fontSize: "12px", fontWeight: 500 }} className="truncate">
                         {MODEL_LABELS[model.name] || model.name}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span className="text-[10px] tabular-nums text-muted-foreground">
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span style={{ fontSize: "10px", color: "var(--text-secondary)" }} className="tabular-nums">
                         Features: {model.features_count || "—"}
                       </span>
-                      <span className="text-[10px] font-semibold tabular-nums">
+                      <span style={{ fontSize: "11px", fontWeight: 600 }} className="tabular-nums">
                         R² {model.r2?.toFixed(4) || "—"}
                       </span>
                     </div>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </div>
       </motion.div>

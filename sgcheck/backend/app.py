@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 # Make sure we can import sibling modules
 sys.path.insert(0, os.path.dirname(__file__))
 
-from predict import predict, predict_ensemble
+from predict import predict, predict_ensemble, ALL_MODELS
 
 app = FastAPI(
     title="CaneSense — Sugarcane Yield Prediction API",
@@ -88,7 +88,7 @@ MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 def health():
     """Health check — also reports which models are available."""
     available = []
-    for name in ["catboost", "xgboost", "random_forest", "linear_regression", "elastic_net"]:
+    for name in ALL_MODELS:
         path = os.path.join(MODELS_DIR, f"{name}.joblib")
         if os.path.exists(path):
             available.append(name)
@@ -103,18 +103,23 @@ def health():
 def list_models():
     """List all available trained models with their performance metrics."""
     models_info = {}
-    for name in ["catboost", "xgboost", "random_forest", "linear_regression", "elastic_net"]:
+    for name in ALL_MODELS:
         path = os.path.join(MODELS_DIR, f"{name}.joblib")
         if os.path.exists(path):
             import joblib
             data = joblib.load(path)
             meta = data.get("metadata", {})
-            models_info[name] = {
+            info = {
                 "metrics": meta.get("metrics", {}),
                 "features_count": len(meta.get("features", [])),
             }
             if "scaler" in meta:
-                models_info[name]["requires_scaling"] = True
+                info["requires_scaling"] = True
+            if "target_transformer" in meta:
+                info["target_transformed"] = True
+            if "engineered_features" in meta.get("best_params", {}):
+                info["engineered_features"] = True
+            models_info[name] = info
 
     # Load training results summary
     results_path = os.path.join(MODELS_DIR, "training_results.json")
@@ -136,13 +141,12 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
     """
     Predict yield using a specific model.
 
-    Supported model names: catboost, xgboost, random_forest, linear_regression, elastic_net
+    Supported model names: catboost, xgboost, random_forest, linear_regression, elastic_net, cane_sugar
     """
-    valid = ["catboost", "xgboost", "random_forest", "linear_regression", "elastic_net"]
-    if model_name not in valid:
+    if model_name not in ALL_MODELS:
         raise HTTPException(
             status_code=400,
-            detail=f"Unknown model '{model_name}'. Choose from: {', '.join(valid)}",
+            detail=f"Unknown model '{model_name}'. Choose from: {', '.join(ALL_MODELS)}",
         )
 
     try:
@@ -160,8 +164,7 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
 @app.post("/predict/batch/{model_name}")
 def predict_batch(model_name: str, batch: BatchPredictionInput):
     """Batch prediction using a specific model."""
-    valid = ["catboost", "xgboost", "random_forest", "linear_regression", "elastic_net"]
-    if model_name not in valid:
+    if model_name not in ALL_MODELS:
         raise HTTPException(status_code=400, detail=f"Unknown model '{model_name}'.")
 
     try:
@@ -225,8 +228,7 @@ def predict_auto(input_data: PredictionInput):
 @app.get("/features/{model_name}")
 def get_model_features(model_name: str):
     """List the features used by a specific model."""
-    valid = ["catboost", "xgboost", "random_forest", "linear_regression", "elastic_net"]
-    if model_name not in valid:
+    if model_name not in ALL_MODELS:
         raise HTTPException(status_code=400, detail=f"Unknown model '{model_name}'.")
 
     try:
