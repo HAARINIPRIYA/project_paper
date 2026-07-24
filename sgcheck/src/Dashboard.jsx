@@ -540,6 +540,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                 const m = modelMetrics[name] || {}
                 const isBest = idx === 0
                 const colors = {
+                  cane_sugar: "#FF6B35",
                   catboost: "var(--accent-green)",
                   xgboost: "var(--accent-blue)",
                   random_forest: "var(--accent-orange)",
