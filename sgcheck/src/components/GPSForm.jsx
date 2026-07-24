@@ -22,6 +22,7 @@ import ModelResults from "./ModelResults"
 
 const MODEL_OPTIONS = [
   { value: "auto", label: "Auto (Best Model)" },
+  { value: "cane_sugar", label: "🍬 CaneSugar" },
   { value: "catboost", label: "CatBoost" },
   { value: "xgboost", label: "XGBoost" },
   { value: "random_forest", label: "Random Forest" },

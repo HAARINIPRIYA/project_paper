@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator"
 import ModelResults from "@/components/ModelResults"
 
 const MODEL_LABELS = {
+  cane_sugar: "CaneSugar",
   catboost: "CatBoost",
   xgboost: "XGBoost",
   random_forest: "Random Forest",
@@ -26,6 +27,7 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS = {
+  cane_sugar: "#FF6B35",
   catboost: "var(--accent-green)",
   xgboost: "var(--accent-blue)",
   random_forest: "var(--accent-orange)",
@@ -34,6 +36,7 @@ const MODEL_COLORS = {
 }
 
 const MODEL_GRADIENTS = {
+  cane_sugar: "linear-gradient(90deg, #FF6B35, #E85D26)",
   catboost: "linear-gradient(90deg, #00CC66, #00994D)",
   xgboost: "linear-gradient(90deg, #00E676, #00CC66)",
   random_forest: "linear-gradient(90deg, #FFD600, #FFEA00)",

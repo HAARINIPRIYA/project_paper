@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 const MODEL_LABELS = {
+  cane_sugar: "CaneSugar",
   catboost: "CatBoost",
   xgboost: "XGBoost",
   random_forest: "Random Forest",
@@ -17,6 +18,7 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS_MAP = {
+  cane_sugar: "#FF6B35",
   catboost: "#00CC66",
   xgboost: "#00E676",
   random_forest: "#FFD600",
