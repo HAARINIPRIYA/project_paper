@@ -79,42 +79,46 @@ def prepare_input(data: dict) -> pd.DataFrame:
 
 def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
     """
-    Prepare input for CaneSugar model with full feature engineering.
+    Prepare input for CaneSugar v3 model with full feature engineering.
 
     CaneSugar uses extended features (interactions, ratios, polynomials, logs)
     that must be computed from the raw input fields.
     """
     df = pd.DataFrame([data])
-    eps = 1e-5
+    eps = 1e-6
 
     # Parse dates
     for col in ["Planting_Date", "Harvesting_Date"]:
         if col in df.columns:
-            df[col] = pd.to_datetime(df[col])
+            df[col] = pd.to_datetime(df[col], errors="coerce")
 
-    # Compute crop duration BEFORE dropping date columns
+    # Compute crop duration from dates
     if "Planting_Date" in df.columns and "Harvesting_Date" in df.columns:
-        df["Crop_Duration_Calc"] = (
-            df["Harvesting_Date"] - df["Planting_Date"]
-        ).dt.days
+        calc_dur = (df["Harvesting_Date"] - df["Planting_Date"]).dt.days
+        # Use calculated if Crop_Duration_Days not provided
+        if "Crop_Duration_Days" not in df.columns or df["Crop_Duration_Days"].isna().all():
+            df["Crop_Duration_Calc"] = calc_dur
 
     # Date features
-    if "Planting_Date" in df.columns:
-        df["Planting_Year"] = df["Planting_Date"].dt.year
-        df["Planting_Month"] = df["Planting_Date"].dt.month
-        df["Planting_Day"] = df["Planting_Date"].dt.day
-        df["Planting_DayOfYear"] = df["Planting_Date"].dt.dayofyear
-        df.drop("Planting_Date", axis=1, inplace=True)
+    for prefix, col in [("Planting", "Planting_Date"), ("Harvest", "Harvesting_Date")]:
+        if col in df.columns:
+            df[f"{prefix}_Year"] = df[col].dt.year
+            df[f"{prefix}_Month"] = df[col].dt.month
+            df[f"{prefix}_Day"] = df[col].dt.day
+            df[f"{prefix}_DayOfYear"] = df[col].dt.dayofyear
+            df.drop(col, axis=1, inplace=True)
 
-    if "Harvesting_Date" in df.columns:
-        df["Harvest_Year"] = df["Harvesting_Date"].dt.year
-        df["Harvest_Month"] = df["Harvesting_Date"].dt.month
-        df["Harvest_Day"] = df["Harvesting_Date"].dt.day
-        df["Harvest_DayOfYear"] = df["Harvesting_Date"].dt.dayofyear
-        df.drop("Harvesting_Date", axis=1, inplace=True)
+    # Parse sunshine hours if present as "hh:mm"
+    if "Sunshine_Hours_hh_mm" in df.columns:
+        try:
+            parts = df["Sunshine_Hours_hh_mm"].astype(str).str.split(":", expand=True)
+            df["Sunshine_Hours"] = parts[0].astype(float) + parts[1].astype(float) / 60
+            df.drop("Sunshine_Hours_hh_mm", axis=1, inplace=True)
+        except Exception:
+            pass
 
     # Drop geo fields
-    drop_cols = ["Latitude", "Longitude", "Khasra_No", "Sugar_Mill", "Tehsil", "District", "State"]
+    drop_cols = ["Latitude", "Longitude", "Khasra_No", "Sugar_Mill", "Tehsil", "District", "State", "Region"]
     for c in drop_cols:
         if c in df.columns:
             df.drop(c, axis=1, inplace=True)
@@ -123,69 +127,115 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
     if TARGET in df.columns:
         df.drop(TARGET, axis=1, inplace=True)
 
-    # ---- Feature engineering (same as training) ----
-    top_numeric = [
+    # Impute missing numeric values (user may not provide all fields)
+    for col in df.select_dtypes(include=["int64", "float64"]).columns:
+        df[col] = df[col].fillna(0.0)
+
+    # ---- Feature engineering (matches run_cane_sugar.py v3 exactly) ----
+    core_features = [
         "Nitrogen_kg_per_acre", "Potassium_kg_per_acre",
         "Soil_Moisture_%", "Temp_Avg_C",
         "Phosphorus_kg_per_acre", "Crop_Duration_Days",
         "Rainfall_Total_mm", "Evapotranspiration_mm_day",
         "Organic_Carbon_%", "Soil_pH",
     ]
-    existing_num = [c for c in top_numeric if c in df.columns]
-    n_top = min(len(existing_num), 6)
 
-    # Interactions
-    for i in range(n_top):
-        for j in range(i + 1, n_top):
-            a, b = existing_num[i], existing_num[j]
-            name = f"{a}_x_{b}"
+    # 1. Interaction features
+    interactions = [
+        ("Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "N_x_P"),
+        ("Nitrogen_kg_per_acre", "Potassium_kg_per_acre", "N_x_K"),
+        ("Nitrogen_kg_per_acre", "Soil_Moisture_%", "N_x_Moisture"),
+        ("Nitrogen_kg_per_acre", "Rainfall_Total_mm", "N_x_Rainfall"),
+        ("Potassium_kg_per_acre", "Soil_Moisture_%", "K_x_Moisture"),
+        ("Soil_Moisture_%", "Temp_Avg_C", "Moisture_x_Temp"),
+        ("Soil_Moisture_%", "Evapotranspiration_mm_day", "Moisture_x_ETo"),
+        ("Rainfall_Total_mm", "Temp_Avg_C", "Rainfall_x_Temp"),
+        ("Organic_Carbon_%", "Soil_Moisture_%", "OC_x_Moisture"),
+        ("Temp_Avg_C", "Evapotranspiration_mm_day", "Temp_x_ETo"),
+    ]
+    for a, b, name in interactions:
+        if a in df and b in df and name not in df.columns:
             df[name] = df[a] * df[b]
 
-    # Ratios
-    ratio_pairs = [
+    # 2. Ratio features
+    ratios = [
         ("Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "N_P_Ratio"),
         ("Potassium_kg_per_acre", "Phosphorus_kg_per_acre", "K_P_Ratio"),
+        ("Nitrogen_kg_per_acre", "Potassium_kg_per_acre", "N_K_Ratio"),
         ("Rainfall_Total_mm", "Evapotranspiration_mm_day", "Rain_ETo_Ratio"),
         ("Soil_Moisture_%", "Evapotranspiration_mm_day", "Moisture_ETo_Ratio"),
-        ("Nitrogen_kg_per_acre", "Potassium_kg_per_acre", "N_K_Ratio"),
+        ("Organic_Carbon_%", "Soil_pH", "OC_pH_Ratio"),
+        ("Nitrogen_kg_per_acre", "Crop_Duration_Days", "N_per_Day"),
+        ("Phosphorus_kg_per_acre", "Crop_Duration_Days", "P_per_Day"),
     ]
-    for a, b, name in ratio_pairs:
+    for a, b, name in ratios:
         if a in df and b in df and name not in df.columns:
             df[name] = df[a] / (df[b] + eps)
 
-    # Polynomials
-    for col in existing_num[:4]:
-        sq_name = f"{col}_sq"
-        if sq_name not in df.columns:
-            df[sq_name] = df[col] ** 2
+    # 3. Polynomials
+    for col in ["Nitrogen_kg_per_acre", "Potassium_kg_per_acre",
+                "Soil_Moisture_%", "Temp_Avg_C",
+                "Phosphorus_kg_per_acre", "Rainfall_Total_mm"]:
+        if col in df:
+            sq_name = f"{col}_sq"
+            if sq_name not in df.columns:
+                df[sq_name] = df[col] ** 2
 
-    # Log transforms
-    log_cols = ["Rainfall_Total_mm", "Nitrogen_kg_per_acre",
+    # 4. Log transforms
+    for col in ["Rainfall_Total_mm", "Nitrogen_kg_per_acre",
                 "Phosphorus_kg_per_acre", "Potassium_kg_per_acre",
-                "Fertilizer_Quantity"]
-    for col in log_cols:
-        if col in df.columns:
+                "Fertilizer_Quantity", "Evapotranspiration_mm_day"]:
+        if col in df:
             log_name = f"{col}_log"
             if log_name not in df.columns:
                 df[log_name] = np.log1p(df[col].clip(lower=0))
 
-    # Temp range
-    if "Temp_Max_C" in df.columns and "Temp_Min_C" in df.columns:
+    # 5. Temperature range
+    if "Temp_Max_C" in df and "Temp_Min_C" in df:
         if "Temp_Range_C" not in df.columns:
             df["Temp_Range_C"] = df["Temp_Max_C"] - df["Temp_Min_C"]
 
-    # Moisture deficit
-    if "Rainfall_Total_mm" in df.columns and "Evapotranspiration_mm_day" in df.columns:
+    # 6. Moisture deficit
+    if "Rainfall_Total_mm" in df and "Evapotranspiration_mm_day" in df:
         if "Moisture_Deficit" not in df.columns:
             df["Moisture_Deficit"] = (
                 df["Rainfall_Total_mm"] - df["Evapotranspiration_mm_day"] * 30
             )
 
-    # Fertilizer efficiency
-    if "Fertilizer_Quantity" in df.columns and "Nitrogen_kg_per_acre" in df.columns:
+    # 7. Fertilizer efficiency
+    if "Fertilizer_Quantity" in df and "Nitrogen_kg_per_acre" in df:
         if "Fertilizer_N_Efficiency" not in df.columns:
             df["Fertilizer_N_Efficiency"] = (
                 df["Nitrogen_kg_per_acre"] / (df["Fertilizer_Quantity"] + eps)
+            )
+
+    # 8. Seasonal features
+    for month_col in ["Planting_Month", "Harvest_Month"]:
+        if month_col in df.columns:
+            sin_name = f"{month_col}_sin"
+            cos_name = f"{month_col}_cos"
+            if sin_name not in df.columns:
+                df[sin_name] = np.sin(2 * np.pi * df[month_col] / 12)
+                df[cos_name] = np.cos(2 * np.pi * df[month_col] / 12)
+
+    # 9. Binned features
+    for col in ["Nitrogen_kg_per_acre", "Soil_pH", "Soil_Moisture_%", "Temp_Avg_C"]:
+        if col in df:
+            bin_name = f"{col}_bin5"
+            if bin_name not in df.columns:
+                try:
+                    # Use fixed bins for single-row prediction
+                    df[bin_name] = 0  # default bin
+                except Exception:
+                    pass
+
+    # 10. NPK total
+    if all(c in df for c in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]):
+        if "NPK_Total" not in df.columns:
+            df["NPK_Total"] = (
+                df["Nitrogen_kg_per_acre"]
+                + df["Phosphorus_kg_per_acre"]
+                + df["Potassium_kg_per_acre"]
             )
 
     return df
@@ -218,34 +268,20 @@ def predict(
     meta = model_data["metadata"]
     features = meta.get("features", [])
 
-    # ---- CaneSugar uses its own preprocessing with feature engineering ----
+    # ---- CaneSugar v3 uses CatBoost with full feature engineering ----
     if model_name == "cane_sugar":
         raw_df = pd.concat(
             [prepare_input_cane_sugar(r) for r in records], ignore_index=True
         )
-        # Apply saved label encoders
-        encoders = meta.get("encoders", {})
-        for col, le in encoders.items():
-            if col in raw_df.columns:
-                raw_df[col] = raw_df[col].astype(str)
-                known = set(le.classes_)
-                raw_df[col] = raw_df[col].apply(
-                    lambda x: x if x in known else le.classes_[0]
-                )
-                raw_df[col] = le.transform(raw_df[col])
+
+        # Get categorical feature indices from metadata (for CatBoost)
+        cat_features_indices = meta.get("cat_features_indices", [])
 
         # Build feature DataFrame — reindex to match training features, filling missing with 0
         X = raw_df.reindex(columns=features, fill_value=0)
 
-        # Predict on transformed target, then inverse-transform
-        preds_trans = model.predict(X)
-        target_transformer = meta.get("target_transformer")
-        if target_transformer is not None:
-            preds = target_transformer.inverse_transform(
-                preds_trans.reshape(-1, 1)
-            ).ravel()
-        else:
-            preds = preds_trans
+        # CatBoost handles categoricals natively
+        preds = model.predict(X)
 
         preds_list = [round(float(p), 4) for p in preds]
 
@@ -254,6 +290,7 @@ def predict(
             "predictions": preds_list,
             "metrics": meta.get("metrics", {}),
             "features_used": features,
+            "features_count": len(features),
             "engineered_features": True,
         }
 

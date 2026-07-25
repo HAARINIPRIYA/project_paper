@@ -1,12 +1,33 @@
 {
-  "CaneSugar v2 (transformed target)": {
-    "r2": 0.2884,
-    "mae": 52.8742,
-    "rmse": 64.5953
+  "CatBoost (transformed)": {
+    "r2": 0.8922,
+    "mae": 18.3554,
+    "rmse": 24.5987
   },
-  "CaneSugar (orig. scale)": {
-    "r2": 0.2878,
-    "mae": 73.4455,
-    "rmse": 89.9514
-  }
+  "CatBoost (orig. scale)": {
+    "r2": 0.8906,
+    "mae": 26.1404,
+    "rmse": 35.2537
+  },
+  "XGBoost (orig. scale)": {
+    "r2": 0.8732,
+    "mae": 28.821,
+    "rmse": 37.9497
+  },
+  "Ensemble (w_CB=1.00) (orig. scale)": {
+    "r2": 0.8906,
+    "mae": 26.1404,
+    "rmse": 35.2537
+  },
+  "Ridge Stacking (orig. scale)": {
+    "r2": 0.8993,
+    "mae": 24.6536,
+    "rmse": 33.8233
+  },
+  "CaneSugar v5 (orig. scale)": {
+    "r2": 0.8993,
+    "mae": 24.6536,
+    "rmse": 33.8233
+  },
+  "best_model_name": "Ridge Stacking"
 }

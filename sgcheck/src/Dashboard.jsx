@@ -561,16 +561,19 @@ To get started, enter your field details in the **Tools** panel (right side), th
                     className="hover:bg-muted"
                   >
                     <span className="size-2 shrink-0 rounded-full" style={{ background: colors[name] || "var(--text-secondary)" }} />
-                    <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, minWidth: 0 }} className="truncate capitalize">
+                    <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, overflow: "visible", whiteSpace: "nowrap" }} className="capitalize">
                       {name.replace(/_/g, " ")}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--accent-green)" }}>
                         R² {m.r2 ? m.r2.toFixed(3) : "—"}
                       </span>
-                      {isBest && (
-                        <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
-                      )}
+                      {/* Always keep badge space for alignment */}
+                      <div style={{ width: "44px", display: "flex", justifyContent: "center", flexShrink: 0 }}>
+                        {isBest && (
+                          <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )

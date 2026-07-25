@@ -41,12 +41,12 @@ function ModelRow({ name, prediction, metric, isEnsemble = false, isBest = false
         transition: "background 120ms",
       }}
     >
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-2" style={{ overflow: "visible", minWidth: 0 }}>
         <span
           className="size-2 shrink-0 rounded-full"
           style={{ background: MODEL_COLORS_MAP[name] || "var(--text-secondary)" }}
         />
-        <span style={{ fontSize: compact ? "12px" : "13px", fontWeight: 500 }} className="truncate">
+        <span style={{ fontSize: compact ? "12px" : "13px", fontWeight: 500, whiteSpace: "nowrap", overflow: "visible" }}>
           {MODEL_LABELS[name] || name}
           {isEnsemble && <span style={{ color: "var(--accent-green)", marginLeft: "4px" }}>(Ensemble)</span>}
         </span>

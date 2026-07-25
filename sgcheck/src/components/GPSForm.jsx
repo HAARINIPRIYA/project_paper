@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import {
   Calendar,
   ChevronRight,
+  Cpu,
   Crop,
   Droplets,
   FlaskConical,
@@ -12,6 +13,9 @@ import {
   Sprout,
   Tractor,
   Trees,
+  Zap,
+  Bot,
+  Settings2,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -28,7 +32,7 @@ const MODEL_OPTIONS = [
   { value: "random_forest", label: "Random Forest" },
   { value: "linear_regression", label: "Linear Regression" },
   { value: "elastic_net", label: "ElasticNet" },
-  { value: "ensemble", label: "Ensemble (All)" },
+  { value: "ensemble", label: "Ensemble (All Models)" },
 ]
 
 const FIELD_META = {
@@ -57,6 +61,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
   const [predictionResult, setPredictionResult] = useState(null)
   const [ensembleResult, setEnsembleResult] = useState(null)
   const [isPredicting, setIsPredicting] = useState(false)
+  const [predictionMode, setPredictionMode] = useState("auto") // "auto" | "manual"
   const [selectedModel, setSelectedModel] = useState("auto")
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -112,10 +117,11 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
       if (selectedModel === "ensemble") {
         const result = await predictEnsemble([fieldData])
         setEnsembleResult(result)
+      } else if (selectedModel === "auto") {
+        const result = await predictAuto(fieldData)
+        setPredictionResult({ ...result, model: result.best_model || result.model })
       } else {
-        const result = selectedModel === "auto"
-          ? await predictAuto(fieldData)
-          : await predictWithModel(selectedModel, fieldData)
+        const result = await predictWithModel(selectedModel, fieldData)
         setPredictionResult(result)
       }
     } catch (err) {
@@ -126,12 +132,14 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
     }
   }
 
-  const activeModels = useMemo(
+  const manualModels = useMemo(
     () => MODEL_OPTIONS.filter(
-      (m) => m.value === "auto" || m.value === "ensemble" || availableModels?.includes(m.value)
+      (m) => m.value !== "auto" && (m.value === "ensemble" || availableModels?.includes(m.value))
     ),
     [availableModels]
   )
+
+  // bestModelName placeholder — the actual best model is determined at prediction time by the backend
 
   const savedSummary = gpsData ? [
     gpsData.Planting_Date && `Planted: ${gpsData.Planting_Date}`,
@@ -262,25 +270,119 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
 
         <TabsContent value="predict">
           <div className="flex flex-col gap-3">
-            {/* Model Selection */}
+            {/* Mode Toggle: Auto vs Manual */}
             <div className="field-section">
               <div className="field-label-row">
-                <Radar className="size-3.5" style={{ color: "var(--text-secondary)" }} />
-                <label className="field-label">Select Model</label>
+                <Cpu className="size-3.5" style={{ color: "var(--text-secondary)" }} />
+                <label className="field-label">Prediction Mode</label>
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {activeModels.map((m) => (
-                  <button
-                    key={m.value}
-                    type="button"
-                    onClick={() => setSelectedModel(m.value)}
-                    className={"model-chip" + (selectedModel === m.value ? " active" : "")}
-                  >
-                    {m.label}
-                  </button>
-                ))}
+              <div style={{
+                display: "flex",
+                gap: "4px",
+                padding: "3px",
+                borderRadius: "4px",
+                background: "var(--bg-deep)",
+                border: "1px solid var(--border-subtle)",
+              }}>
+                <button
+                  type="button"
+                  onClick={() => { setPredictionMode("auto"); setSelectedModel("auto") }}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    padding: "7px 12px",
+                    borderRadius: "3px",
+                    border: "none",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 150ms",
+                    background: predictionMode === "auto" ? "var(--accent-green)" : "transparent",
+                    color: predictionMode === "auto" ? "#08090A" : "var(--text-secondary)",
+                  }}
+                >
+                  <Bot className="size-3.5" />
+                  Auto Mode
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setPredictionMode("manual"); setSelectedModel(manualModels[0]?.value || "cane_sugar") }}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    padding: "7px 12px",
+                    borderRadius: "3px",
+                    border: "none",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 150ms",
+                    background: predictionMode === "manual" ? "var(--accent-blue)" : "transparent",
+                    color: predictionMode === "manual" ? "#fff" : "var(--text-secondary)",
+                  }}
+                >
+                  <Settings2 className="size-3.5" />
+                  Manual Mode
+                </button>
               </div>
             </div>
+
+            {/* Auto Mode: Show info */}
+            {predictionMode === "auto" && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 12px",
+                  borderRadius: "2px",
+                  border: "1px solid rgba(0, 214, 143, 0.2)",
+                  background: "rgba(0, 214, 143, 0.06)",
+                }}
+              >
+                <Zap className="size-4 shrink-0" style={{ color: "var(--accent-green)" }} />
+                <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+                  <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>Auto Mode</span>
+                  — The system will automatically select the best-performing model based on R² score
+                </div>
+              </motion.div>
+            )}
+
+            {/* Manual Mode: Model Selection */}
+            {predictionMode === "manual" && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="field-section"
+              >
+                <div className="field-label-row">
+                  <Radar className="size-3.5" style={{ color: "var(--text-secondary)" }} />
+                  <label className="field-label">Select Model</label>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {manualModels.map((m) => (
+                    <button
+                      key={m.value}
+                      type="button"
+                      onClick={() => setSelectedModel(m.value)}
+                      className={"model-chip" + (selectedModel === m.value ? " active" : "")}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
             {/* Predict Button */}
             <Button
