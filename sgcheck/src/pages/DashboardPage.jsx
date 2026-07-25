@@ -27,21 +27,21 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS = {
-  cane_sugar: "#FF6B35",
-  catboost: "var(--accent-green)",
-  xgboost: "var(--accent-blue)",
+  cane_sugar: "var(--accent-terracotta)",
+  catboost: "var(--accent-gold)",
+  xgboost: "var(--accent-sage)",
   random_forest: "var(--accent-orange)",
   linear_regression: "var(--accent-purple)",
   elastic_net: "var(--accent-red)",
 }
 
 const MODEL_GRADIENTS = {
-  cane_sugar: "linear-gradient(90deg, #FF6B35, #E85D26)",
-  catboost: "linear-gradient(90deg, #00CC66, #00994D)",
-  xgboost: "linear-gradient(90deg, #00E676, #00CC66)",
-  random_forest: "linear-gradient(90deg, #FFD600, #FFEA00)",
-  linear_regression: "linear-gradient(90deg, #006030, #004D26)",
-  elastic_net: "linear-gradient(90deg, #FF5252, #FF1744)",
+  cane_sugar: "linear-gradient(90deg, #C76B4A, #B05535)",
+  catboost: "linear-gradient(90deg, #D4A843, #B88A30)",
+  xgboost: "linear-gradient(90deg, #7BA05B, #5C7A40)",
+  random_forest: "linear-gradient(90deg, #E8A048, #D48830)",
+  linear_regression: "linear-gradient(90deg, #9B7ED8, #7B5CC0)",
+  elastic_net: "linear-gradient(90deg, #E55858, #CC4040)",
 }
 
 function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, backendStatus, predictionResult, ensembleResult }) {
@@ -120,7 +120,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
             <div style={{
               width: "28px", height: "28px",
-              background: "linear-gradient(135deg, #00CC66, #004D26)",
+              background: "linear-gradient(135deg, var(--accent-gold), #B88A30)",
               borderRadius: "2px",
               display: "grid", placeItems: "center",
               flexShrink: 0,
