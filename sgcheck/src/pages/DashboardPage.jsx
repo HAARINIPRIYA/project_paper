@@ -27,21 +27,21 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS = {
-  cane_sugar: "#FF6B35",
-  catboost: "var(--accent-green)",
-  xgboost: "var(--accent-blue)",
+  cane_sugar: "var(--accent-terracotta)",
+  catboost: "var(--accent-gold)",
+  xgboost: "var(--accent-sage)",
   random_forest: "var(--accent-orange)",
   linear_regression: "var(--accent-purple)",
   elastic_net: "var(--accent-red)",
 }
 
 const MODEL_GRADIENTS = {
-  cane_sugar: "linear-gradient(90deg, #FF6B35, #E85D26)",
-  catboost: "linear-gradient(90deg, #00CC66, #00994D)",
-  xgboost: "linear-gradient(90deg, #00E676, #00CC66)",
-  random_forest: "linear-gradient(90deg, #FFD600, #FFEA00)",
-  linear_regression: "linear-gradient(90deg, #006030, #004D26)",
-  elastic_net: "linear-gradient(90deg, #FF5252, #FF1744)",
+  cane_sugar: "linear-gradient(90deg, #C76B4A, #B05535)",
+  catboost: "linear-gradient(90deg, #D4A843, #B88A30)",
+  xgboost: "linear-gradient(90deg, #7BA05B, #5C7A40)",
+  random_forest: "linear-gradient(90deg, #E8A048, #D48830)",
+  linear_regression: "linear-gradient(90deg, #9B7ED8, #7B5CC0)",
+  elastic_net: "linear-gradient(90deg, #E55858, #CC4040)",
 }
 
 function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, backendStatus, predictionResult, ensembleResult }) {
@@ -120,7 +120,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
             <div style={{
               width: "28px", height: "28px",
-              background: "linear-gradient(135deg, #00CC66, #004D26)",
+              background: "linear-gradient(135deg, var(--accent-gold), #B88A30)",
               borderRadius: "2px",
               display: "grid", placeItems: "center",
               flexShrink: 0,
@@ -204,7 +204,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 <div className="flex flex-col" style={{ gap: "2px" }}>
                   {/* Header */}
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 8px 8px" }}>
-                    <div style={{ width: "100px", flexShrink: 0 }} />
+                    <div style={{ width: "160px", flexShrink: 0 }} />
                     <div className="flex-1" />
                     <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
                       <span className="divider-label-text">R²</span>
@@ -212,6 +212,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
                       <span className="divider-label-text">RMSE</span>
                     </div>
+                    <div style={{ width: "44px", flexShrink: 0 }} />
                   </div>
 
                   {/* Bars */}
@@ -220,10 +221,10 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     const isBest = idx === 0
                     return (
                       <div key={model.name} className={"model-rank-item" + (isBest ? " best" : "")}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100px", flexShrink: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "160px", flexShrink: 0, overflow: "visible" }}>
                           <div className="model-rank-badge">{idx + 1}</div>
                           <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
-                          <span className="truncate" style={{ fontSize: "13px", fontWeight: 500 }}>
+                          <span style={{ fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap", overflow: "visible" }}>
                             {MODEL_LABELS[model.name] || model.name}
                           </span>
                         </div>
@@ -245,11 +246,12 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                             {model.rmse ? model.rmse.toFixed(1) : "—"}
                           </span>
                         </div>
-                        {isBest && (
-                          <div style={{ width: "40px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
+                        {/* Always render the badge column to keep alignment */}
+                        <div style={{ width: "44px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
+                          {isBest && (
                             <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     )
                   })}
@@ -427,9 +429,9 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     borderRadius: "2px",
                     transition: "background 120ms",
                   }} className="hover:bg-muted">
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2" style={{ overflow: "visible", minWidth: 0 }}>
                       <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
-                      <span style={{ fontSize: "12px", fontWeight: 500 }} className="truncate">
+                      <span style={{ fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap", overflow: "visible" }}>
                         {MODEL_LABELS[model.name] || model.name}
                       </span>
                     </div>

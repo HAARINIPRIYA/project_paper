@@ -6,11 +6,9 @@ import {
   ChevronRight,
   LayoutDashboard,
   Loader2,
-  Menu,
   MessageSquareText,
   Plus,
   Send,
-  SlidersHorizontal,
   Sparkles,
   TrendingUp,
   Trash2,
@@ -31,9 +29,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+
 import { Textarea } from "@/components/ui/textarea"
+import ThemeSwitcher from "@/components/ui/ThemeSwitcher"
 
 import GPSForm from "./components/GPSForm"
 import UploadZone from "./components/UploadZone"
@@ -577,16 +575,19 @@ To get started, enter your field details in the **Tools** panel (right side), th
                     className="hover:bg-muted"
                   >
                     <span className="size-2 shrink-0 rounded-full" style={{ background: colors[name] || "var(--text-secondary)" }} />
-                    <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, minWidth: 0 }} className="truncate capitalize">
+                    <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, overflow: "visible", whiteSpace: "nowrap" }} className="capitalize">
                       {name.replace(/_/g, " ")}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--accent-green)" }}>
                         R² {m.r2 ? m.r2.toFixed(3) : "—"}
                       </span>
-                      {isBest && (
-                        <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
-                      )}
+                      {/* Always keep badge space for alignment */}
+                      <div style={{ width: "44px", display: "flex", justifyContent: "center", flexShrink: 0 }}>
+                        {isBest && (
+                          <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
@@ -627,7 +628,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
 
   return (
     <div className="h-screen w-full overflow-hidden" style={{ background: "var(--bg-deep)" }}>
-      <div className="app-grid hidden md:flex">
+      <div className="app-grid flex">
         <aside className="sidebar">
           <div className="sidebar-header">
             <div className="sidebar-brand">
@@ -700,6 +701,10 @@ To get started, enter your field details in the **Tools** panel (right side), th
               </div>
             </div>
           )}
+          {/* Theme Switcher */}
+          <div style={{ padding: "8px 16px", borderTop: "1px solid var(--border-subtle)" }}>
+            <ThemeSwitcher />
+          </div>
           <div className="sidebar-user">
             <div className="sidebar-user-inner">
               <Avatar size="sm">
@@ -853,7 +858,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                     )}
                     {streamingContent && (
                       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
-                        <Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>
+                        <Avatar><AvatarFallback style={{ background: "var(--accent-gold)", color: "#1A1A1A" }}>CS</AvatarFallback></Avatar>
                         <div className="message-bubble assistant">
                           {streamingContent ? <MarkdownRenderer content={streamingContent} /> : ''}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-green)" }}>▌</span>
                         </div>
@@ -861,7 +866,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                     )}
                     {isPredicting && !streamingContent && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
-                        <Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>
+                        <Avatar><AvatarFallback style={{ background: "var(--accent-gold)", color: "#1A1A1A" }}>CS</AvatarFallback></Avatar>
                         <div className="message-bubble assistant flex items-center gap-3">
                           <Loader2 className="size-4 animate-spin" style={{ color: "var(--accent-green)" }} />
                           <div className="flex flex-col gap-0.5">
@@ -921,155 +926,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
           </div>
         </aside>
       </div>
-      <div className="flex h-full flex-col md:hidden">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "10px 16px", borderBottom: "1px solid var(--border-subtle)", background: "var(--bg-card)", flexShrink: 0 }}>
-          <div className="min-w-0">
-            <div className="truncate" style={{ fontSize: "14px", fontWeight: 600 }}>CaneSense</div>
-            <div className="truncate" style={{ fontSize: "11px", color: "var(--text-secondary)" }}>{view === "analysis" ? "AI Chat" : "Dashboard"}</div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              {hasImage && <span className="status-dot connected" />}
-              {hasFieldData && <span className="status-dot connected" />}
-              {isBackendReady && <span className="status-dot connected" />}
-            </div>
-            <Sheet>
-              <SheetTrigger asChild><Button variant="default" size="icon-sm" aria-label="Menu"><Menu className="size-4" /></Button></SheetTrigger>
-              <SheetContent side="left">
-                <SheetHeader><SheetTitle>Menu</SheetTitle></SheetHeader>
-                <div className="mt-4 flex flex-col gap-4 px-4">
-                  <div className="nav-btn-grid">
-                    {NAV_ITEMS.map((item) => {
-                      const Icon = item.icon
-                      return (<Button key={item.id} variant={view === item.id ? "primary" : "default"} size="sm" onClick={() => { setView(item.id); if (item.id === "analysis" && conversations.length === 0) createNewConversation() }} className="gap-1.5">
-                        <Icon className="size-3.5" />{item.label}</Button>)
-                    })}
-                  </div>
-                  <Separator />
-                  {view === "analysis" && (
-                    <div className="flex flex-col gap-1">
-                      <Button variant="default" size="sm" onClick={createNewConversation} className="gap-1.5 mb-2"><Plus className="size-3.5" /> New Chat</Button>
-                      {conversations.map((c) => (
-                        <button key={c.id} type="button" onClick={() => switchConversation(c.id)}
-                          className={"chat-item" + (activeChatId === c.id ? " active" : "")}
-                          style={{ color: "var(--text-primary)", padding: "8px 12px", borderRadius: "2px", width: "100%", textAlign: "left", border: "none", background: activeChatId === c.id ? "var(--accent-blue-bg)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <div className="min-w-0">
-                            <div className="chat-item-title" style={{ fontSize: "12px" }}>{c.title}</div>
-                            <div className="chat-item-subtitle" style={{ color: "var(--text-secondary)", fontSize: "10px" }}>{formatTime(c.updatedAt)} · {c.messages.length} msgs</div>
-                          </div>
-                          {conversations.length > 1 && (<Trash2 className="size-3 shrink-0" style={{ color: "var(--text-muted)", cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); deleteConversation(c.id) }} />)}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
-            <Sheet>
-              <SheetTrigger asChild><Button variant="default" size="sm" className="gap-1.5"><SlidersHorizontal className="size-3.5" /> Tools</Button></SheetTrigger>
-              <SheetContent side="right">
-                <SheetHeader><SheetTitle>Tools & Data</SheetTitle></SheetHeader>
-                <div className="mt-4 px-4">{toolPanel}</div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-        <ScrollArea className="flex-1">
-          {view === "dashboard" ? (
-            <div className="px-4 py-5">
-              <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} availableModels={availableModels} modelMetrics={modelMetrics} backendStatus={backendStatus} predictionResult={predictionResult} ensembleResult={ensembleResult} />
-            </div>
-          ) : (
-            <div style={{ padding: "20px 16px" }}>
-              {messages.map((m, idx) => {
-                const isUser = m.role === "user"
-                return (
-                  <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: Math.min(0.02 * idx, 0.15) }}
-                    className={"message-row" + (isUser ? " user" : " assistant")} style={{ marginBottom: "8px" }}>
-                    {!isUser ? (<Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>) : null}
-                    <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
-                      {isUser ? m.content : <MarkdownRenderer content={m.content} />}
-                    </div>
-                    {isUser ? (<Avatar size="sm"><AvatarFallback>U</AvatarFallback></Avatar>) : null}
-                  </motion.div>
-                )
-              })}
-              {/* Suggestion Chips — mobile */}
-              {messages.length === 1 && messages[0]?.id === "sys_welcome" && !isPredicting && !streamingContent && (
-                <div style={{ marginTop: "4px", marginBottom: "12px" }}>
-                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px", fontWeight: 500 }}>
-                    Try asking:
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                    {SUGGESTIONS.map((s, i) => {
-                      const Icon = s.icon
-                      return (
-                        <motion.button
-                          key={s.query}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.25, delay: i * 0.04 }}
-                          whileTap={{ scale: 0.97 }}
-                          onClick={() => handleSuggestionClick(s.query)}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "5px",
-                            padding: "5px 10px",
-                            border: "1px solid var(--border-subtle)",
-                            borderRadius: "20px",
-                            background: "var(--bg-card)",
-                            color: "var(--text-primary)",
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            cursor: "pointer",
-                            transition: "all 150ms",
-                          }}
-                          className="suggestion-chip"
-                        >
-                          <Icon className="size-3" style={{ color: s.color }} />
-                          <span>{s.label}</span>
-                        </motion.button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-              {streamingContent && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
-                  <Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>
-                  <div className="message-bubble assistant">
-                    {streamingContent ? <MarkdownRenderer content={streamingContent} /> : ''}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-green)" }}>▌</span>
-                  </div>
-                </motion.div>
-              )}
-              {isPredicting && !streamingContent && (
-                <div className="flex items-center justify-center gap-2 py-4">
-                  <Loader2 className="size-4 animate-spin" style={{ color: "var(--accent-green)" }} />
-                  <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Connecting to AI...</span>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-        </ScrollArea>
-        {view === "analysis" && (
-          <div className="composer-wrap" style={{ padding: "10px 12px" }}>
-            <div className="composer-box">
-              <div className="composer-flex" style={{ padding: "4px" }}>
-                <div className="composer-input-wrap">
-                  <Textarea value={composer} onChange={(e) => setComposer(e.target.value)} placeholder="Message CaneSense…"
-                    style={{ minHeight: "36px", border: "none", background: "transparent", padding: "4px 8px", fontSize: "13px", boxShadow: "none", borderRadius: 0 }}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend() } }} />
-                </div>
-                <Button variant="primary" size="icon" aria-label="Send" onClick={onSend} disabled={!composer.trim() || isPredicting}>
-                  {isPredicting ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+
     </div>
   )
 }

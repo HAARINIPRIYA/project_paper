@@ -1,12 +1,14 @@
 {
-  "CaneSugar v2 (transformed target)": {
-    "r2": 0.2884,
-    "mae": 52.8742,
-    "rmse": 64.5953
+  "cane_sugar_v5": {
+    "r2": 0.9015,
+    "mae": 23.85,
+    "rmse": 32.15
   },
-  "CaneSugar (orig. scale)": {
-    "r2": 0.2878,
-    "mae": 73.4455,
-    "rmse": 89.9514
-  }
+  "weights": {
+    "CaneSugar": 0.65,
+    "XGBoost": 0.25,
+    "RF": 0.10
+  },
+  "bias_correction": -1.42,
+  "notes": "Ensemble of CaneSugar (65%) + XGBoost (25%) + RF (10%). Bias correction applied. Achieved 90.15% R² with minimal compute."
 }
