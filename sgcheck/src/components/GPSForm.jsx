@@ -35,14 +35,24 @@ const MODEL_OPTIONS = [
   { value: "ensemble", label: "Ensemble (All Models)" },
 ]
 
+const DROPDOWN_OPTIONS = {
+  Variety: ["", "CoJ64", "Co98014", "Co0238", "CoC671", "Co86032", "Other"],
+  Crop_Type: ["", "Kharif", "Rabi", "Spring", "Zaid", "Summer", "Late"],
+  Soil_Type: ["", "Clay", "Sandy", "Loamy", "Alluvial", "Silt", "Peaty", "Saline", "Other"],
+  Irrigation_Type: ["", "Flood", "Drip", "Sprinkler", "Furrow", "Basin", "Other"],
+  Fertilizer_Type: ["", "Urea", "DAP", "NPK", "Organic", "Vermicompost", "Compost", "Other"],
+}
+
+const isDropdownField = (name) => Object.prototype.hasOwnProperty.call(DROPDOWN_OPTIONS, name)
+
 const FIELD_META = {
   Planting_Date: { label: "Planting Date", icon: Calendar, placeholder: "YYYY-MM-DD", type: "date", required: true },
   Harvesting_Date: { label: "Harvesting Date", icon: Trees, placeholder: "YYYY-MM-DD", type: "date", required: false },
-  Variety: { label: "Variety", icon: Sprout, placeholder: "e.g., Co-0238", type: "text", required: false },
-  Crop_Type: { label: "Crop Type / Season", icon: Crop, placeholder: "e.g., Kharif, Rabi, Spring", type: "text", required: false },
-  Soil_Type: { label: "Soil Type", icon: Tractor, placeholder: "e.g., Loamy, Clay, Sandy", type: "text", required: false },
-  Irrigation_Type: { label: "Irrigation Type", icon: Droplets, placeholder: "e.g., Drip, Flood, Sprinkler", type: "text", required: false },
-  Fertilizer_Type: { label: "Fertilizer Type", icon: FlaskConical, placeholder: "e.g., Urea, DAP, Organic", type: "text", required: false },
+  Variety: { label: "Variety", icon: Sprout, placeholder: "Select variety", type: "select", required: false },
+  Crop_Type: { label: "Crop Type / Season", icon: Crop, placeholder: "Select season", type: "select", required: false },
+  Soil_Type: { label: "Soil Type", icon: Tractor, placeholder: "Select soil type", type: "select", required: false },
+  Irrigation_Type: { label: "Irrigation Type", icon: Droplets, placeholder: "Select method", type: "select", required: false },
+  Fertilizer_Type: { label: "Fertilizer Type", icon: FlaskConical, placeholder: "Select fertilizer", type: "select", required: false },
 }
 
 const CORE_FIELDS = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type"]
@@ -178,15 +188,31 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                       {meta.required && <span style={{ color: "var(--accent-red)", marginLeft: "2px" }}>*</span>}
                     </label>
                   </div>
-                  <Input
-                    name={fieldName}
-                    type={meta.type}
-                    value={formData[fieldName]}
-                    onChange={handleChange}
-                    placeholder={meta.placeholder}
-                    aria-invalid={Boolean(err)}
-                    className={err ? "border-red" : ""}
-                  />
+                  {isDropdownField(fieldName) ? (
+                    <select
+                      name={fieldName}
+                      value={formData[fieldName]}
+                      onChange={handleChange}
+                      className="input"
+                      style={{ height: "42px", width: "100%", fontSize: "13px", padding: "0 12px", cursor: "pointer", appearance: "auto" }}
+                    >
+                      {DROPDOWN_OPTIONS[fieldName].map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt || `— Select ${meta.label} —`}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      name={fieldName}
+                      type={meta.type}
+                      value={formData[fieldName]}
+                      onChange={handleChange}
+                      placeholder={meta.placeholder}
+                      aria-invalid={Boolean(err)}
+                      className={err ? "border-red" : ""}
+                    />
+                  )}
                   {err ? (
                     <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
                       style={{ fontSize: "11px", color: "var(--accent-red)" }}>
@@ -224,18 +250,34 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
                         <Icon className="size-3.5" style={{ color: "var(--text-secondary)" }} />
                         <label className="field-label">{meta.label}</label>
                       </div>
-                      <Input
-                        name={fieldName}
-                        type={meta.type}
-                        value={formData[fieldName]}
-                        onChange={handleChange}
-                        placeholder={meta.placeholder}
-                      />
-                    </div>
-                  )
-                })}
-              </div>
-            </details>
+                  {isDropdownField(fieldName) ? (
+                    <select
+                      name={fieldName}
+                      value={formData[fieldName]}
+                      onChange={handleChange}
+                      className="input"
+                      style={{ height: "42px", width: "100%", fontSize: "13px", padding: "0 12px", cursor: "pointer", appearance: "auto" }}
+                    >
+                      {DROPDOWN_OPTIONS[fieldName].map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt || `— Select ${meta.label} —`}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      name={fieldName}
+                      type={meta.type}
+                      value={formData[fieldName]}
+                      onChange={handleChange}
+                      placeholder={meta.placeholder}
+                    />
+                  )}
+                  </div>
+                )
+              })}
+            </div>
+          </details>
 
             <Button type="submit" variant="primary" disabled={isSubmitting} className="mt-1 w-full">
               {isSubmitting ? (

@@ -217,7 +217,10 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
             "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
             "model": model_name,
             "input": {
+                "planting_date": input_data.Planting_Date,
+                "harvesting_date": input_data.Harvesting_Date,
                 "variety": input_data.Variety,
+                "crop_type": input_data.Crop_Type,
                 "soil_type": input_data.Soil_Type,
                 "irrigation_type": input_data.Irrigation_Type,
                 "fertilizer_type": input_data.Fertilizer_Type,
@@ -256,7 +259,10 @@ def predict_batch(model_name: str, batch: BatchPredictionInput):
                 "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
                 "model": model_name,
                 "input": {
+                    "planting_date": record.Planting_Date,
+                    "harvesting_date": record.Harvesting_Date,
                     "variety": record.Variety,
+                    "crop_type": record.Crop_Type,
                     "soil_type": record.Soil_Type,
                     "irrigation_type": record.Irrigation_Type,
                     "fertilizer_type": record.Fertilizer_Type,
@@ -291,7 +297,10 @@ def predict_ensemble_endpoint(input_data: EnsembleInput):
                 "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
                 "model": "ensemble",
                 "input": {
+                    "planting_date": record.Planting_Date,
+                    "harvesting_date": record.Harvesting_Date,
                     "variety": record.Variety,
+                    "crop_type": record.Crop_Type,
                     "soil_type": record.Soil_Type,
                     "irrigation_type": record.Irrigation_Type,
                     "fertilizer_type": record.Fertilizer_Type,
@@ -336,7 +345,10 @@ def predict_auto(input_data: PredictionInput):
             "model": "auto",
             "selected_model": best_model,
             "input": {
+                "planting_date": input_data.Planting_Date,
+                "harvesting_date": input_data.Harvesting_Date,
                 "variety": input_data.Variety,
+                "crop_type": input_data.Crop_Type,
                 "soil_type": input_data.Soil_Type,
                 "irrigation_type": input_data.Irrigation_Type,
                 "fertilizer_type": input_data.Fertilizer_Type,

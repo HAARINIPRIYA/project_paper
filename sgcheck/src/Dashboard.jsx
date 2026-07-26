@@ -794,7 +794,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                 <span onClick={() => setView("dashboard")}>CaneSense</span>
                 <ChevronRight className="chevron" size={12} />
                 <span style={{ color: "var(--text-primary)", cursor: "default" }}>
-                  {view === "dashboard" ? "Dashboard" : showChat ? "AI Assistant" : "Dashboard"}
+                  {view === "dashboard" ? "Dashboard" : view === "history" ? "Prediction History" : showChat ? "AI Assistant" : "Dashboard"}
                 </span>
               </div>
             </div>
@@ -825,6 +825,12 @@ To get started, enter your field details in the **Tools** panel (right side), th
                 <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                   <div className="main-content">
                     <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} availableModels={availableModels} modelMetrics={modelMetrics} backendStatus={backendStatus} predictionResult={predictionResult} ensembleResult={ensembleResult} />
+                  </div>
+                </motion.div>
+              ) : view === "history" ? (
+                <motion.div key="history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                  <div className="main-content" style={{ maxWidth: "960px", margin: "0 auto", padding: "24px 28px" }}>
+                    <HistoryPage onBack={() => setView("dashboard")} />
                   </div>
                 </motion.div>
               ) : (
@@ -1030,14 +1036,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
         </div>
       )}
       
-      {/* History Page Overlay */}
-      {view === "history" && (
-        <div className="fixed inset-0 z-40 overflow-y-auto bg-deep">
-          <div className="max-w-7xl mx-auto p-6">
-            <HistoryPage onBack={() => setView("dashboard")} />
-          </div>
-        </div>
-      )}
+      {/* History Page is now rendered inline in the main content area */}
     </div>
   )
 }
