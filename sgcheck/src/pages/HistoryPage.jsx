@@ -11,14 +11,14 @@ import {
   Save,
   Calendar,
   MapPin,
-  Drop,
+  Droplet,
   Leaf,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { format } from "date-fns"
+
 
 const MODEL_LABELS = {
   catboost: "CatBoost",
@@ -343,7 +343,7 @@ function HistoryPage({ onBack }) {
                           )}
                           {item.input?.irrigation_type && (
                             <div className="flex items-center gap-2">
-                              <Drop className="h-3 w-3 text-muted-foreground" />
+                              <Droplet className="h-3 w-3 text-muted-foreground" />
                               <span>{item.input.irrigation_type}</span>
                             </div>
                           )}
