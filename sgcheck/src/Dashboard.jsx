@@ -24,6 +24,7 @@ import {
   Sprout,
   Moon,
   Sun,
+  History,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -37,6 +38,8 @@ import GPSForm from "./components/GPSForm"
 import UploadZone from "./components/UploadZone"
 import DashboardPage from "./pages/DashboardPage"
 import PredictionHero from "./components/PredictionHero"
+import HistoryPage from "./pages/HistoryPage"
+import ModelSelector from "./components/ModelSelector"
 import ToastNotification from "./components/ToastNotification"
 import { useToast } from "./hooks/useToast"
 import { predictAuto, predictEnsemble } from "./lib/api"
@@ -88,6 +91,51 @@ function buildTitle(messages) {
   return "New Conversation"
 }
 
+// --- Model Selection Handler ---
+  async function handleModelSelection(model) {
+    setSelectedModel(model)
+    setShowModelSelector(false)
+    setIsSelectingModel(true)
+    
+    try {
+      const fieldData = {
+        Planting_Date: gpsData?.Planting_Date,
+        Harvesting_Date: gpsData?.Harvesting_Date,
+        Variety: gpsData?.Variety,
+        Crop_Type: gpsData?.Crop_Type,
+        Soil_Type: gpsData?.Soil_Type,
+        Irrigation_Type: gpsData?.Irrigation_Type,
+        Fertilizer_Type: gpsData?.Fertilizer_Type,
+      }
+      
+      // Check if we have valid field data
+      const hasValidData = Object.values(fieldData).some(v => v && v.trim() !== "")
+      
+      if (!hasValidData) {
+        addToast('error', 'No field data', 'Please enter field details first')
+        return
+      }
+      
+      let result
+      if (model === "auto") {
+        result = await predictAuto(fieldData)
+      } else if (model === "ensemble") {
+        result = await predictEnsemble([fieldData])
+      } else {
+        result = await predictAuto(fieldData) // Fallback to auto if specific model not supported
+      }
+      
+      if (result && result.predictions?.[0] !== undefined) {
+        onEnsembleResult(result)
+        addToast('success', 'Prediction complete', `Using ${model === "auto" ? "best model" : model}: ${result.predictions[0].toFixed(2)} Quintal/Acre`)
+      }
+    } catch (error) {
+      addToast('error', 'Prediction failed', error.message)
+    } finally {
+      setIsSelectingModel(false)
+    }
+  }
+
 function buildContextMessage(gpsData, availableModels, backendStatus) {
   let ctx = "**Current Session Context:**\n"
   if (backendStatus === "connected") {
@@ -136,6 +184,9 @@ function Dashboard({
   const [streamingContent, setStreamingContent] = useState("")
   const [aiStatus, setAiStatus] = useState("idle")
   const [showChat, setShowChat] = useState(false)
+  const [showModelSelector, setShowModelSelector] = useState(false)
+  const [selectedModel, setSelectedModel] = useState(null)
+  const [isSelectingModel, setIsSelectingModel] = useState(false)
   const abortRef = useRef(null)
   const messagesEndRef = useRef(null)
   const composerRef = useRef("")
@@ -650,6 +701,13 @@ To get started, enter your field details in the **Tools** panel (right side), th
                 </button>
               )
             })}
+            <button
+              type="button"
+              onClick={() => setView("history")}
+              className={"sidebar-nav-btn" + (view === "history" ? " active" : "")}
+            >
+              <History className="size-4.5" />History
+            </button>
           </div>
           {view === "analysis" && (
             <>
@@ -925,6 +983,45 @@ To get started, enter your field details in the **Tools** panel (right side), th
       
       {/* Toast Notifications */}
       <ToastNotification toasts={toasts} removeToast={removeToast} />
+      
+      {/* Model Selector Modal */}
+      {showModelSelector && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-card rounded-xl shadow-2xl max-w-lg w-full mx-4"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold">Select Prediction Model</h2>
+                <button
+                  type="button"
+                  onClick={() => setShowModelSelector(false)}
+                  className="text-muted hover:text-primary transition-colors"
+                >
+                  <XCircle className="size-5" />
+                </button>
+              </div>
+              <ModelSelector
+                onSelect={handleModelSelection}
+                selectedModel={selectedModel}
+                availableModels={availableModels}
+              />
+            </div>
+          </motion.div>
+        </div>
+      )}
+      
+      {/* History Page Overlay */}
+      {view === "history" && (
+        <div className="fixed inset-0 z-40 overflow-y-auto bg-deep">
+          <div className="max-w-7xl mx-auto p-6">
+            <HistoryPage onBack={() => setView("dashboard")} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
