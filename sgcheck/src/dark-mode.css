@@ -1,0 +1,360 @@
+/* ============================================
+   Dark Mode Theme Support
+   CaneSense - Sugarcane Yield Prediction
+   ============================================ */
+
+/* Dark mode variables - applied when .dark class is on html */
+.dark {
+  /* Ultra-dark backgrounds for true dark mode */
+  --bg-deep: #000000;
+  --bg-surface: #0A0A0A;
+  --bg-elevated: #121212;
+  --bg-card: #0D0D0D;
+  --bg-card-hover: #151515;
+  --bg-input: #080808;
+  
+  /* Glassmorphism for dark mode */
+  --glass-bg: rgba(18, 18, 18, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  
+  /* Borders - more subtle in dark mode */
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-strong: #D4A843;
+  --border-focus: #D4A843;
+  
+  /* Text - high contrast for readability */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --text-muted: #707070;
+  --text-placeholder: #505050;
+  
+  /* Gold accent remains the same but with stronger glow */
+  --accent-gold: #E0B84E;
+  --accent-gold-hover: #F0C85E;
+  --accent-gold-bg: rgba(224, 184, 78, 0.12);
+  --accent-gold-border: rgba(224, 184, 78, 0.3);
+  --accent-gold-glow: rgba(224, 184, 78, 0.4);
+  
+  /* Primary accent (gold) */
+  --accent-primary: #E0B84E;
+  --accent-primary-hover: #F0C85E;
+  --accent-primary-bg: rgba(224, 184, 78, 0.12);
+  --accent-primary-border: rgba(224, 184, 78, 0.3);
+  --accent-primary-glow: rgba(224, 184, 78, 0.35);
+  
+  --accent-blue: #E0B84E;
+  --accent-blue-hover: #F0C85E;
+  --accent-blue-bg: rgba(224, 184, 78, 0.12);
+  --accent-blue-border: rgba(224, 184, 78, 0.3);
+  
+  /* Green accents - brighter for dark mode */
+  --accent-green: #35845F;
+  --accent-green-hover: #40996F;
+  --accent-green-bg: rgba(53, 132, 95, 0.15);
+  --accent-green-border: rgba(53, 132, 95, 0.35);
+  
+  /* Sage green - brighter */
+  --accent-sage: #8BB36B;
+  --accent-sage-bg: rgba(139, 179, 107, 0.12);
+  --accent-sage-border: rgba(139, 179, 107, 0.3);
+  
+  /* Terracotta - slightly brighter */
+  --accent-terracotta: #D77B5A;
+  --accent-terracotta-bg: rgba(215, 123, 90, 0.12);
+  --accent-terracotta-border: rgba(215, 123, 90, 0.3);
+  
+  /* Status colors - enhanced for dark mode */
+  --accent-red: #F56868;
+  --accent-red-hover: #FF7878;
+  --accent-red-bg: rgba(245, 104, 104, 0.12);
+  --accent-red-border: rgba(245, 104, 104, 0.3);
+  
+  --accent-orange: #F8B058;
+  --accent-orange-hover: #FFC068;
+  --accent-orange-bg: rgba(248, 176, 88, 0.12);
+  --accent-orange-border: rgba(248, 176, 88, 0.3);
+  
+  --accent-purple: #AB8EE8;
+  --accent-purple-bg: rgba(171, 142, 232, 0.12);
+  
+  --accent-cyan: #6BC8D4;
+  --accent-cyan-bg: rgba(107, 200, 212, 0.12);
+  
+  /* Shadows - deeper and more dramatic */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.8);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.8);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.9);
+  --shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.95);
+  
+  /* Glow effects - stronger in dark mode */
+  --glow-primary: 0 0 24px rgba(224, 184, 78, 0.35);
+  --glow-primary-strong: 0 0 36px rgba(224, 184, 78, 0.5);
+  --glow-success: 0 0 18px rgba(53, 132, 95, 0.4);
+  
+  /* Sugarcane theme colors */
+  --cane-green: #35845F;
+  --cane-green-bg: rgba(53, 132, 95, 0.15);
+  --cane-green-border: rgba(53, 132, 95, 0.35);
+  --cane-gold: #E0B84E;
+  --cane-gold-bg: rgba(224, 184, 78, 0.15);
+  --cane-gold-border: rgba(224, 184, 78, 0.35);
+}
+
+/* Smooth transition when switching themes */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ensure cards and surfaces transition smoothly */
+.sidebar,
+.main-area,
+.tools-panel,
+.gcp-card,
+.aws-card,
+.stat-card,
+.message-bubble {
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Dark mode specific enhancements */
+.dark .sidebar {
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.6);
+}
+
+.dark .tools-panel {
+  box-shadow: -2px 0 16px rgba(0, 0, 0, 0.6);
+}
+
+.dark .main-header {
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Enhanced glow effects in dark mode */
+.dark .sidebar-logo {
+  box-shadow: 0 2px 16px rgba(224, 184, 78, 0.4);
+}
+
+.dark .btn-primary {
+  box-shadow: 0 2px 12px rgba(224, 184, 78, 0.4);
+}
+
+.dark .btn-primary:hover {
+  box-shadow: var(--glow-primary-strong);
+}
+
+/* Stronger focus rings in dark mode */
+.dark .sidebar-search-wrap input:focus,
+.dark .btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(224, 184, 78, 0.3);
+}
+
+/* Enhanced status dots in dark mode */
+.dark .status-dot.connected {
+  box-shadow: 0 0 8px rgba(139, 179, 107, 0.6);
+}
+
+/* Better card hover effects in dark mode */
+.dark .stat-card:hover,
+.dark .gcp-card:hover,
+.dark .aws-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+  transform: translateY(-2px);
+}
+
+/* Improved scrollbar for dark mode */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(224, 184, 78, 0.25);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(224, 184, 78, 0.4);
+}
+
+/* Dark mode selection */
+.dark ::selection {
+  background: rgba(224, 184, 78, 0.35);
+  color: #FFFFFF;
+}
+
+/* Message bubbles in dark mode */
+.dark .message-bubble.assistant {
+  background: #0D0D0D;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .message-bubble.user {
+  background: linear-gradient(135deg, rgba(224, 184, 78, 0.15), rgba(224, 184, 78, 0.08));
+  border-color: rgba(224, 184, 78, 0.25);
+}
+
+/* Upload dropzone in dark mode */
+.dark .upload-dropzone {
+  background: #080808;
+}
+
+.dark .upload-dropzone:hover {
+  background: rgba(224, 184, 78, 0.08);
+  box-shadow: 0 0 0 1px rgba(224, 184, 78, 0.3);
+}
+
+/* Composer in dark mode */
+.dark .composer-wrap {
+  background: #0A0A0A;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .composer-box {
+  background: #0D0D0D;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Chart enhancements for dark mode */
+.dark .recharts-surface {
+  background: transparent;
+}
+
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.06);
+}
+
+/* Toast notifications in dark mode */
+.dark .toast-container {
+  background: #0D0D0D;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+}
+
+/* Prediction hero in dark mode */
+.dark .prediction-hero {
+  background: linear-gradient(135deg, rgba(224, 184, 78, 0.08), rgba(53, 132, 95, 0.08));
+  border-color: rgba(224, 184, 78, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+}
+
+.dark .prediction-hero-value {
+  text-shadow: 0 0 40px rgba(224, 184, 78, 0.5);
+}
+
+/* Model comparison bars in dark mode */
+.dark .model-bar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Badge enhancements for dark mode */
+.dark .badge-outline {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Input fields in dark mode */
+.dark input,
+.dark textarea,
+.dark select {
+  background: #080808;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(224, 184, 78, 0.15);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #505050;
+}
+
+/* Code blocks in dark mode */
+.dark pre {
+  background: #050505;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark code {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--accent-gold);
+}
+
+/* Links in dark mode */
+.dark a {
+  color: var(--accent-gold);
+}
+
+.dark a:hover {
+  color: var(--accent-gold-hover);
+}
+
+/* Dividers in dark mode */
+.dark hr,
+.dark .divider {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Tooltips in dark mode */
+.dark .tooltip {
+  background: #0A0A0A;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.9);
+}
+
+/* Loading states in dark mode */
+.dark .skeleton {
+  background: linear-gradient(90deg, #0D0D0D 0%, #151515 50%, #0D0D0D 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Animation refinements for dark mode */
+.dark .animate-glow {
+  animation: glowDark 2s ease-in-out infinite;
+}
+
+@keyframes glowDark {
+  0%, 100% { 
+    box-shadow: 0 0 12px rgba(224, 184, 78, 0.4); 
+  }
+  50% { 
+    box-shadow: 0 0 32px rgba(224, 184, 78, 0.7); 
+  }
+}
+
+/* Ensure proper contrast for accessibility */
+.dark .text-muted {
+  color: #909090;
+}
+
+.dark .text-secondary {
+  color: #C0C0C0;
+}
+
+/* Dark mode hero value glow animation */
+@keyframes heroValueGlowDark {
+  0%, 100% { 
+    text-shadow: 0 0 48px rgba(224, 184, 78, 0.6), 
+                 0 0 96px rgba(224, 184, 78, 0.3), 
+                 0 4px 16px rgba(0,0,0,0.8); 
+  }
+  50% { 
+    text-shadow: 0 0 72px rgba(224, 184, 78, 0.8), 
+                 0 0 120px rgba(224, 184, 78, 0.4), 
+                 0 4px 16px rgba(0,0,0,0.8); 
+  }
+}
+
+.dark .prediction-hero-value {
+  animation: heroValueGlowDark 3s ease-in-out infinite !important;
+}

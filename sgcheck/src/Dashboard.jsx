@@ -701,10 +701,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
               </div>
             </div>
           )}
-          {/* Theme Switcher */}
-          <div style={{ padding: "8px 16px", borderTop: "1px solid var(--border-subtle)" }}>
-            <ThemeSwitcher />
-          </div>
           <div className="sidebar-user">
             <div className="sidebar-user-inner">
               <Avatar size="sm">
@@ -926,7 +922,9 @@ To get started, enter your field details in the **Tools** panel (right side), th
           </div>
         </aside>
       </div>
-
+      
+      {/* Toast Notifications */}
+      <ToastNotification toasts={toasts} removeToast={removeToast} />
     </div>
   )
 }
