@@ -759,6 +759,22 @@ To get started, enter your field details in the **Tools** panel (right side), th
               </div>
             </div>
           )}
+          {view === "analysis" && (
+            <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+              <Bot className="size-8" style={{ opacity: 0.5, color: "var(--text-secondary)", marginBottom: "12px" }} />
+              <div style={{ fontSize: "12px", color: "var(--text-secondary)", opacity: 0.6, lineHeight: 1.6 }}>
+                AI Analysis active<br /><span style={{ fontSize: "10px" }}>Start a new conversation</span>
+              </div>
+            </div>
+          )}
+          {view === "history" && (
+            <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+              <History className="size-8" style={{ opacity: 0.5, color: "var(--text-secondary)", marginBottom: "12px" }} />
+              <div style={{ fontSize: "12px", color: "var(--text-secondary)", opacity: 0.6, lineHeight: 1.6 }}>
+                History page active<br /><span style={{ fontSize: "10px" }}>View all predictions</span>
+              </div>
+            </div>
+          )}
           <div className="sidebar-user">
             <div className="sidebar-user-inner">
               <Avatar size="sm">
