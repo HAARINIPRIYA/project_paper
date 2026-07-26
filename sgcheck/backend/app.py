@@ -84,6 +84,27 @@ class EnsembleInput(BaseModel):
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 
 
+# Store predictions in a JSON file for history
+HISTORY_FILE = os.path.join(MODELS_DIR, "history.json")
+
+def load_history():
+    """Load prediction history from JSON file."""
+    try:
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r') as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {"predictions": []}
+
+def save_history(history):
+    """Save prediction history to JSON file."""
+    try:
+        with open(HISTORY_FILE, 'w') as f:
+            json.dump(history, f, indent=2)
+    except Exception as e:
+        print(f"Error saving history: {e}")
+
 @app.get("/health")
 def health():
     """Health check — also reports which models are available."""
@@ -96,6 +117,45 @@ def health():
         "status": "ok",
         "models_available": available,
         "model_count": len(available),
+    }
+
+@app.get("/history")
+def get_history():
+    """Get prediction history with latest first."""
+    history = load_history()
+    return {
+        "success": True,
+        "predictions": history.get("predictions", []),
+        "count": len(history.get("predictions", []))
+    }
+
+@app.get("/history/stats")
+def get_history_stats():
+    """Get prediction statistics."""
+    history = load_history()
+    predictions = history.get("predictions", [])
+    
+    if not predictions:
+        return {
+            "success": True,
+            "total_predictions": 0,
+            "models_used": [],
+            "date_range": None
+        }
+    
+    models_used = list(set(p.get("model") for p in predictions if p.get("model")))
+    
+    # Get date range
+    dates = [p.get("timestamp") for p in predictions if p.get("timestamp")]
+    
+    return {
+        "success": True,
+        "total_predictions": len(predictions),
+        "models_used": models_used,
+        "date_range": {
+            "first": min(dates) if dates else None,
+            "last": max(dates) if dates else None
+        }
     }
 
 
@@ -151,6 +211,25 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
 
     try:
         result = predict(model_name, input_data.dict())
+        
+        # Save to history
+        prediction_record = {
+            "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
+            "model": model_name,
+            "input": {
+                "variety": input_data.Variety,
+                "soil_type": input_data.Soil_Type,
+                "irrigation_type": input_data.Irrigation_Type,
+                "fertilizer_type": input_data.Fertilizer_Type,
+            },
+            "prediction": result.get("predictions", [None])[0],
+            "status": "success"
+        }
+        
+        history = load_history()
+        history["predictions"].insert(0, prediction_record)
+        save_history(history)
+        
         return result
     except FileNotFoundError:
         raise HTTPException(
@@ -170,6 +249,25 @@ def predict_batch(model_name: str, batch: BatchPredictionInput):
     try:
         records = [r.dict() for r in batch.records]
         result = predict(model_name, records)
+        
+        # Save to history
+        for i, record in enumerate(batch.records):
+            prediction_record = {
+                "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
+                "model": model_name,
+                "input": {
+                    "variety": record.Variety,
+                    "soil_type": record.Soil_Type,
+                    "irrigation_type": record.Irrigation_Type,
+                    "fertilizer_type": record.Fertilizer_Type,
+                },
+                "prediction": result.get("predictions", [None])[i],
+                "status": "success"
+            }
+            history = load_history()
+            history["predictions"].insert(0, prediction_record)
+            save_history(history)
+        
         return result
     except FileNotFoundError:
         raise HTTPException(
@@ -186,6 +284,25 @@ def predict_ensemble_endpoint(input_data: EnsembleInput):
     try:
         records = [r.dict() for r in input_data.records]
         result = predict_ensemble(records, weights=input_data.weights)
+        
+        # Save to history
+        for i, record in enumerate(input_data.records):
+            prediction_record = {
+                "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
+                "model": "ensemble",
+                "input": {
+                    "variety": record.Variety,
+                    "soil_type": record.Soil_Type,
+                    "irrigation_type": record.Irrigation_Type,
+                    "fertilizer_type": record.Fertilizer_Type,
+                },
+                "prediction": result.get("predictions", [None])[i],
+                "status": "success"
+            }
+            history = load_history()
+            history["predictions"].insert(0, prediction_record)
+            save_history(history)
+        
         return result
     except RuntimeError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -212,6 +329,25 @@ def predict_auto(input_data: PredictionInput):
 
         result = predict(best_model, input_data.dict())
         result["best_model"] = best_model
+        
+        # Save to history
+        prediction_record = {
+            "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
+            "model": "auto",
+            "selected_model": best_model,
+            "input": {
+                "variety": input_data.Variety,
+                "soil_type": input_data.Soil_Type,
+                "irrigation_type": input_data.Irrigation_Type,
+                "fertilizer_type": input_data.Fertilizer_Type,
+            },
+            "prediction": result.get("predictions", [None])[0],
+            "status": "success"
+        }
+        history = load_history()
+        history["predictions"].insert(0, prediction_record)
+        save_history(history)
+        
         return result
     except FileNotFoundError:
         raise HTTPException(
@@ -243,6 +379,97 @@ def get_model_features(model_name: str):
         }
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail=f"Model '{model_name}' not trained yet.")
+
+
+class ModelSelectionInput(BaseModel):
+    """Input for model selection with auto/manual mode."""
+    mode: str = Field("auto", description="Mode: 'auto' (best model) or 'manual' (select specific model)")
+    model_name: Optional[str] = Field(None, description="Model name when mode is 'manual'")
+    variety: Optional[str] = Field(None, description="Sugarcane variety (optional)")
+    soil_type: Optional[str] = Field(None, description="Soil type (optional)")
+    irrigation_type: Optional[str] = Field(None, description="Irrigation type (optional)")
+    fertilizer_type: Optional[str] = Field(None, description="Fertilizer type (optional)")
+
+
+@app.post("/predict/select")
+def predict_with_selection(input_data: ModelSelectionInput):
+    """
+    Predict with explicit model selection (Auto/Manual mode).
+    
+    Auto mode: Uses the best model based on R² score.
+    Manual mode: Uses the specified model name.
+    """
+    try:
+        if input_data.mode == "auto":
+            # Use best model
+            results_path = os.path.join(MODELS_DIR, "training_results.json")
+            if os.path.exists(results_path):
+                with open(results_path) as f:
+                    summary = json.load(f)
+                best_model = max(
+                    summary.keys(),
+                    key=lambda m: summary[m].get("r2", 0),
+                )
+            else:
+                best_model = "catboost"
+            
+            result = predict(best_model, input_data.dict())
+            result["best_model"] = best_model
+            
+            # Save to history
+            prediction_record = {
+                "timestamp": input_data.variety or input_data.soil_type or "Unknown",
+                "mode": "auto",
+                "selected_model": best_model,
+                "input": {
+                    "variety": input_data.variety,
+                    "soil_type": input_data.soil_type,
+                    "irrigation_type": input_data.irrigation_type,
+                    "fertilizer_type": input_data.fertilizer_type,
+                },
+                "prediction": result.get("predictions", [None])[0],
+                "status": "success"
+            }
+        else:
+            # Manual mode
+            model_name = input_data.model_name or "catboost"
+            if model_name not in ALL_MODELS:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unknown model '{model_name}'. Choose from: {', '.join(ALL_MODELS)}",
+                )
+            
+            result = predict(model_name, input_data.dict())
+            result["selected_model"] = model_name
+            
+            # Save to history
+            prediction_record = {
+                "timestamp": input_data.variety or input_data.soil_type or "Unknown",
+                "mode": "manual",
+                "selected_model": model_name,
+                "input": {
+                    "variety": input_data.variety,
+                    "soil_type": input_data.soil_type,
+                    "irrigation_type": input_data.irrigation_type,
+                    "fertilizer_type": input_data.fertilizer_type,
+                },
+                "prediction": result.get("predictions", [None])[0],
+                "status": "success"
+            }
+        
+        # Save to history
+        history = load_history()
+        history["predictions"].insert(0, prediction_record)
+        save_history(history)
+        
+        return result
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="No trained models found. Run training first.",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ----- Run -----

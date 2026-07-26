@@ -2,3 +2,4 @@ node_modules
 backend/models
 sgcheck/backend/models/*.joblib
 sgcheck/.env
+sgcheck/backend/models/history.json
