@@ -4,7 +4,6 @@ import {
   BarChart3,
   Bot,
   ChevronRight,
-  Cpu,
   LayoutDashboard,
   Loader2,
   Menu,
@@ -25,6 +24,8 @@ import {
   BarChartHorizontal,
   BookOpen,
   Sprout,
+  Moon,
+  Sun,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -38,6 +39,8 @@ import GPSForm from "./components/GPSForm"
 import UploadZone from "./components/UploadZone"
 import DashboardPage from "./pages/DashboardPage"
 import PredictionHero from "./components/PredictionHero"
+import ToastNotification from "./components/ToastNotification"
+import { useToast } from "./hooks/useToast"
 import { predictAuto, predictEnsemble } from "./lib/api"
 import { sendChatMessage, parseStreamingResponse, SYSTEM_PROMPT, extractFieldData } from "./lib/aiChat"
 import MarkdownRenderer from "./components/MarkdownRenderer"
@@ -125,7 +128,9 @@ function Dashboard({
   modelMetrics,
   backendError,
 }) {
+  const { toasts, addToast, removeToast } = useToast()
   const [view, setView] = useState("dashboard")
+  const [darkMode, setDarkMode] = useState(false)
   const [conversations, setConversations] = useState(() => loadConversations())
   const [activeChatId, setActiveChatId] = useState(null)
   const [composer, setComposer] = useState("")
@@ -154,6 +159,15 @@ function Dashboard({
   useEffect(() => { backendStatusRef.current = backendStatus }, [backendStatus])
   useEffect(() => { onPredictionResultRef.current = onPredictionResult }, [onPredictionResult])
   useEffect(() => { onEnsembleResultRef.current = onEnsembleResult }, [onEnsembleResult])
+
+  // Theme toggle
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark")
+    } else {
+      document.documentElement.classList.remove("dark")
+    }
+  }, [darkMode])
 
   // Save conversations to localStorage on change
   useEffect(() => {
