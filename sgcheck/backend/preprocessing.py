@@ -8,7 +8,6 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from typing import Tuple, List, Optional
 
-# Columns dropped from every model (geo / identity fields)
 DROP_COLUMNS = [
     "Latitude",
     "Longitude",
@@ -27,7 +26,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
     print(f"Loaded dataset: {df.shape}")
 
-    # --- Impute ---
     num_cols = df.select_dtypes(include=["int64", "float64"]).columns
     cat_cols = df.select_dtypes(include=["object"]).columns
 
@@ -36,7 +34,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
     for col in cat_cols:
         df[col] = df[col].fillna(df[col].mode()[0])
 
-    # --- Parse dates ---
     df["Planting_Date"] = pd.to_datetime(df["Planting_Date"])
     df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"])
 
@@ -50,7 +47,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
 
     df.drop(["Planting_Date", "Harvesting_Date"], axis=1, inplace=True)
 
-    # --- Drop geo / identity columns ---
     existing = [c for c in DROP_COLUMNS if c in df.columns]
     if existing:
         df.drop(columns=existing, inplace=True)

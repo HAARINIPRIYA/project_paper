@@ -54,7 +54,7 @@ export default function ThemeSwitcher() {
 
   function handleSelect(themeId) {
     setActiveTheme(themeId)
-    // Add transition class for smooth theme switch
+    
     document.documentElement.classList.add('theme-transitioning')
     setTimeout(() => {
       document.documentElement.classList.remove('theme-transitioning')
@@ -110,7 +110,7 @@ export default function ThemeSwitcher() {
                 }
               }}
             >
-              {/* Color palette preview */}
+              {}
               <div
                 style={{
                   display: "flex",
@@ -133,7 +133,7 @@ export default function ThemeSwitcher() {
                 ))}
               </div>
 
-              {/* Theme name */}
+              {}
               <div
                 style={{
                   display: "flex",
@@ -152,7 +152,7 @@ export default function ThemeSwitcher() {
                 )}
               </div>
 
-              {/* Active indicator ring */}
+              {}
               {isActive && (
                 <div
                   style={{

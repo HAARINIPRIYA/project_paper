@@ -27,12 +27,10 @@ def main():
         X, y, test_size=0.20, random_state=42
     )
 
-    # ---- Scale ----
     scaler = StandardScaler()
     X_train_s = scaler.fit_transform(X_train)
     X_test_s = scaler.transform(X_test)
 
-    # ---- Initial model ----
     lr = LinearRegression()
     lr.fit(X_train_s, y_train)
     y_pred = lr.predict(X_test_s)
@@ -42,7 +40,6 @@ def main():
     print(f"MAE      : {mean_absolute_error(y_test, y_pred):.4f}")
     print(f"RMSE     : {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}")
 
-    # ---- Coefficients ----
     coef_df = pd.DataFrame({"Feature": X.columns, "Coefficient": lr.coef_})
     coef_df = coef_df.sort_values("Coefficient", ascending=False)
     print("\n=== Coefficients ===")

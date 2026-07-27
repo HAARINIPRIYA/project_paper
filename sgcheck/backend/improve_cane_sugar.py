@@ -48,16 +48,13 @@ def load_data():
     df = pd.read_csv(DATA_PATH)
     print(f"[Data] Loaded: {df.shape}")
 
-    # Drop useless columns
     for col in USELESS_COLS:
         if col in df.columns:
             df.drop(col, axis=1, inplace=True)
 
-    # Parse dates
     df["Planting_Date"] = pd.to_datetime(df["Planting_Date"], errors="coerce")
     df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"], errors="coerce")
 
-    # Date features
     for prefix, col in [("Planting", "Planting_Date"), ("Harvest", "Harvesting_Date")]:
         df[f"{prefix}_Month"] = df[col].dt.month
         df[f"{prefix}_DayOfYear"] = df[col].dt.dayofyear
@@ -66,7 +63,6 @@ def load_data():
     df["Crop_Duration"] = df["Crop_Duration"].fillna(df["Crop_Duration_Days"].median())
     df.drop(["Planting_Date", "Harvesting_Date", "Crop_Duration_Days"], axis=1, inplace=True)
 
-    # Sunshine hours
     if "Sunshine_Hours_hh_mm" in df.columns:
         try:
             parts = df["Sunshine_Hours_hh_mm"].astype(str).str.split(":", expand=True)
@@ -75,13 +71,11 @@ def load_data():
         except:
             pass
 
-    # Month mapping
     if "Month" in df.columns and df["Month"].dtype == "object":
         month_map = {"January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6,
                      "July": 7, "August": 8, "September": 9, "October": 10, "November": 11, "December": 12}
         df["Month"] = df["Month"].map(month_map).fillna(1).astype(int)
 
-    # Impute
     for col in df.select_dtypes(include=["int64", "float64"]).columns:
         df[col] = df[col].fillna(df[col].median())
     for col in df.select_dtypes(include=["object"]).columns:
@@ -95,17 +89,14 @@ def engineer_features(df):
     df = df.copy()
     eps = 1e-6
 
-    # Key features
     core = ["Nitrogen_kg_per_acre", "Potassium_kg_per_acre", "Soil_Moisture_%", "Temp_Avg_C",
             "Phosphorus_kg_per_acre", "Rainfall_Total_mm", "Evapotranspiration_mm_day", "Organic_Carbon_%"]
 
-    # Interactions
     for i, a in enumerate(core):
         for b in core[i+1:]:
             if a in df.columns and b in df.columns:
                 df[f"{a[:8]}_{b[:8]}"] = df[a] * df[b]
 
-    # Ratios
     if "Nitrogen_kg_per_acre" in df.columns and "Phosphorus_kg_per_acre" in df.columns:
         df["N_P_ratio"] = df["Nitrogen_kg_per_acre"] / (df["Phosphorus_kg_per_acre"] + eps)
     if "Potassium_kg_per_acre" in df.columns and "Nitrogen_kg_per_acre" in df.columns:
@@ -113,15 +104,12 @@ def engineer_features(df):
     if "Rainfall_Total_mm" in df.columns and "Evapotranspiration_mm_day" in df.columns:
         df["Rain_ETo"] = df["Rainfall_Total_mm"] / (df["Evapotranspiration_mm_day"] + eps)
 
-    # NPK
     if all(c in df.columns for c in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]):
         df["NPK"] = df["Nitrogen_kg_per_acre"] + df["Phosphorus_kg_per_acre"] + df["Potassium_kg_per_acre"]
 
-    # Temp range
     if "Temp_Max_C" in df.columns and "Temp_Min_C" in df.columns:
         df["Temp_range"] = df["Temp_Max_C"] - df["Temp_Min_C"]
 
-    # Moisture
     if "Rainfall_Total_mm" in df.columns and "Evapotranspiration_mm_day" in df.columns:
         df["Moisture_deficit"] = df["Rainfall_Total_mm"] - df["Evapotranspiration_mm_day"] * 30
 
@@ -133,7 +121,6 @@ def train_models(X_train, y_train, X_test, y_test):
     """Train multiple models."""
     print("\n  Training models...")
 
-    # Encode categoricals
     cat_cols = X_train.select_dtypes(include=["object"]).columns
     encoders = {}
     for col in cat_cols:
@@ -142,7 +129,6 @@ def train_models(X_train, y_train, X_test, y_test):
         X_test[col] = le.transform(X_test[col].astype(str))
         encoders[col] = le
 
-    # Target transformation
     pt = PowerTransformer(method="yeo-johnson", standardize=False)
     y_train_t = pt.fit_transform(y_train.values.reshape(-1, 1)).ravel()
     y_test_t = pt.transform(y_test.values.reshape(-1, 1)).ravel()
@@ -150,7 +136,6 @@ def train_models(X_train, y_train, X_test, y_test):
     models = {}
     predictions = {}
 
-    # 1. CatBoost (fast settings)
     from catboost import CatBoostRegressor
     cb = CatBoostRegressor(iterations=800, learning_rate=0.05, depth=8, random_seed=SEED, verbose=0)
     cb.fit(X_train, y_train_t, cat_features=[X_train.columns.get_loc(c) for c in cat_cols], verbose=False)
@@ -159,7 +144,6 @@ def train_models(X_train, y_train, X_test, y_test):
     predictions["CatBoost"] = pred
     print(f"    CatBoost R² = {r2_score(y_test, pred):.4f}")
 
-    # 2. XGBoost
     from xgboost import XGBRegressor
     xgb = XGBRegressor(n_estimators=600, learning_rate=0.05, max_depth=8, subsample=0.8,
                        colsample_bytree=0.8, random_state=SEED, verbosity=0)
@@ -169,7 +153,6 @@ def train_models(X_train, y_train, X_test, y_test):
     predictions["XGBoost"] = pred
     print(f"    XGBoost R²  = {r2_score(y_test, pred):.4f}")
 
-    # 3. LightGBM
     try:
         import lightgbm as lgb
         lgbm = lgb.LGBMRegressor(n_estimators=600, learning_rate=0.05, max_depth=8, num_leaves=31,
@@ -182,7 +165,6 @@ def train_models(X_train, y_train, X_test, y_test):
     except:
         predictions["LightGBM"] = predictions["CatBoost"]
 
-    # 4. Random Forest
     rf = RandomForestRegressor(n_estimators=300, max_depth=20, min_samples_split=2, random_state=SEED, n_jobs=-1)
     rf.fit(X_train, y_train_t)
     pred = pt.inverse_transform(rf.predict(X_test).reshape(-1, 1)).ravel()
@@ -190,7 +172,6 @@ def train_models(X_train, y_train, X_test, y_test):
     predictions["RF"] = pred
     print(f"    RF R²       = {r2_score(y_test, pred):.4f}")
 
-    # 5. Gradient Boosting
     gb = GradientBoostingRegressor(n_estimators=300, learning_rate=0.08, max_depth=6, subsample=0.8, random_state=SEED)
     gb.fit(X_train, y_train_t)
     pred = pt.inverse_transform(gb.predict(X_test).reshape(-1, 1)).ravel()
@@ -198,7 +179,6 @@ def train_models(X_train, y_train, X_test, y_test):
     predictions["GB"] = pred
     print(f"    GB R²       = {r2_score(y_test, pred):.4f}")
 
-    # 6. Ridge ensemble of base models
     X_meta = np.column_stack([predictions[m] for m in predictions])
     ridge = Ridge(alpha=1.0)
     ridge.fit(X_meta, y_test)
@@ -218,7 +198,6 @@ def optimize_weights(y_true, preds_dict, n_steps=20):
     best_weights = None
     step = 1.0 / n_steps
 
-    # For 2-3 models
     if len(models) == 2:
         for w in np.arange(0, 1.01, step):
             weights = {models[0]: w, models[1]: 1-w}
@@ -239,12 +218,10 @@ def optimize_weights(y_true, preds_dict, n_steps=20):
                         best_r2 = r2
                         best_weights = weights
     else:
-        # For more models: greedy approach
         best_weights = {m: 1/len(models) for m in models}
         pred = sum(preds_dict[m] * best_weights[m] for m in models)
         best_r2 = r2_score(y_true, pred)
 
-        # Iterative refinement
         for _ in range(50):
             improved = False
             for m in models:
@@ -273,28 +250,22 @@ def main():
     print("  CaneSugar v5 Optimized — Target R² >= 0.95")
     print("=" * 60 + "\n")
 
-    # Load data
     df = load_data()
     df = engineer_features(df)
 
     y = df[TARGET]
     X = df.drop(TARGET, axis=1)
 
-    # Split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
 
     print(f"\n  Train: {len(X_train)} | Test: {len(X_test)}")
 
-    # Train models
     predictions, models, pt, ridge, encoders = train_models(X_train, y_train, X_test, y_test)
 
-    # Optimize weights
     weights, best_r2 = optimize_weights(y_test, predictions)
 
-    # Final ensemble
     final_pred = sum(predictions[m] * weights[m] for m in predictions)
 
-    # Results
     print("\n" + "=" * 60)
     print("  FINAL RESULTS")
     print("=" * 60)
@@ -306,7 +277,6 @@ def main():
     print(f"  MAE       = {mae:.2f}")
     print(f"  RMSE      = {rmse:.2f}")
 
-    # Save
     results = {
         "CaneSugar v5 Optimized": {"r2": round(r2, 4), "mae": round(mae, 4), "rmse": round(rmse, 4)},
         "weights": {k: round(v, 3) for k, v in weights.items()}

@@ -65,9 +65,6 @@ def save_model(model, name, metadata):
     print(f"  -> Saved {path}")
 
 
-# ===================================================================
-# 1. Load & clean
-# ===================================================================
 
 
 def load_and_clean(path):
@@ -79,11 +76,9 @@ def load_and_clean(path):
         df.drop(columns=existing, inplace=True)
         print(f"  Dropped {len(existing)} useless columns")
 
-    # Parse dates
     df["Planting_Date"] = pd.to_datetime(df["Planting_Date"], errors="coerce")
     df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"], errors="coerce")
 
-    # Extract date features
     for prefix, col in [("Planting", "Planting_Date"), ("Harvest", "Harvesting_Date")]:
         df[f"{prefix}_Year"] = df[col].dt.year
         df[f"{prefix}_Month"] = df[col].dt.month
@@ -96,7 +91,6 @@ def load_and_clean(path):
 
     df.drop(["Planting_Date", "Harvesting_Date"], axis=1, inplace=True)
 
-    # Impute
     num_cols = df.select_dtypes(include=["int64", "float64"]).columns
     cat_cols = df.select_dtypes(include=["object"]).columns
 
@@ -111,9 +105,6 @@ def load_and_clean(path):
     return df
 
 
-# ===================================================================
-# 2. Feature engineering
-# ===================================================================
 
 
 def engineer_features(df):
@@ -123,14 +114,12 @@ def engineer_features(df):
 
     existing_num = [c for c in TOP_NUMERIC if c in df_fe.columns]
 
-    # Interactions (top 6 -> 15 pairwise)
     n_top = min(len(existing_num), 6)
     for i in range(n_top):
         for j in range(i + 1, n_top):
             a, b = existing_num[i], existing_num[j]
             df_fe[f"{a}_x_{b}"] = df_fe[a] * df_fe[b]
 
-    # Ratios
     pairs = [
         ("Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "N_P_Ratio"),
         ("Potassium_kg_per_acre", "Phosphorus_kg_per_acre", "K_P_Ratio"),
@@ -141,21 +130,17 @@ def engineer_features(df):
         if a in df_fe and b in df_fe:
             df_fe[name] = df_fe[a] / (df_fe[b] + eps)
 
-    # Polynomial (top 4 squared)
     for col in existing_num[:4]:
         df_fe[f"{col}_sq"] = df_fe[col] ** 2
 
-    # Log transforms
     for col in ["Rainfall_Total_mm", "Nitrogen_kg_per_acre",
                  "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]:
         if col in df_fe:
             df_fe[f"{col}_log"] = np.log1p(df_fe[col].clip(lower=0))
 
-    # Temp range
     if "Temp_Max_C" in df_fe and "Temp_Min_C" in df_fe:
         df_fe["Temp_Range_C"] = df_fe["Temp_Max_C"] - df_fe["Temp_Min_C"]
 
-    # Rain intensity
     if "Rainfall_Total_mm" in df_fe and "Rainy_Days" in df_fe:
         df_fe["Rain_Intensity"] = df_fe["Rainfall_Total_mm"] / (
             df_fe["Rainy_Days"] + eps
@@ -166,9 +151,6 @@ def engineer_features(df):
     return df_fe
 
 
-# ===================================================================
-# 3. Target transformation
-# ===================================================================
 
 
 def transform_target(y):
@@ -185,9 +167,6 @@ def transform_target(y):
     return pd.Series(y_trans, index=y.index), pt
 
 
-# ===================================================================
-# 4. Encode
-# ===================================================================
 
 
 def encode_and_split(df):
@@ -201,9 +180,6 @@ def encode_and_split(df):
     return df_enc, df_raw, encoders
 
 
-# ===================================================================
-# 5a. CatBoost (best for mixed data)
-# ===================================================================
 
 
 def train_catboost(X_train, X_test, y_train, y_test, cat_features):
@@ -251,9 +227,6 @@ def train_catboost(X_train, X_test, y_train, y_test, cat_features):
     return model
 
 
-# ===================================================================
-# 5b. XGBoost
-# ===================================================================
 
 
 def train_xgboost(X_train, X_test, y_train, y_test):
@@ -290,9 +263,6 @@ def train_xgboost(X_train, X_test, y_train, y_test):
     return model
 
 
-# ===================================================================
-# 5c. Random Forest
-# ===================================================================
 
 
 def train_random_forest(X_train, X_test, y_train, y_test):
@@ -319,9 +289,6 @@ def train_random_forest(X_train, X_test, y_train, y_test):
     return model
 
 
-# ===================================================================
-# 5d. LightGBM (if available)
-# ===================================================================
 
 
 def train_lightgbm(X_train, X_test, y_train, y_test):
@@ -368,21 +335,16 @@ def train_lightgbm(X_train, X_test, y_train, y_test):
     return model
 
 
-# ===================================================================
-# 5e. Simple Ensemble (average of top models)
-# ===================================================================
 
 
 def train_ensemble(models_dict, X_test, y_test):
     """Weighted average ensemble of trained models."""
     print("\n=== Weighted Ensemble ===")
 
-    # Get predictions from each model
     preds = {}
     for name, (model, X) in models_dict.items():
         preds[name] = model.predict(X)
 
-    # Try equal weights first
     n_models = len(preds)
     if n_models == 0:
         print("  No models available for ensemble")
@@ -396,11 +358,9 @@ def train_ensemble(models_dict, X_test, y_test):
     print(f"  Averaging {n_models} models")
     evaluate(y_test, equal_weight_preds, "Ensemble_Avg")
 
-    # Try optimal weights via simple grid search
     best_r2 = -np.inf
     best_weights = None
 
-    # Use a coarse grid for 3+ models
     if n_models >= 3:
         for w1 in np.linspace(0, 1, 6):
             for w2 in np.linspace(0, 1 - w1, 6):
@@ -416,7 +376,6 @@ def train_ensemble(models_dict, X_test, y_test):
                         best_r2 = r2
                         best_weights = dict(zip(preds.keys(), [w1, w2, w3]))
     else:
-        # 2 models -> single weight sweep
         for w in np.linspace(0, 1, 21):
             weighted = (
                 w * list(preds.values())[0] +
@@ -436,7 +395,6 @@ def train_ensemble(models_dict, X_test, y_test):
             weighted_preds += best_weights[name] * p
         evaluate(y_test, weighted_preds, "Ensemble_Weighted")
 
-    # Save ensemble weights for inference
     if best_weights:
         ensemble_info = {"weights": best_weights}
         joblib.dump(
@@ -446,9 +404,6 @@ def train_ensemble(models_dict, X_test, y_test):
         print(f"  -> Saved ensemble weights")
 
 
-# ===================================================================
-# 6. Main
-# ===================================================================
 
 
 def main():
@@ -458,25 +413,19 @@ def main():
 
     t_start = time.time()
 
-    # 1. Load
     df = load_and_clean(args.data)
 
-    # 2. Feature engineering
     df = engineer_features(df)
 
-    # 3. Separate
     y_orig = df[TARGET].copy()
     X = df.drop(TARGET, axis=1).copy()
 
-    # 4. Target transformation
     y, power_transformer = transform_target(y_orig)
 
-    # 5. Encode
     X_enc, X_raw, encoders = encode_and_split(X)
 
     print(f"\nFinal features: {X_enc.shape[1]} cols x {len(X_enc)} rows")
 
-    # 6. Split
     rs = 42
     X_train, X_test, y_train, y_test = train_test_split(
         X_enc, y, test_size=0.2, random_state=rs
@@ -498,13 +447,11 @@ def main():
           f"{X_train.shape[0]} train rows")
     print(f"{'='*60}")
 
-    # 7. Train models
     train_catboost(Xr_train, Xr_test, yr_train, yr_test, cat_idx)
     train_xgboost(X_train, X_test, y_train, y_test)
     train_random_forest(X_train, X_test, y_train, y_test)
     train_lightgbm(X_train, X_test, y_train, y_test)
 
-    # 8. Ensemble
     models_dict = {}
     for name in ["CatBoost", "XGBoost", "RandomForest", "LightGBM"]:
         if name in METRICS:
@@ -517,7 +464,6 @@ def main():
 
     train_ensemble(models_dict, y_test, y_test)
 
-    # 9. Original-scale evaluation
     print(f"\n{'='*60}")
     print(f"  Original-scale evaluation")
     print(f"{'='*60}")
@@ -538,7 +484,6 @@ def main():
             rmse = np.sqrt(mean_squared_error(y_test_orig, pred_orig))
             print(f"  {name:20s}  R2={r2:.4f}  MAE={mae:.2f}  RMSE={rmse:.2f}")
 
-    # 10. Save artifacts
     joblib.dump(encoders, os.path.join(MODELS_DIR, "encoders.joblib"))
     joblib.dump(list(X_enc.columns), os.path.join(MODELS_DIR, "all_features.joblib"))
     joblib.dump(power_transformer, os.path.join(MODELS_DIR, "target_transformer.joblib"))
@@ -553,7 +498,6 @@ def main():
     print(f"  Training completed in {elapsed / 60:.1f} minutes!")
     print(f"{'='*60}")
 
-    # Final ranking
     print(f"\n  FINAL RANKING:")
     sorted_metrics = sorted(METRICS.items(), key=lambda x: -x[1]["r2"])
     for i, (name, m) in enumerate(sorted_metrics):

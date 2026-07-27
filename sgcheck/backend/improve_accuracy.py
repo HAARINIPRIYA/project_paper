@@ -19,18 +19,15 @@ warnings.filterwarnings("ignore")
 TARGET = "Yield_Quintal_per_Acre"
 t0 = time.time()
 
-# 1. Load
 df = pd.read_csv("DataSet/FINAL_SUGARCANE_DATASET.csv")
 print(f"Loaded: {df.shape}")
 
-# 2. Basic cleaning (same as original)
 drop_cols = ["Latitude", "Longitude", "Khasra_No", "Sugar_Mill",
              "Tehsil", "District", "State", "Region"]
 existing = [c for c in drop_cols if c in df.columns]
 if existing:
     df.drop(columns=existing, inplace=True)
 
-# Parse dates
 df["Planting_Date"] = pd.to_datetime(df["Planting_Date"], errors="coerce")
 df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"], errors="coerce")
 for prefix, col in [("Planting", "Planting_Date"), ("Harvest", "Harvesting_Date")]:
@@ -41,7 +38,6 @@ for prefix, col in [("Planting", "Planting_Date"), ("Harvest", "Harvesting_Date"
 df["Crop_Dur"] = (df["Harvesting_Date"] - df["Planting_Date"]).dt.days
 df.drop(["Planting_Date", "Harvesting_Date"], axis=1, inplace=True)
 
-# Impute
 for col in df.select_dtypes(include=["int64", "float64"]).columns:
     df[col] = df[col].fillna(df[col].median())
 for col in df.select_dtypes(include=["object"]).columns:
@@ -49,7 +45,6 @@ for col in df.select_dtypes(include=["object"]).columns:
 
 print(f"Cleaned: {df.shape}")
 
-# 3. Feature engineering
 eps = 1e-5
 top_numeric = ["Nitrogen_kg_per_acre", "Potassium_kg_per_acre",
                "Soil_Moisture_%", "Temp_Avg_C",
@@ -58,14 +53,12 @@ top_numeric = ["Nitrogen_kg_per_acre", "Potassium_kg_per_acre",
                "Organic_Carbon_%", "Soil_pH"]
 existing_num = [c for c in top_numeric if c in df.columns]
 
-# Interactions
 n_top = min(len(existing_num), 6)
 for i in range(n_top):
     for j in range(i + 1, n_top):
         a, b = existing_num[i], existing_num[j]
         df[f"{a}_x_{b}"] = df[a] * df[b]
 
-# Ratios
 for a, b, name in [
     ("Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "N_P_Ratio"),
     ("Potassium_kg_per_acre", "Phosphorus_kg_per_acre", "K_P_Ratio"),
@@ -74,33 +67,27 @@ for a, b, name in [
     if a in df and b in df:
         df[name] = df[a] / (df[b] + eps)
 
-# Polynomials
 for col in existing_num[:4]:
     df[f"{col}_sq"] = df[col] ** 2
 
-# Log transforms
 for col in ["Rainfall_Total_mm", "Nitrogen_kg_per_acre",
              "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]:
     if col in df:
         df[f"{col}_log"] = np.log1p(df[col].clip(lower=0))
 
-# Temp range
 if "Temp_Max_C" in df and "Temp_Min_C" in df:
     df["Temp_Range"] = df["Temp_Max_C"] - df["Temp_Min_C"]
 
 print(f"After feature eng: {df.shape}")
 
-# 4. Separate
 y_orig = df[TARGET].copy()
 X = df.drop(TARGET, axis=1).copy()
 
-# 5. Encode categoricals
 for col in X.select_dtypes(include=["object"]).columns:
     X[col] = LabelEncoder().fit_transform(X[col].astype(str))
 
 print(f"Features: {X.shape[1]} cols")
 
-# 6. Baseline (original approach)
 X_train, X_test, y_train, y_test = train_test_split(
     X, y_orig, test_size=0.2, random_state=42
 )
@@ -121,7 +108,6 @@ print(f"  R2  : {r2_base:.4f}")
 print(f"  MAE : {mae_base:.4f}")
 print(f"  RMSE: {rmse_base:.4f}")
 
-# 7. Target transformation
 print(f"\n{'='*50}")
 print(f"  WITH TARGET TRANSFORMATION + FEATURE ENG")
 print(f"{'='*50}")
@@ -148,7 +134,6 @@ print(f"  R2  : {r2_trans:.4f}")
 print(f"  MAE : {mae_trans:.4f}")
 print(f"  RMSE: {rmse_trans:.4f}")
 
-# 8. With better hyperparameters
 print(f"\n{'='*50}")
 print(f"  BEST: feature eng + target transform + tuned CatBoost")
 print(f"{'='*50}")
@@ -167,7 +152,6 @@ print(f"  R2  : {r3:.4f}")
 print(f"  MAE : {m3:.4f}")
 print(f"  RMSE: {rm3:.4f}")
 
-# Summary
 print(f"\n{'='*50}")
 print(f"  IMPROVEMENT SUMMARY")
 print(f"{'='*50}")

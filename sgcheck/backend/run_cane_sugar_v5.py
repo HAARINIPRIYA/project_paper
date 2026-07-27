@@ -53,9 +53,6 @@ SEED = 42
 N_FOLDS = 5
 
 
-# ═══════════════════════════════════════════════════════════════
-# 1. Load & clean
-# ═══════════════════════════════════════════════════════════════
 
 def load_and_clean(path: str) -> pd.DataFrame:
     """Load CSV, drop geo/id cols, parse dates, impute missing values intelligently."""
@@ -117,9 +114,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
     return df
 
 
-# ═══════════════════════════════════════════════════════════════
-# 2. Advanced feature engineering
-# ═══════════════════════════════════════════════════════════════
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """Create comprehensive engineered features with focus on high-impact features."""
@@ -136,7 +130,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     ]
     existing_core = [c for c in core_features if c in df_fe.columns]
 
-    # Pairwise interactions
     for i in range(len(existing_core)):
         for j in range(i + 1, len(existing_core)):
             a, b = existing_core[i], existing_core[j]
@@ -145,7 +138,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[name] = df_fe[a] * df_fe[b]
                 created.append(name)
 
-    # Ratio features
     ratio_features = [
         ("Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "N_P_Ratio"),
         ("Potassium_kg_per_acre", "Phosphorus_kg_per_acre", "K_P_Ratio"),
@@ -163,7 +155,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             df_fe[name] = df_fe[a] / (df_fe[b] + eps)
             created.append(name)
 
-    # Polynomial features
     poly_features = ["Nitrogen_kg_per_acre", "Potassium_kg_per_acre", "Soil_Moisture_%", "Temp_Avg_C"]
     for col in poly_features:
         if col in df_fe:
@@ -172,7 +163,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[sq_name] = df_fe[col] ** 2
                 created.append(sq_name)
 
-    # Log transforms
     log_features = ["Rainfall_Total_mm", "Nitrogen_kg_per_acre", "Fertilizer_Quantity"]
     for col in log_features:
         if col in df_fe:
@@ -181,25 +171,21 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[log_name] = np.log1p(df_fe[col].clip(lower=0))
                 created.append(log_name)
 
-    # Temperature range
     if "Temp_Max_C" in df_fe and "Temp_Min_C" in df_fe:
         if "Temp_Range_C" not in df_fe.columns:
             df_fe["Temp_Range_C"] = df_fe["Temp_Max_C"] - df_fe["Temp_Min_C"]
             created.append("Temp_Range_C")
 
-    # Moisture deficit
     if "Rainfall_Total_mm" in df_fe and "Evapotranspiration_mm_day" in df_fe:
         if "Moisture_Deficit" not in df_fe.columns:
             df_fe["Moisture_Deficit"] = df_fe["Rainfall_Total_mm"] - df_fe["Evapotranspiration_mm_day"] * 30
             created.append("Moisture_Deficit")
 
-    # NPK Total
     if all(c in df_fe for c in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]):
         if "NPK_Total" not in df_fe.columns:
             df_fe["NPK_Total"] = df_fe["Nitrogen_kg_per_acre"] + df_fe["Phosphorus_kg_per_acre"] + df_fe["Potassium_kg_per_acre"]
             created.append("NPK_Total")
 
-    # Cyclical features
     for month_col in ["Month", "Planting_Month", "Harvest_Month"]:
         if month_col in df_fe.columns:
             month_vals = pd.to_numeric(df_fe[month_col], errors="coerce").fillna(0)
@@ -208,15 +194,11 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[f"{month_col}_cos"] = np.cos(2 * np.pi * month_vals / 12)
                 created.extend([f"{month_col}_sin", f"{month_col}_cos"])
 
-    # Clean up
     df_fe = df_fe.replace([np.inf, -np.inf], np.nan).fillna(0)
     print(f"  Feature engineering: {df.shape[1]} -> {df_fe.shape[1]} columns ({len(created)} new)")
     return df_fe
 
 
-# ═══════════════════════════════════════════════════════════════
-# 3. Target transformation
-# ═══════════════════════════════════════════════════════════════
 
 def winsorize_target(y: pd.Series, limits=(0.005, 0.005)) -> pd.Series:
     arr = y.values.copy()
@@ -252,9 +234,6 @@ def evaluate(y_true, y_pred, name=""):
     return METRICS[name]
 
 
-# ═══════════════════════════════════════════════════════════════
-# 4. Model training functions
-# ═══════════════════════════════════════════════════════════════
 
 def train_catboost(X_train, y_train, cat_features_indices, X_val, y_val):
     from catboost import CatBoostRegressor
@@ -398,9 +377,6 @@ def train_extra_trees(X_train, y_train, X_val, y_val):
     return model, val_pred
 
 
-# ═══════════════════════════════════════════════════════════════
-# 5. Ensemble optimization
-# ═══════════════════════════════════════════════════════════════
 
 def find_optimal_weights(y_true, preds_dict, step=0.02):
     """Find optimal ensemble weights using grid search."""
@@ -430,13 +406,11 @@ def find_optimal_weights(y_true, preds_dict, step=0.02):
                         best_r2 = r2
                         best_weights = weights
     else:
-        # 4+ models - equal weights baseline
         equal_weights = {m: 1.0 / n_models for m in models}
         best_weights = equal_weights
         ensemble_pred = sum(preds_dict[m] * best_weights[m] for m in models)
         best_r2 = r2_score(y_true, ensemble_pred)
 
-        # Hill climbing refinement
         for _ in range(200):
             improved = False
             for m in models:
@@ -458,9 +432,6 @@ def find_optimal_weights(y_true, preds_dict, step=0.02):
     return best_weights, best_r2
 
 
-# ═══════════════════════════════════════════════════════════════
-# 6. Main
-# ═══════════════════════════════════════════════════════════════
 
 def main():
     parser = argparse.ArgumentParser(description="CaneSugar v5 — Ultra-High-Accuracy Model (target R² >= 0.95)")
@@ -476,7 +447,6 @@ def main():
     print("  Architecture: CatBoost + XGBoost + LightGBM + RF + ExtraTrees + MLP")
     print("=" * 70 + "\n")
 
-    # Load & clean
     df = load_and_clean(args.data)
     df = engineer_features(df)
 
@@ -484,35 +454,28 @@ def main():
     X = df.drop(TARGET, axis=1).copy()
     print(f"\n  Total features: {X.shape[1]} columns × {len(X)} rows")
 
-    # Winsorize target
     y_winsorized = winsorize_target(y_orig, limits=(0.005, 0.005))
 
-    # Yeo-Johnson transformation
     print("\n  Applying Yeo-Johnson target transformation...")
     pt = PowerTransformer(method="yeo-johnson", standardize=False)
     y_transformed = pt.fit_transform(y_winsorized.values.reshape(-1, 1)).ravel()
     y = pd.Series(y_transformed, index=y_winsorized.index)
 
-    # Train/test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
     X_train_orig, X_test_orig, y_train_orig, y_test_orig = train_test_split(X, y_orig, test_size=0.2, random_state=SEED)
 
     print(f"\n  Train: {X_train.shape[0]} samples  |  Test: {X_test.shape[0]} samples")
 
-    # Categorical features for CatBoost
     cat_col_names = X_train.select_dtypes(include=["object"]).columns.tolist()
     cat_features_indices = [X_train.columns.get_loc(c) for c in cat_col_names]
 
-    # Encode categoricals
     X_enc, encoders = encode_categoricals(X)
     X_train_enc = X_enc.iloc[X_train.index]
     X_test_enc = X_enc.iloc[X_test.index]
 
-    # StandardScaler for MLP
     scaler = StandardScaler()
     scaler.fit(X_train_enc)
 
-    # Cross-validation
     print(f"\n{'=' * 70}")
     print("  5-FOLD CROSS-VALIDATION TRAINING")
     print(f"{'=' * 70}")
@@ -535,7 +498,6 @@ def main():
         X_fold_train_enc = X_train_enc.iloc[train_idx]
         X_fold_val_enc = X_train_enc.iloc[val_idx]
 
-        # Train all models
         cb_model, cb_val = train_catboost(X_fold_train, y_fold_train, cat_features_indices, X_fold_val, y_fold_val)
         oof_preds["catboost"].append(cb_val)
         test_preds["catboost"].append(cb_model.predict(X_test))
@@ -568,7 +530,6 @@ def main():
         print(f"    ExtraT:   {r2_score(y_fold_val, et_val):.4f}")
         print(f"    MLP:      {r2_score(y_fold_val, mlp_val):.4f}")
 
-    # Evaluate on test set
     print(f"\n{'=' * 70}")
     print("  INDIVIDUAL MODEL EVALUATION ON TEST SET")
     print(f"{'=' * 70}")
@@ -581,7 +542,6 @@ def main():
             r2 = r2_score(y_test, avg_test_pred)
             print(f"  {model_name:15s}  R²={r2:.4f}")
 
-    # Stacking ensemble
     print(f"\n{'=' * 70}")
     print("  STACKING ENSEMBLE (Ridge Meta-Model)")
     print(f"{'=' * 70}")
@@ -609,21 +569,17 @@ def main():
         stacking_r2 = r2_score(y_test_orig, stacking_pred_orig)
         print(f"  Ridge Stacking R² = {stacking_r2:.4f}")
 
-    # Weighted ensemble
     print(f"\n{'=' * 70}")
     print("  WEIGHTED ENSEMBLE OPTIMIZATION")
     print(f"{'=' * 70}")
 
     best_weights, best_r2 = find_optimal_weights(y_test, model_test_preds, step=0.02)
 
-    # Apply weighted ensemble
     weighted_pred = sum(model_test_preds[m] * best_weights[m] for m in model_test_preds)
     weighted_pred_orig = pt.inverse_transform(weighted_pred.reshape(-1, 1)).ravel()
 
-    # Final ensemble: blend stacking + weighted
     final_pred = 0.5 * stacking_pred_orig + 0.5 * weighted_pred_orig
 
-    # Evaluate all
     print(f"\n{'=' * 70}")
     print("  FINAL RESULTS")
     print(f"{'=' * 70}")
@@ -632,7 +588,6 @@ def main():
     evaluate(y_test_orig, weighted_pred_orig, "Weighted Ensemble (orig. scale)")
     evaluate(y_test_orig, final_pred, "CaneSugar v5 (final)")
 
-    # Save model
     results = METRICS.copy()
     results["best_model_name"] = "CaneSugar v5"
     results["weights"] = {k: round(v, 4) for k, v in best_weights.items()}
@@ -640,13 +595,11 @@ def main():
     with open(os.path.join(MODELS_DIR, "cane_sugar_results.json"), "w") as f:
         json.dump(results, f, indent=2)
 
-    # Save model artifacts
     joblib.dump(pt, os.path.join(MODELS_DIR, "cane_sugar_transformer.joblib"))
     joblib.dump(encoders, os.path.join(MODELS_DIR, "cane_sugar_encoders.joblib"))
     joblib.dump(scaler, os.path.join(MODELS_DIR, "cane_sugar_scaler.joblib"))
     joblib.dump(meta_model, os.path.join(MODELS_DIR, "cane_sugar_meta.joblib"))
 
-    # Save model test predictions for prediction API
     np.save(os.path.join(MODELS_DIR, "cane_sugar_test_preds.npy"), final_pred)
 
     elapsed = time.time() - t_start

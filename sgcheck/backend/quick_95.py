@@ -54,7 +54,6 @@ def load_data():
     for col in df.select_dtypes(include=["object"]).columns:
         df[col] = df[col].fillna(df[col].mode()[0])
     
-    # Feature engineering
     eps = 1e-6
     if all(c in df.columns for c in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre"]):
         df["N_P"] = df["Nitrogen_kg_per_acre"] / (df["Phosphorus_kg_per_acre"] + eps)
@@ -91,23 +90,19 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
     print(f"Train: {len(X_train)} | Test: {len(X_test)}")
     
-    # Target transform
     pt = PowerTransformer(method="yeo-johnson", standardize=False)
     y_train_t = pt.fit_transform(y_train.reshape(-1, 1)).ravel()
     y_test_t = pt.transform(y_test.reshape(-1, 1)).ravel()
     
-    # Load models
     print("\n  Loading models...")
     catboost = joblib.load("models/catboost.joblib")["model"]
     xgboost = joblib.load("models/xgboost.joblib")["model"]
     rf = joblib.load("models/random_forest.joblib")["model"]
     
-    # Predict with CatBoost (handles raw features)
     catboost_pred_t = catboost.predict(X_train)
     cb_r2 = r2_score(y_train_t, catboost_pred_t)
     print(f"  CatBoost R² = {cb_r2:.4f}")
     
-    # XGBoost and RF need encoded features
     xgboost_pred_t = xgboost.predict(X_train)
     xgb_r2 = r2_score(y_train_t, xgboost_pred_t)
     print(f"  XGBoost R²  = {xgb_r2:.4f}")
@@ -116,7 +111,6 @@ def main():
     rf_r2 = r2_score(y_train_t, rf_pred_t)
     print(f"  RF R²       = {rf_r2:.4f}")
     
-    # Test set predictions
     cb_pred_test = pt.inverse_transform(catboost.predict(X_test).reshape(-1, 1)).ravel()
     xgb_pred_test = pt.inverse_transform(xgboost.predict(X_test).reshape(-1, 1)).ravel()
     rf_pred_test = pt.inverse_transform(rf.predict(X_test).reshape(-1, 1)).ravel()
@@ -126,7 +120,6 @@ def main():
     print(f"  XGBoost R²  = {r2_score(y_test, xgb_pred_test):.4f}")
     print(f"  RF R²       = {r2_score(y_test, rf_pred_test):.4f}")
     
-    # Weighted ensemble
     print("\n  Optimizing ensemble weights...")
     best_r2, best_w = -1e9, None
     for w1 in np.arange(0, 1.05, 0.1):
@@ -141,11 +134,9 @@ def main():
     
     final_pred = sum([cb_pred_test * best_w["CatBoost"], xgb_pred_test * best_w["XGBoost"], rf_pred_test * best_w["RF"]])
     
-    # Bias correction
     bias = np.mean(y_test - final_pred)
     final_pred_adj = final_pred - bias
     
-    # Final
     r2 = r2_score(y_test, final_pred_adj)
     mae = mean_absolute_error(y_test, final_pred_adj)
     rmse = np.sqrt(mean_squared_error(y_test, final_pred_adj))
@@ -159,7 +150,6 @@ def main():
     print(f"  Weights: {best_w}")
     print(f"  Bias: {bias:.2f}")
     
-    # Save
     results = {
         "cane_sugar_v5": {"r2": round(r2, 4), "mae": round(mae, 4), "rmse": round(rmse, 4)},
         "weights": {k: round(v, 2) for k, v in best_w.items()},

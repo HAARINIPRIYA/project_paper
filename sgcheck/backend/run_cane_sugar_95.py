@@ -95,7 +95,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df_fe = df.copy()
     eps = 1e-6
 
-    # Key interactions
     core = ["Nitrogen_kg_per_acre", "Potassium_kg_per_acre", "Soil_Moisture_%", "Temp_Avg_C",
             "Phosphorus_kg_per_acre", "Crop_Duration_Days", "Rainfall_Total_mm", "Evapotranspiration_mm_day"]
     existing = [c for c in core if c in df_fe.columns]
@@ -105,22 +104,18 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             a, b = existing[i], existing[j]
             df_fe[f"{a}_x_{b}"] = df_fe[a] * df_fe[b]
 
-    # Key ratios
     ratios = [("Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre"), ("Potassium_kg_per_acre", "Nitrogen_kg_per_acre"),
               ("Rainfall_Total_mm", "Evapotranspiration_mm_day"), ("Soil_Moisture_%", "Evapotranspiration_mm_day")]
     for a, b in ratios:
         if a in df_fe and b in df_fe:
             df_fe[f"{a}_div_{b}"] = df_fe[a] / (df_fe[b] + eps)
 
-    # Temperature features
     if "Temp_Max_C" in df_fe and "Temp_Min_C" in df_fe:
         df_fe["Temp_Range_C"] = df_fe["Temp_Max_C"] - df_fe["Temp_Min_C"]
 
-    # NPK
     if all(c in df_fe for c in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]):
         df_fe["NPK_Total"] = df_fe["Nitrogen_kg_per_acre"] + df_fe["Phosphorus_kg_per_acre"] + df_fe["Potassium_kg_per_acre"]
 
-    # Moisture deficit
     if "Rainfall_Total_mm" in df_fe and "Evapotranspiration_mm_day" in df_fe:
         df_fe["Moisture_Deficit"] = df_fe["Rainfall_Total_mm"] - df_fe["Evapotranspiration_mm_day"] * 30
 
@@ -164,30 +159,25 @@ def main():
     y_orig = df[TARGET].copy()
     X = df.drop(TARGET, axis=1).copy()
 
-    # Winsorize & transform
     y_winsorized = y_orig.clip(y_orig.quantile(0.005), y_orig.quantile(0.995))
     pt = PowerTransformer(method="yeo-johnson", standardize=False)
     y = pt.fit_transform(y_winsorized.values.reshape(-1, 1)).ravel()
 
-    # Split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
     X_train_orig, X_test_orig, y_train_orig, y_test_orig = train_test_split(X, y_orig, test_size=0.2, random_state=SEED)
 
     print(f"\n  Train: {len(X_train)} | Test: {len(X_test)}")
 
-    # Encode
     X_enc, encoders = encode_categoricals(X)
     X_train_enc = X_enc.iloc[X_train.index]
     X_test_enc = X_enc.iloc[X_test.index]
 
-    # Scaler
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train_enc)
     X_test_scaled = scaler.transform(X_test_enc)
 
     print("\n  Training models...")
 
-    # CatBoost
     from catboost import CatBoostRegressor
     cat_features = [X_train.columns.get_loc(c) for c in X_train.select_dtypes(include=["object"]).columns]
     cb = CatBoostRegressor(iterations=2000, learning_rate=0.02, depth=10, random_seed=SEED, verbose=0, early_stopping_rounds=200)
@@ -195,7 +185,6 @@ def main():
     cb_pred = cb.predict(X_test)
     print(f"    CatBoost R² = {r2_score(y_test, cb_pred):.4f}")
 
-    # XGBoost
     from xgboost import XGBRegressor
     xgb = XGBRegressor(n_estimators=1500, learning_rate=0.02, max_depth=8, subsample=0.8, colsample_bytree=0.8,
                        random_state=SEED, early_stopping_rounds=200, verbosity=0)
@@ -203,7 +192,6 @@ def main():
     xgb_pred = xgb.predict(X_test_enc)
     print(f"    XGBoost R²  = {r2_score(y_test, xgb_pred):.4f}")
 
-    # LightGBM
     try:
         import lightgbm as lgb
         lgb_model = lgb.LGBMRegressor(n_estimators=1500, learning_rate=0.02, max_depth=8, num_leaves=31,
@@ -215,26 +203,22 @@ def main():
     except:
         lgb_pred = cb_pred
 
-    # Random Forest
     rf = RandomForestRegressor(n_estimators=400, max_depth=None, min_samples_split=2, random_state=SEED, n_jobs=-1)
     rf.fit(X_train_enc, y_train)
     rf_pred = rf.predict(X_test_enc)
     print(f"    RF R²        = {r2_score(y_test, rf_pred):.4f}")
 
-    # Gradient Boosting
     gb = GradientBoostingRegressor(n_estimators=500, learning_rate=0.05, max_depth=8, subsample=0.8, random_state=SEED)
     gb.fit(X_train_enc, y_train)
     gb_pred = gb.predict(X_test_enc)
     print(f"    GB R²        = {r2_score(y_test, gb_pred):.4f}")
 
-    # MLP
     mlp = MLPRegressor(hidden_layer_sizes=(128, 64), activation='relu', solver='adam', alpha=0.001,
                        learning_rate='adaptive', max_iter=500, early_stopping=True, random_state=SEED, verbose=False)
     mlp.fit(X_train_scaled, y_train)
     mlp_pred = mlp.predict(X_test_scaled)
     print(f"    MLP R²       = {r2_score(y_test, mlp_pred):.4f}")
 
-    # Stacking
     print("\n  Building stacking ensemble...")
     estimators = [('cb', cb), ('xgb', xgb), ('rf', rf)]
     stack = StackingRegressor(estimators=estimators, final_estimator=Ridge(alpha=1.0), cv=3)
@@ -242,12 +226,10 @@ def main():
     stack_pred = stack.predict(X_test_enc)
     print(f"    Stacking R²  = {r2_score(y_test, stack_pred):.4f}")
 
-    # Weighted ensemble optimization
     print("\n  Optimizing weights...")
     preds = {"CatBoost": cb_pred, "XGBoost": xgb_pred, "LightGBM": lgb_pred, "RF": rf_pred, "GB": gb_pred, "MLP": mlp_pred, "Stack": stack_pred}
 
     best_r2, best_weights, best_pred = -1e9, None, None
-    # Grid search weights for top 3 models
     for w1 in np.arange(0, 1.05, 0.1):
         for w2 in np.arange(0, 1.05 - w1, 0.1):
             for w3 in np.arange(0, 1.05 - w1 - w2, 0.1):
@@ -263,11 +245,9 @@ def main():
     print(f"    Best weights: {best_weights}")
     print(f"    Weighted R²  = {best_r2:.4f}")
 
-    # Convert to original scale
     stack_pred_orig = pt.inverse_transform(stack_pred.reshape(-1, 1)).ravel()
     weighted_pred_orig = pt.inverse_transform(best_pred.reshape(-1, 1)).ravel()
 
-    # Final ensemble
     final_pred = 0.4 * stack_pred_orig + 0.6 * weighted_pred_orig
 
     print("\n" + "=" * 60)
@@ -277,7 +257,6 @@ def main():
     evaluate(y_test_orig, weighted_pred_orig, "Weighted (orig. scale)")
     evaluate(y_test_orig, final_pred, "CaneSugar v5.1 (final)")
 
-    # Save results
     results = METRICS.copy()
     results["best_model_name"] = "CaneSugar v5.1"
     results["weights"] = {k: round(v, 2) for k, v in best_weights.items()}

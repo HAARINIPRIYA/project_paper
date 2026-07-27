@@ -96,7 +96,7 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
         </p>
       </div>
 
-      {/* Mode Selection */}
+      {}
       <div className="space-y-4">
         <div 
           className={`p-4 rounded-lg border cursor-pointer transition-all ${
@@ -162,7 +162,7 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
                     ))}
                   </select>
 
-                  {/* Model Details */}
+                  {}
                   <div className="mt-3 space-y-2">
                     <Card>
                       <CardHeader className="pb-2">
@@ -211,7 +211,7 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {}
       <div className="flex gap-3 pt-4">
         <Button
           variant="default"

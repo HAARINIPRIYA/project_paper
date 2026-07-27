@@ -17,7 +17,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-# Make sure we can import sibling modules
 sys.path.insert(0, os.path.dirname(__file__))
 
 from predict import predict, predict_ensemble, ALL_MODELS
@@ -31,16 +30,14 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Allow the React frontend to call the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ----- Request Schemas -----
 
 
 class PredictionInput(BaseModel):
@@ -53,11 +50,9 @@ class PredictionInput(BaseModel):
 
     model_config = {"extra": "allow"}
 
-    # Date fields (optional — the model uses year/month/day features)
     Planting_Date: Optional[str] = Field(None, description="Planting date (YYYY-MM-DD)")
     Harvesting_Date: Optional[str] = Field(None, description="Harvesting date (YYYY-MM-DD)")
 
-    # Convenience categorical fields
     Variety: Optional[str] = Field(None, description="Sugarcane variety")
     Crop_Type: Optional[str] = Field(None, description="Crop type / season")
     Soil_Type: Optional[str] = Field(None, description="Soil type")
@@ -79,12 +74,10 @@ class EnsembleInput(BaseModel):
     )
 
 
-# ----- Health / info -----
 
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 
 
-# Store predictions in a JSON file for history
 HISTORY_FILE = os.path.join(MODELS_DIR, "history.json")
 
 def load_history():
@@ -145,7 +138,6 @@ def get_history_stats():
     
     models_used = list(set(p.get("model") for p in predictions if p.get("model")))
     
-    # Get date range
     dates = [p.get("timestamp") for p in predictions if p.get("timestamp")]
     
     return {
@@ -181,7 +173,6 @@ def list_models():
                 info["engineered_features"] = True
             models_info[name] = info
 
-    # Load training results summary
     results_path = os.path.join(MODELS_DIR, "training_results.json")
     if os.path.exists(results_path):
         with open(results_path) as f:
@@ -193,7 +184,6 @@ def list_models():
     }
 
 
-# ----- Prediction endpoints -----
 
 
 @app.post("/predict/{model_name}")
@@ -212,12 +202,14 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
     try:
         result = predict(model_name, input_data.dict())
         
-        # Save to history
         prediction_record = {
             "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
             "model": model_name,
             "input": {
+                "planting_date": input_data.Planting_Date,
+                "harvesting_date": input_data.Harvesting_Date,
                 "variety": input_data.Variety,
+                "crop_type": input_data.Crop_Type,
                 "soil_type": input_data.Soil_Type,
                 "irrigation_type": input_data.Irrigation_Type,
                 "fertilizer_type": input_data.Fertilizer_Type,
@@ -250,13 +242,15 @@ def predict_batch(model_name: str, batch: BatchPredictionInput):
         records = [r.dict() for r in batch.records]
         result = predict(model_name, records)
         
-        # Save to history
         for i, record in enumerate(batch.records):
             prediction_record = {
                 "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
                 "model": model_name,
                 "input": {
+                    "planting_date": record.Planting_Date,
+                    "harvesting_date": record.Harvesting_Date,
                     "variety": record.Variety,
+                    "crop_type": record.Crop_Type,
                     "soil_type": record.Soil_Type,
                     "irrigation_type": record.Irrigation_Type,
                     "fertilizer_type": record.Fertilizer_Type,
@@ -285,13 +279,15 @@ def predict_ensemble_endpoint(input_data: EnsembleInput):
         records = [r.dict() for r in input_data.records]
         result = predict_ensemble(records, weights=input_data.weights)
         
-        # Save to history
         for i, record in enumerate(input_data.records):
             prediction_record = {
                 "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
                 "model": "ensemble",
                 "input": {
+                    "planting_date": record.Planting_Date,
+                    "harvesting_date": record.Harvesting_Date,
                     "variety": record.Variety,
+                    "crop_type": record.Crop_Type,
                     "soil_type": record.Soil_Type,
                     "irrigation_type": record.Irrigation_Type,
                     "fertilizer_type": record.Fertilizer_Type,
@@ -318,25 +314,25 @@ def predict_auto(input_data: PredictionInput):
         if os.path.exists(results_path):
             with open(results_path) as f:
                 summary = json.load(f)
-            # Pick model with highest R²
             best_model = max(
                 summary.keys(),
                 key=lambda m: summary[m].get("r2", 0),
             )
         else:
-            # Fallback order
             best_model = "catboost"
 
         result = predict(best_model, input_data.dict())
         result["best_model"] = best_model
         
-        # Save to history
         prediction_record = {
             "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
             "model": "auto",
             "selected_model": best_model,
             "input": {
+                "planting_date": input_data.Planting_Date,
+                "harvesting_date": input_data.Harvesting_Date,
                 "variety": input_data.Variety,
+                "crop_type": input_data.Crop_Type,
                 "soil_type": input_data.Soil_Type,
                 "irrigation_type": input_data.Irrigation_Type,
                 "fertilizer_type": input_data.Fertilizer_Type,
@@ -358,7 +354,6 @@ def predict_auto(input_data: PredictionInput):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ----- Static / Feature info -----
 
 
 @app.get("/features/{model_name}")
@@ -401,7 +396,6 @@ def predict_with_selection(input_data: ModelSelectionInput):
     """
     try:
         if input_data.mode == "auto":
-            # Use best model
             results_path = os.path.join(MODELS_DIR, "training_results.json")
             if os.path.exists(results_path):
                 with open(results_path) as f:
@@ -416,7 +410,6 @@ def predict_with_selection(input_data: ModelSelectionInput):
             result = predict(best_model, input_data.dict())
             result["best_model"] = best_model
             
-            # Save to history
             prediction_record = {
                 "timestamp": input_data.variety or input_data.soil_type or "Unknown",
                 "mode": "auto",
@@ -431,7 +424,6 @@ def predict_with_selection(input_data: ModelSelectionInput):
                 "status": "success"
             }
         else:
-            # Manual mode
             model_name = input_data.model_name or "catboost"
             if model_name not in ALL_MODELS:
                 raise HTTPException(
@@ -442,7 +434,6 @@ def predict_with_selection(input_data: ModelSelectionInput):
             result = predict(model_name, input_data.dict())
             result["selected_model"] = model_name
             
-            # Save to history
             prediction_record = {
                 "timestamp": input_data.variety or input_data.soil_type or "Unknown",
                 "mode": "manual",
@@ -457,7 +448,6 @@ def predict_with_selection(input_data: ModelSelectionInput):
                 "status": "success"
             }
         
-        # Save to history
         history = load_history()
         history["predictions"].insert(0, prediction_record)
         save_history(history)
@@ -472,7 +462,6 @@ def predict_with_selection(input_data: ModelSelectionInput):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ----- Run -----
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

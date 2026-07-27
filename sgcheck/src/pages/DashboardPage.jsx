@@ -114,7 +114,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-6">
-      {/* Page Header — AWS Console style */}
+      {}
       <motion.div variants={itemAnim} className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
@@ -139,7 +139,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
         </Badge>
       </motion.div>
 
-      {/* AWS Console Style Stat Cards */}
+      {}
       <motion.div variants={itemAnim} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((s) => {
           const Icon = s.icon
@@ -165,11 +165,11 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
         })}
       </motion.div>
 
-      {/* Main Content Grid */}
+      {}
       <motion.div variants={itemAnim} className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-        {/* Left Column */}
+        {}
         <div className="flex flex-col gap-5 xl:col-span-2">
-          {/* Model Performance Card */}
+          {}
           <div className="aws-card">
             <div className="aws-card-header">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -202,7 +202,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 </div>
               ) : (
                 <div className="flex flex-col" style={{ gap: "2px" }}>
-                  {/* Header */}
+                  {}
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 8px 8px" }}>
                     <div style={{ width: "160px", flexShrink: 0 }} />
                     <div className="flex-1" />
@@ -215,7 +215,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     <div style={{ width: "44px", flexShrink: 0 }} />
                   </div>
 
-                  {/* Bars */}
+                  {}
                   {sortedModels.map((model, idx) => {
                     const widthPct = Math.max(((model.r2 || 0) / maxR2) * 100, 5)
                     const isBest = idx === 0
@@ -246,7 +246,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                             {model.rmse ? model.rmse.toFixed(1) : "—"}
                           </span>
                         </div>
-                        {/* Always render the badge column to keep alignment */}
+                        {}
                         <div style={{ width: "44px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
                           {isBest && (
                             <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
@@ -260,7 +260,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {}
           <div className="aws-card">
             <div className="aws-card-header">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -292,16 +292,16 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
           </div>
         </div>
 
-        {/* Right Column */}
+        {}
         <div className="flex flex-col gap-5">
-          {/* Prediction Results */}
+          {}
           {(predictionResult || ensembleResult) && (
             <div className="animate-slide-up">
               <ModelResults result={ensembleResult || predictionResult} isEnsemble={!!ensembleResult} />
             </div>
           )}
 
-          {/* Session Summary */}
+          {}
           <div className="aws-card">
             <div className="aws-card-header">
               <div className="aws-card-title">
@@ -311,7 +311,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
               <div className="aws-card-subtitle">Current input state</div>
             </div>
             <div className="aws-card-body" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {/* Billet Image */}
+              {}
               <div className="info-card">
                 <div className="info-card-label">Billet Image</div>
                 <div className="info-card-value flex items-center gap-2">
@@ -326,7 +326,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 </div>
               </div>
 
-              {/* Field Details */}
+              {}
               <div className="info-card">
                 <div className="info-card-label">Field Details</div>
                 <div className="info-card-value">
@@ -356,7 +356,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
 
               <Separator style={{ opacity: 0.5 }} />
 
-              {/* Mini Status */}
+              {}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <div className="mini-card">
                   <div className="mini-card-label">Stage</div>
@@ -380,7 +380,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                 </div>
               </div>
 
-              {/* Quick action */}
+              {}
               {!predictionResult && !ensembleResult && (
                 <button type="button" style={{
                   display: "flex",
@@ -408,7 +408,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
             </div>
           </div>
 
-          {/* Model Details */}
+          {}
           {sortedModels.length > 0 && (
             <div className="aws-card">
               <div className="aws-card-header">

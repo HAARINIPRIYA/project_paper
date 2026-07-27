@@ -47,9 +47,6 @@ METRICS = {}
 SEED = 42
 
 
-# ═══════════════════════════════════════════════════════════════
-# 1. Load & clean
-# ═══════════════════════════════════════════════════════════════
 
 def load_and_clean(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
@@ -60,7 +57,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
         df.drop(columns=existing, inplace=True)
         print(f"  Dropped {len(existing)} useless columns: {existing}")
 
-    # Parse dates
     df["Planting_Date"] = pd.to_datetime(df["Planting_Date"], errors="coerce")
     df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"], errors="coerce")
 
@@ -80,7 +76,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
 
     df.drop(["Planting_Date", "Harvesting_Date"], axis=1, inplace=True)
 
-    # Sunshine hours: parse "hh:mm"
     if "Sunshine_Hours_hh_mm" in df.columns:
         try:
             parts = df["Sunshine_Hours_hh_mm"].astype(str).str.split(":", expand=True)
@@ -89,7 +84,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
         except Exception:
             pass
 
-    # Month: string → int
     if "Month" in df.columns and df["Month"].dtype == "object":
         try:
             month_map = {
@@ -107,7 +101,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
         except Exception:
             pass
 
-    # Impute
     for col in df.select_dtypes(include=["int64", "float64"]).columns:
         df[col] = df[col].fillna(df[col].median())
     for col in df.select_dtypes(include=["object"]).columns:
@@ -118,9 +111,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
     return df
 
 
-# ═══════════════════════════════════════════════════════════════
-# 2. Advanced feature engineering
-# ═══════════════════════════════════════════════════════════════
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df_fe = df.copy()
@@ -136,7 +126,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     ]
     existing_core = [c for c in core_features if c in df_fe.columns]
 
-    # 1. Pairwise interactions
     for i in range(len(existing_core)):
         for j in range(i + 1, len(existing_core)):
             a, b = existing_core[i], existing_core[j]
@@ -145,7 +134,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[name] = df_fe[a] * df_fe[b]
                 created.append(name)
 
-    # 2. Ratio features
     ratio_pairs = [
         ("Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "N_P_Ratio"),
         ("Potassium_kg_per_acre", "Phosphorus_kg_per_acre", "K_P_Ratio"),
@@ -165,7 +153,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             df_fe[name] = df_fe[a] / (df_fe[b] + eps)
             created.append(name)
 
-    # 3. Polynomial features
     for col in ["Nitrogen_kg_per_acre", "Potassium_kg_per_acre",
                 "Soil_Moisture_%", "Temp_Avg_C",
                 "Phosphorus_kg_per_acre", "Rainfall_Total_mm",
@@ -180,7 +167,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[cube_name] = df_fe[col] ** 3
                 created.append(cube_name)
 
-    # 4. Log transforms
     for col in ["Rainfall_Total_mm", "Nitrogen_kg_per_acre",
                 "Phosphorus_kg_per_acre", "Potassium_kg_per_acre",
                 "Fertilizer_Quantity", "Evapotranspiration_mm_day",
@@ -192,7 +178,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[log_name] = np.log1p(df_fe[col].clip(lower=0))
                 created.append(log_name)
 
-    # 5. Temperature range
     if "Temp_Max_C" in df_fe and "Temp_Min_C" in df_fe:
         if "Temp_Range_C" not in df_fe.columns:
             df_fe["Temp_Range_C"] = df_fe["Temp_Max_C"] - df_fe["Temp_Min_C"]
@@ -201,19 +186,16 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             df_fe["Temp_Avg_x_Range"] = df_fe["Temp_Avg_C"] * df_fe["Temp_Range_C"]
             created.append("Temp_Avg_x_Range")
 
-    # 6. Moisture deficit
     if "Rainfall_Total_mm" in df_fe and "Evapotranspiration_mm_day" in df_fe:
         if "Moisture_Deficit" not in df_fe.columns:
             df_fe["Moisture_Deficit"] = df_fe["Rainfall_Total_mm"] - df_fe["Evapotranspiration_mm_day"] * 30
             created.append("Moisture_Deficit")
 
-    # 7. Fertilizer efficiency
     if "Fertilizer_Quantity" in df_fe and "Nitrogen_kg_per_acre" in df_fe:
         if "Fertilizer_N_Efficiency" not in df_fe.columns:
             df_fe["Fertilizer_N_Efficiency"] = df_fe["Nitrogen_kg_per_acre"] / (df_fe["Fertilizer_Quantity"] + eps)
             created.append("Fertilizer_N_Efficiency")
 
-    # 8. Cyclical encoding
     for month_col in ["Month", "Planting_Month", "Harvest_Month"]:
         if month_col in df_fe.columns:
             month_vals = pd.to_numeric(df_fe[month_col], errors="coerce").fillna(0)
@@ -224,7 +206,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[cos_name] = np.cos(2 * np.pi * month_vals / 12)
                 created.extend([sin_name, cos_name])
 
-    # 9. Binned features
     for col in ["Nitrogen_kg_per_acre", "Soil_pH", "Soil_Moisture_%", "Temp_Avg_C",
                 "Rainfall_Total_mm", "Potassium_kg_per_acre"]:
         if col in df_fe:
@@ -236,32 +217,27 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 except ValueError:
                     pass
 
-    # 10. NPK Total
     if all(c in df_fe for c in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]):
         if "NPK_Total" not in df_fe.columns:
             df_fe["NPK_Total"] = df_fe["Nitrogen_kg_per_acre"] + df_fe["Phosphorus_kg_per_acre"] + df_fe["Potassium_kg_per_acre"]
             created.append("NPK_Total")
 
-    # 11. Micro-nutrient sum
     micro_cols = ["Zinc_mg_per_kg", "Iron_mg_per_kg", "Copper_mg_per_kg", "Manganese_mg_per_kg"]
     if all(c in df_fe for c in micro_cols):
         if "Micro_Nutrient_Sum" not in df_fe.columns:
             df_fe["Micro_Nutrient_Sum"] = sum(df_fe[c] for c in micro_cols)
             created.append("Micro_Nutrient_Sum")
 
-    # 12. Water input
     if "Rainfall_Total_mm" in df_fe and "Water_Quantity_liters_per_acre" in df_fe:
         if "Water_Input_Total" not in df_fe.columns:
             df_fe["Water_Input_Total"] = df_fe["Rainfall_Total_mm"] * 4046.86 + df_fe["Water_Quantity_liters_per_acre"].fillna(0)
             created.append("Water_Input_Total")
 
-    # 13. Crop density
     if "Plant_Density" in df_fe and "Row_Spacing_cm" in df_fe:
         if "Density_x_Spacing" not in df_fe.columns:
             df_fe["Density_x_Spacing"] = df_fe["Plant_Density"] / (df_fe["Row_Spacing_cm"] + eps)
             created.append("Density_x_Spacing")
 
-    # Fix NaN/Inf
     df_fe = df_fe.replace([np.inf, -np.inf], np.nan)
     df_fe = df_fe.fillna(0)
 
@@ -269,9 +245,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     return df_fe
 
 
-# ═══════════════════════════════════════════════════════════════
-# 3. Evaluation helper
-# ═══════════════════════════════════════════════════════════════
 
 def evaluate(y_true, y_pred, name="", suffix=""):
     r2 = r2_score(y_true, y_pred)
@@ -283,9 +256,6 @@ def evaluate(y_true, y_pred, name="", suffix=""):
     return r2
 
 
-# ═══════════════════════════════════════════════════════════════
-# 4. Winsorize target
-# ═══════════════════════════════════════════════════════════════
 
 def winsorize_target(y: pd.Series, limits=(0.005, 0.005)) -> pd.Series:
     arr = y.values.copy()
@@ -302,9 +272,6 @@ def winsorize_target(y: pd.Series, limits=(0.005, 0.005)) -> pd.Series:
     return pd.Series(arr, index=y.index)
 
 
-# ═══════════════════════════════════════════════════════════════
-# 5. Main
-# ═══════════════════════════════════════════════════════════════
 
 def main():
     parser = argparse.ArgumentParser(description="CaneSugar v5-fast — R² >= 0.93")
@@ -319,19 +286,15 @@ def main():
     print("  Strategy: CatBoost + Yeo-Johnson + Feature Engineering + optional Ensemble")
     print("=" * 70 + "\n")
 
-    # Step 1-2: Load, clean, feature engineering
     df = load_and_clean(args.data)
     df = engineer_features(df)
 
-    # Step 3: Separate
     y_orig = df[TARGET].copy()
     X = df.drop(TARGET, axis=1).copy()
     print(f"\n  Total features: {X.shape[1]} cols × {len(X)} rows")
 
-    # Step 4: Winsorize target
     y_winsorized = winsorize_target(y_orig, limits=(0.005, 0.005))
 
-    # Step 5: Yeo-Johnson transformation
     print("\n  Applying Yeo-Johnson target transformation...")
     pt = PowerTransformer(method="yeo-johnson", standardize=False)
     y_transformed = pt.fit_transform(y_winsorized.values.reshape(-1, 1)).ravel()
@@ -339,21 +302,15 @@ def main():
     print(f"    Lambda: {pt.lambdas_[0]:.4f}")
     print(f"    Skew: {y_winsorized.skew():.2f} -> {pd.Series(y).skew():.2f}")
 
-    # Step 6: Train/test split (80/20)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
     _, X_test_orig, _, y_test_orig = train_test_split(X, y_orig, test_size=0.2, random_state=SEED)
 
-    # Save the split indices for reference
     print(f"\n  Train: {X_train.shape[0]}  |  Test: {X_test.shape[0]}  |  Features: {X_train.shape[1]}")
 
-    # Identify categorical features for CatBoost
     cat_col_names = X_train.select_dtypes(include=["object"]).columns.tolist()
     cat_features_indices = [X_train.columns.get_loc(c) for c in cat_col_names]
     print(f"  Categorical: {len(cat_features_indices)} features")
 
-    # ───────────────────────────────────────────────────────────
-    # Step 7: TRAIN CATBOOST (primary model)
-    # ───────────────────────────────────────────────────────────
     fast_mode = args.fast
     from catboost import CatBoostRegressor
 
@@ -374,7 +331,7 @@ def main():
         "subsample": 0.80,
         "border_count": 254,
         "random_seed": SEED,
-        "verbose": 50,  # Show progress every 50 iterations
+        "verbose": 50,
         "early_stopping_rounds": cb_early_stop,
         "loss_function": "RMSE",
         "eval_metric": "RMSE",
@@ -397,12 +354,8 @@ def main():
 
     cb_test_pred = cb_model.predict(X_test)
 
-    # Evaluate on transformed scale
     evaluate(y_test, cb_test_pred, "CatBoost (transformed)")
 
-    # ───────────────────────────────────────────────────────────
-    # Step 8: Evaluate on ORIGINAL SCALE
-    # ───────────────────────────────────────────────────────────
     print(f"\n{'=' * 70}")
     print(f"  ★ ORIGINAL SCALE EVALUATION ★")
     print(f"{'=' * 70}")
@@ -410,9 +363,6 @@ def main():
     cb_pred_orig = pt.inverse_transform(cb_test_pred.reshape(-1, 1)).ravel()
     cb_orig_r2 = evaluate(y_test_orig, cb_pred_orig, "CatBoost (orig. scale)")
 
-    # ───────────────────────────────────────────────────────────
-    # Step 9: If CatBoost alone didn't reach 93%, add XGBoost + ensemble
-    # ───────────────────────────────────────────────────────────
     final_pred_orig = cb_pred_orig
     final_r2 = cb_orig_r2
     final_name = "CatBoost"
@@ -426,7 +376,6 @@ def main():
 
         from xgboost import XGBRegressor
 
-        # Encode categoricals for XGBoost
         X_train_enc = X_train.copy()
         X_test_enc = X_test.copy()
         xgb_encoders = {}
@@ -464,7 +413,6 @@ def main():
         xgb_pred_orig = pt.inverse_transform(xgb_test_pred.reshape(-1, 1)).ravel()
         xgb_orig_r2 = evaluate(y_test_orig, xgb_pred_orig, "XGBoost (orig. scale)")
 
-        # ─── Weighted ensemble of CatBoost + XGBoost ───
         print(f"\n  Optimizing ensemble weights...")
         best_w = 0.5
         best_r = 0
@@ -484,7 +432,6 @@ def main():
             final_pred_orig = ensemble_pred
             final_name = f"Ensemble (CatBoost + XGBoost)"
 
-        # ─── Try Ridge stacking too ───
         oof_stack = np.column_stack([cb_pred_orig, xgb_pred_orig])
         ridge = Ridge(alpha=1.0)
         ridge.fit(oof_stack, y_test_orig)
@@ -506,9 +453,6 @@ def main():
     else:
         print(f"\n  ℹ️  Fast mode — skipping XGBoost. CB R² = {cb_orig_r2:.4f}")
 
-    # ───────────────────────────────────────────────────────────
-    # Step 10: Feature importance
-    # ───────────────────────────────────────────────────────────
     print(f"\n  Top 15 features:")
     importances = cb_model.get_feature_importance()
     fi = pd.DataFrame({"Feature": X_train.columns, "Importance": importances})
@@ -516,9 +460,6 @@ def main():
     for i, row in fi.head(15).iterrows():
         print(f"    {row['Feature']:40s}  {row['Importance']:.4f}")
 
-    # ───────────────────────────────────────────────────────────
-    # Step 11: Save results
-    # ───────────────────────────────────────────────────────────
     METRICS["CaneSugar v5 (orig. scale)"] = {
         "r2": round(final_r2, 4),
         "mae": round(mean_absolute_error(y_test_orig, final_pred_orig), 4),
@@ -526,7 +467,6 @@ def main():
     }
     METRICS["best_model_name"] = final_name
 
-    # Save model
     model_path = os.path.join(MODELS_DIR, "cane_sugar.joblib")
     joblib.dump({
         "model": cb_model,
@@ -552,13 +492,11 @@ def main():
     }, model_path)
     print(f"\n  ✅ Saved model → {model_path}")
 
-    # Save results JSON
     results_path = os.path.join(MODELS_DIR, "cane_sugar_results.json")
     with open(results_path, "w") as f:
         json.dump(METRICS, f, indent=2)
     print(f"  ✅ Saved results → {results_path}")
 
-    # Update training_results.json
     main_results_path = os.path.join(MODELS_DIR, "training_results.json")
     if os.path.exists(main_results_path):
         with open(main_results_path) as f:
@@ -570,9 +508,6 @@ def main():
         json.dump(main_results, f, indent=2)
     print(f"  ✅ Updated {main_results_path}")
 
-    # ───────────────────────────────────────────────────────────
-    # Summary
-    # ───────────────────────────────────────────────────────────
     elapsed = time.time() - t_start
     print(f"\n{'=' * 70}")
     print(f"  CANESUGAR v5-fast — TRAINING COMPLETE")
