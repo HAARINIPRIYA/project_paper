@@ -27,7 +27,6 @@ def main():
         X, y, test_size=0.20, random_state=42
     )
 
-    # ---- Initial model ----
     rf = RandomForestRegressor(
         n_estimators=500, max_depth=20, min_samples_split=5,
         min_samples_leaf=2, max_features="sqrt", random_state=42, n_jobs=-1,
@@ -40,7 +39,6 @@ def main():
     print(f"MAE      : {mean_absolute_error(y_test, y_pred):.4f}")
     print(f"RMSE     : {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}")
 
-    # ---- Feature importance ----
     importance = rf.feature_importances_
     fi = pd.DataFrame({"Feature": X.columns, "Importance": importance})
     fi = fi.sort_values("Importance", ascending=False)

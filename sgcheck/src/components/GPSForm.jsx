@@ -71,7 +71,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
   const [predictionResult, setPredictionResult] = useState(null)
   const [ensembleResult, setEnsembleResult] = useState(null)
   const [isPredicting, setIsPredicting] = useState(false)
-  const [predictionMode, setPredictionMode] = useState("auto") // "auto" | "manual"
+  const [predictionMode, setPredictionMode] = useState("auto") 
   const [selectedModel, setSelectedModel] = useState("auto")
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -149,7 +149,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
     [availableModels]
   )
 
-  // bestModelName placeholder — the actual best model is determined at prediction time by the backend
+  
 
   const savedSummary = gpsData ? [
     gpsData.Planting_Date && `Planted: ${gpsData.Planting_Date}`,
@@ -174,7 +174,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
 
         <TabsContent value="inputs">
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            {/* Core Fields */}
+            {}
             {CORE_FIELDS.map((fieldName) => {
               const meta = FIELD_META[fieldName]
               const Icon = meta.icon
@@ -223,7 +223,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               )
             })}
 
-            {/* Advanced Fields */}
+            {}
             <details className="group" style={{ marginTop: "4px" }}>
               <summary style={{
                 display: "flex",
@@ -312,7 +312,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
 
         <TabsContent value="predict">
           <div className="flex flex-col gap-3">
-            {/* Mode Toggle: Auto vs Manual */}
+            {}
             <div className="field-section">
               <div className="field-label-row">
                 <Cpu className="size-3.5" style={{ color: "var(--text-secondary)" }} />
@@ -375,7 +375,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               </div>
             </div>
 
-            {/* Auto Mode: Show info */}
+            {}
             {predictionMode === "auto" && (
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
@@ -399,7 +399,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               </motion.div>
             )}
 
-            {/* Manual Mode: Model Selection */}
+            {}
             {predictionMode === "manual" && (
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
@@ -426,7 +426,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               </motion.div>
             )}
 
-            {/* Predict Button */}
+            {}
             <Button
               type="button"
               variant="primary"
@@ -441,7 +441,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               )}
             </Button>
 
-            {/* Status */}
+            {}
             <div style={{
               display: "flex",
               flexDirection: "column",
@@ -472,7 +472,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               )}
             </div>
 
-            {/* Error */}
+            {}
             {predictionResult?.error ? (
               <div style={{
                 padding: "8px 10px",
@@ -486,7 +486,7 @@ function GPSForm({ onSubmit, gpsData, availableModels }) {
               </div>
             ) : null}
 
-            {/* Results */}
+            {}
             {predictionResult && !predictionResult.error ? (
               <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
                 <ModelResults result={predictionResult} />

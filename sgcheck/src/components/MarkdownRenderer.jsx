@@ -1,17 +1,14 @@
-/**
- * MarkdownRenderer — renders AI bot responses with proper styling.
- * Uses react-markdown with remark-gfm for tables, lists, and formatting.
- */
+
 
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
-// ---------------------------------------------------------------------------
-// Custom components for each markdown element
-// ---------------------------------------------------------------------------
+
+
+
 
 const components = {
-  // Headings
+  
   h2: ({ children, ...props }) => (
     <h2
       style={{
@@ -48,7 +45,7 @@ const components = {
     )
   },
 
-  // Paragraphs
+  
   p: ({ children, ...props }) => (
     <p
       style={{
@@ -63,12 +60,12 @@ const components = {
     </p>
   ),
 
-  // Bold — with special glowing highlight for yield prediction values
+  
   strong: ({ children, ...props }) => {
     const text = typeof children === 'string' ? children : ''
     const isYieldValue = text.includes('Quintal')
     if (isYieldValue) {
-      // Yield prediction value — make it HUGE, green, and glowing
+      
       return (
         <strong
           style={{
@@ -101,7 +98,7 @@ const components = {
     )
   },
 
-  // Lists
+  
   ul: ({ children, ...props }) => (
     <ul
       style={{
@@ -136,7 +133,7 @@ const components = {
     </li>
   ),
 
-  // Blockquotes
+  
   blockquote: ({ children, ...props }) => (
     <blockquote
       style={{
@@ -155,7 +152,7 @@ const components = {
     </blockquote>
   ),
 
-  // Inline code
+  
   code: ({ inline, children, ...props }) => {
     if (inline) {
       return (
@@ -191,7 +188,7 @@ const components = {
     )
   },
 
-  // Tables (GFM)
+  
   table: ({ children, ...props }) => (
     <div style={{ overflow: "auto", margin: "8px 0" }}>
       <table
@@ -254,7 +251,7 @@ const components = {
     </td>
   ),
 
-  // Horizontal rules (separators)
+  
   hr: ({ ...props }) => (
     <hr
       style={{
@@ -266,7 +263,7 @@ const components = {
     />
   ),
 
-  // Links
+  
   a: ({ children, href, ...props }) => (
     <a
       href={href}
@@ -283,13 +280,13 @@ const components = {
     </a>
   ),
 
-  // Break / newline
+  
   br: ({ ...props }) => <br style={{ lineHeight: 1.8 }} {...props} />,
 }
 
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
+
+
+
 
 export default function MarkdownRenderer({ content }) {
   if (!content) return null

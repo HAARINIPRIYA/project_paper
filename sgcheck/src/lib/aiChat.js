@@ -1,23 +1,10 @@
-/**
- * CaneSense Local AI Chat Service
- *
- * No external API calls! This is a fully local bot that answers questions
- * about the trained ML models by fetching data from your own backend.
- *
- * It can answer:
- *   - Which model is best? (accuracy comparison)
- *   - Why is CatBoost better than XGBoost?
- *   - What model should I choose for my data?
- *   - Show me all model metrics
- *   - Tell me about a specific model
- *   + General sugarcane & yield prediction info
- */
+
 
 import { getModels, predictAuto, predictEnsemble } from "./api"
 
-// ---------------------------------------------------------------------------
-// Model knowledge base — used to generate rich responses
-// ---------------------------------------------------------------------------
+
+
+
 
 const MODEL_DESCRIPTIONS = {
   cane_sugar: {
@@ -111,24 +98,17 @@ const MODEL_DESCRIPTIONS = {
   },
 }
 
-// ---------------------------------------------------------------------------
-// Field data extraction — detect structured field data in user messages
-// ---------------------------------------------------------------------------
+
+
+
 
 const FIELD_KEYS = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type", "Soil_Type", "Irrigation_Type", "Fertilizer_Type"]
 
-/**
- * Extract field data from a user message text.
- * Supports:
- *   - JSON objects: { "Planting_Date": "2023-06-15", ... }
- *   - Key: value pairs: Planting_Date: 2023-06-15, Variety: Co-0238
- *   - Simple mentions: Planting_Date = 2023-06-15
- * Returns extracted data object or null if no field data found.
- */
+
 function extractFieldData(text) {
   if (!text || text.trim().length < 10) return null
 
-  // Try JSON parse first
+  
   try {
     const jsonMatch = text.match(/\{[^}]+\}/s)
     if (jsonMatch) {
@@ -142,13 +122,13 @@ function extractFieldData(text) {
       if (Object.keys(matched).length >= 2) return matched
     }
   } catch {
-    // Not valid JSON, continue
+    
   }
 
-  // Pattern match: field names followed by : or = with a value
+  
   const data = {}
   for (const key of FIELD_KEYS) {
-    // Match patterns like: Planting_Date: 2023-06-15 or Planting_Date = 2023-06-15
+    
     const escapedKey = key.replace(/_/g, "[ _]")
     const regex = new RegExp(`(?:^|[,\\n;])\\s*${escapedKey}\\s*[:=]\\s*([^,\\n;]+)`, "i")
     const match = text.match(regex)
@@ -166,9 +146,9 @@ function extractFieldData(text) {
 
 export { extractFieldData }
 
-// ---------------------------------------------------------------------------
-// Helper to create proper AbortError for signal cancellation
-// ---------------------------------------------------------------------------
+
+
+
 
 function createAbortError() {
   const err = new Error("The operation was aborted")
@@ -176,18 +156,18 @@ function createAbortError() {
   return err
 }
 
-// ---------------------------------------------------------------------------
-// Intent recognition
-// ---------------------------------------------------------------------------
+
+
+
 
 function detectIntent(text) {
-  // Check for structured field data first (highest priority)
+  
   if (extractFieldData(text)) {
     return "prediction"
   }
   const lower = text.toLowerCase()
 
-  // Best model / ranking
+  
   if (
     /\b(best|top|rank|leaderboard|number one|highest|most accurate)\b/.test(lower) &&
     /\b(model|r2|score|accuracy|performa)\b/.test(lower)
@@ -195,7 +175,7 @@ function detectIntent(text) {
     return "best_model"
   }
 
-  // Comparison between models
+  
   if (
     /\b(compare|difference|vs|versus|better than|worse than|how does)\b/.test(lower) &&
     /\b(cane.?sugar|catboost|xgboost|random.?forest|linear.?regression|elastic.?net)\b/.test(lower)
@@ -203,7 +183,7 @@ function detectIntent(text) {
     return "compare_models"
   }
 
-  // Why a model is best
+  
   if (
     /\b(why|reason|explain|how is|what makes)\b/.test(lower) &&
     /\b(best|better|good)\b/.test(lower) &&
@@ -212,27 +192,27 @@ function detectIntent(text) {
     return "why_best"
   }
 
-  // What model should I choose
+  
   if (
     /\b(choose|recommend|pick|select|which model|what model)\b/.test(lower)
   ) {
     return "recommend"
   }
 
-  // Tell me about a specific model
+  
   const modelMatch = lower.match(/\b(cane.?sugar|catboost|xgboost|random.?forest|linear.?regression|elastic.?net)\b/)
   if (modelMatch && /\b(tell|about|explain|describe|what is|how does|details)\b/.test(lower)) {
     return "model_info"
   }
 
-  // Specific metric for a specific model — e.g. "what is the RMSE of Random Forest?"
+  
   const modelNameInText = lower.match(/\b(cane.?sugar|catboost|xgboost|random.?forest|linear.?regression|elastic.?net|rf)\b/)
   if (modelNameInText && /\b(r2|r²|rmse|mae|metric|value|score)\b/.test(lower) &&
       /\b(of|for|is|does|what|show|get|tell)\b/.test(lower)) {
     return "specific_metric"
   }
 
-  // Best / worst in a specific metric — e.g. "which model has the lowest MAE?"
+  
   if (
     /\b(lowest|highest|best|worst|minimum|maximum|min|max)\b/.test(lower) &&
     /\b(r2|r²|rmse|mae|accuracy|error|score|metric)\b/.test(lower)
@@ -240,7 +220,7 @@ function detectIntent(text) {
     return "best_in_metric"
   }
 
-  // Metric explanation — e.g. "what does R² mean?" "explain RMSE"
+  
   if (
     /\b(what.?is|what.?does|explain|define|meaning|means|stand for|interpret|understanding)\b/.test(lower) &&
     /\b(r2|r²|rmse|mae|accuracy|metric|score|error)\b/.test(lower)
@@ -248,35 +228,35 @@ function detectIntent(text) {
     return "metric_explanation"
   }
 
-  // Show metrics / accuracy / performance
+  
   if (
     /\b(metric|accuracy|performa|r2|r²|rmse|mae|score|result)\b/.test(lower)
   ) {
     return "show_metrics"
   }
 
-  // Predict / yield prediction
+  
   if (
     /\b(predict|yield|forecast|estimate|production|harvest|quintal)\b/.test(lower)
   ) {
     return "prediction"
   }
 
-  // Feature importance
+  
   if (
     /\b(feature|important|factor|variable|attribute|column)\b/.test(lower)
   ) {
     return "features"
   }
 
-  // General help
+  
   if (
     /\b(help|what can you|how do you|guide|tutorial)\b/.test(lower)
   ) {
     return "help"
   }
 
-  // Metric explanation fallback — e.g. "what is R²" without "explain" keyword
+  
   if (
     /\b(r2|r²|rmse|mae)\b/.test(lower) &&
     /\b(meaning|what|defini|tutorial|lesson)\b/.test(lower)
@@ -287,16 +267,16 @@ function detectIntent(text) {
   return "general"
 }
 
-// ---------------------------------------------------------------------------
-// Response generators
-// ---------------------------------------------------------------------------
 
-/** Capitalize first letter */
+
+
+
+
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-/** Which metric is mentioned in the text? */
+
 function getMetricName(text) {
   const lower = text.toLowerCase()
   if (/\b(r²|r2|r_squared|r squared|coefficient of determination)\b/.test(lower)) return "R²"
@@ -305,7 +285,7 @@ function getMetricName(text) {
   return null
 }
 
-/** Is this metric better when higher (true) or lower (false)? */
+
 function isHigherBetter(metric) {
   return metric === "R²"
 }
@@ -371,7 +351,7 @@ function generateComparisonResponse(text, metrics, sortedNames) {
   const mentioned = models.filter((m) => text.toLowerCase().includes(m) || text.toLowerCase().includes(MODEL_DESCRIPTIONS[m].name.toLowerCase()))
 
   if (mentioned.length < 2) {
-    // Compare all
+    
     let response = `## 📊 Model Comparison\n\n`
     response += `Here's how all ${sortedNames.length} models stack up:\n\n`
     response += formatMetricsTable(metrics, sortedNames)
@@ -391,7 +371,7 @@ function generateComparisonResponse(text, metrics, sortedNames) {
     return response
   }
 
-  // Compare specific models
+  
   let response = `## 🔄 Comparing ${mentioned.map((m) => MODEL_DESCRIPTIONS[m]?.name).join(" vs ")}\n\n`
 
   const sortedMentioned = mentioned.filter((m) => sortedNames.includes(m)).sort((a, b) => (metrics[b]?.r2 || 0) - (metrics[a]?.r2 || 0))
@@ -472,7 +452,7 @@ function generateRecommendResponse(text, metrics, sortedNames) {
 
   const lower = text.toLowerCase()
 
-  // Check for specific priorities in the question
+  
   const wantsSpeed = /\b(speed|fast|quick|rapid|time)\b/.test(lower)
   const wantsAccuracy = /\b(accurate|precise|exact|best|highest)\b/.test(lower)
   const wantsInterpretability = /\b(interpret|explain|understand|simple|straightforward)\b/.test(lower)
@@ -501,7 +481,7 @@ function generateRecommendResponse(text, metrics, sortedNames) {
     response += `Random Forest is highly resistant to overfitting and provides reliable feature importance scores. R² = ${(metrics.random_forest?.r2 || 0).toFixed(4)}.\n\n`
   }
 
-  // General recommendation
+  
   response += `### 📋 General Guidance\n\n`
   response += `| If you want… | Choose… | Why |\n`
   response += `|-------------|---------|-----|\n`
@@ -554,7 +534,7 @@ function generateModelInfoResponse(text, metrics, sortedNames) {
   response += `### When to Choose This Model\n`
   response += `${desc.whenToChoose}\n`
 
-  // Compare to best
+  
   if (sortedNames[0] !== key && sortedNames.length > 1) {
     const best = sortedNames[0]
     const bestDesc = MODEL_DESCRIPTIONS[best]
@@ -573,16 +553,16 @@ function generateSpecificMetricResponse(text, metrics, sortedNames) {
   const metric = getMetricName(text)
 
   if (!modelKey && !metric) {
-    // Fall back to full metrics table
+    
     return generateMetricsResponse(metrics, sortedNames)
   }
 
   if (!modelKey && metric) {
-    // Show this metric for all models
+    
     const mLabel = metric === "R²" ? "r2" : metric.toLowerCase()
     const isHigher = isHigherBetter(metric)
 
-    // Find best in this metric
+    
     const sorted = [...sortedNames].sort((a, b) => {
       const va = metrics[a]?.[mLabel] ?? 0
       const vb = metrics[b]?.[mLabel] ?? 0
@@ -607,22 +587,22 @@ function generateSpecificMetricResponse(text, metrics, sortedNames) {
     return response
   }
 
-  // We have a specific model
+  
   const key = modelKey || sortedNames[0]
   const desc = MODEL_DESCRIPTIONS[key]
   const m = metrics[key] || {}
 
   if (!metric) {
-    // No specific metric asked — show all metrics for this model
+    
     return generateModelInfoResponse(text, metrics, sortedNames)
   }
 
-  // Specific model + specific metric
+  
   const mLabel = metric === "R²" ? "r2" : metric.toLowerCase()
   const val = m[mLabel]
   const formatted = val !== undefined ? (metric === "R²" ? val.toFixed(4) : val.toFixed(2)) : "—"
 
-  // Rank
+  
   const isHigher = isHigherBetter(metric)
   const sorted = [...sortedNames].sort((a, b) => {
     const va = metrics[a]?.[mLabel] ?? 0
@@ -674,7 +654,7 @@ function generateBestInMetricResponse(text, metrics, sortedNames) {
   const isHigher = isHigherBetter(metric)
   const direction = isHigher ? "highest" : "lowest"
 
-  // Sort by this metric
+  
   const sorted = [...sortedNames].sort((a, b) => {
     const va = metrics[a]?.[mLabel] ?? 0
     const vb = metrics[b]?.[mLabel] ?? 0
@@ -729,7 +709,7 @@ function generateMetricExplanationResponse(text) {
     return `## 📚 What is RMSE?\n\n**RMSE (Root Mean Squared Error)** measures prediction error with a focus on penalizing larger mistakes more heavily.\n\n### Key Points\n- **Range:** 0 to ∞ (lower is better)\n- **0** → Perfect predictions\n- **Penalizes big errors** more than small ones (due to squaring)\n- **Unit:** Same as your target variable (Quintal/Acre)\n\n### Comparison with MAE\n- RMSE ≥ MAE **always** (because it penalizes big errors)\n- **RMSE ≈ MAE** → Errors are evenly distributed\n- **RMSE >> MAE** → There are some very bad predictions in the mix\n\n### In Context\n- **CatBoost** has RMSE of **32.10** vs MAE of **23.24**\n- The gap (RMSE - MAE = 8.86) suggests moderate variance in error sizes\n- **Linear Regression** has RMSE of **68.74** — significantly larger errors\n\n### Why It Matters\n- If you want to avoid any really bad predictions, focus on RMSE\n- If average error matters more, focus on MAE\n\n> 💡 **Bottom line:** RMSE tells you about the worst-case prediction errors. The gap between RMSE and MAE reveals error consistency.`
   }
 
-  // Safety fallback — should not be reached
+  
   return `I can explain the model metrics! Which one would you like to know about: **R²**, **MAE**, or **RMSE**?`
 }
 
@@ -792,17 +772,17 @@ function generateFeatureResponse(metrics, sortedNames) {
 }
 
 async function generatePredictionResponse(text, gpsData) {
-  // Try to extract field data from the user's message text directly
+  
   const inlineFieldData = extractFieldData(text)
 
-  // Use inline data if available (higher priority), otherwise use saved gpsData
+  
   const fieldData = inlineFieldData || {}
 
   if (!inlineFieldData && (!gpsData || Object.keys(gpsData).length === 0)) {
     return `## 🌾 Yield Prediction\n\nI'd love to help you with a yield prediction! To get started, please enter your field details in the **Field Details** panel (right side).\n\nI need information like:\n- **Planting Date** and **Harvesting Date**\n- **Sugarcane Variety** (e.g., Co86032, CoC671)\n- **Soil Type** (Clay, Sandy, Loamy, etc.)\n- **Irrigation & Fertilizer** methods\n\nOnce you've entered the data, ask me again for a prediction!`
   }
 
-  // If we don't have inline data, use saved gpsData
+  
   if (!inlineFieldData && gpsData) {
     const fields = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type", "Soil_Type", "Irrigation_Type", "Fertilizer_Type"]
     for (const key of fields) {
@@ -819,7 +799,7 @@ async function generatePredictionResponse(text, gpsData) {
   }
 
   try {
-    // Try ensemble first, fall back to auto
+    
     let result
     try {
       result = await predictEnsemble([fieldData])
@@ -886,22 +866,22 @@ function generateHelpResponse() {
 function generateGeneralResponse(text, metrics, sortedNames) {
   const lower = text.toLowerCase()
 
-  // Greetings
+  
   if (/\b(hi|hello|hey|greetings|sup|howdy)\b/.test(lower)) {
     return `## Hello! 👋\n\nWelcome to **CaneSense** — your sugarcane yield prediction assistant.\n\nI can help you with:\n- 🏆 **Model comparisons** — "Which model is best?"\n- 📊 **Performance metrics** — "Show me accuracy"\n- 🎯 **Recommendations** — "What model should I use?"\n- 🌾 **Yield predictions** — "Predict my yield"\n\nWhat would you like to know?`
   }
 
-  // Thanks
+  
   if (/\b(thank|thanks|thx|ty|appreciate)\b/.test(lower)) {
     return "You're welcome! 😊 Let me know if you have any other questions about the models or predictions."
   }
 
-  // About / who are you
+  
   if (/\b(who are you|what are you|about|your name|introduce)\b/.test(lower)) {
     return `I'm **CaneSense** 🤖 — a local AI assistant built specifically for sugarcane yield prediction.\n\nI don't call any external AI service (no API keys needed!). I answer questions using data from your trained ML models directly.\n\n**What I know:**\n- ${sortedNames.length} trained ML models for yield prediction\n- ${sortedNames.map((n) => MODEL_DESCRIPTIONS[n]?.name).join(", ")}\n- Sugarcane field parameters and agricultural best practices\n\nAsk me about model performance, comparisons, or yield predictions!`
   }
 
-  // Default fallback — give a useful response
+  
   let response = `I understand you're asking about something related to sugarcane yield prediction. Let me help!\n\n`
   response += `Here's what I can do:\n\n`
   response += `- 📊 **View model performance** — Ask "show me model accuracy"\n`
@@ -914,7 +894,7 @@ function generateGeneralResponse(text, metrics, sortedNames) {
   response += `- 🌾 **Predict yield** — Ask "predict my yield" (after entering field data)\n`
   response += `- 📚 **Learn about models** — Ask "tell me about Random Forest"\n\n`
 
-  // Quick stats
+  
   if (sortedNames.length > 0) {
     const best = sortedNames[0]
     response += `> 💡 **Quick stats:** Currently running **${sortedNames.length} models**. **${MODEL_DESCRIPTIONS[best]?.name}** is the best performer with R² = **${(metrics[best]?.r2 || 0).toFixed(4)}**.`
@@ -923,35 +903,28 @@ function generateGeneralResponse(text, metrics, sortedNames) {
   return response
 }
 
-// ---------------------------------------------------------------------------
-// Main AI response generator
-// ---------------------------------------------------------------------------
 
-/**
- * Generate a local AI response based on the conversation history.
- * No external API calls — uses data from the backend models.
- *
- * @param {Array} messages - Array of { role, content } objects
- * @param {Object} options - { temperature, max_tokens, signal }
- * @returns {Promise<string>} - The full response text
- */
+
+
+
+
 export async function sendChatMessage(messages, options = {}) {
   const { signal } = options
 
-  // Abort if needed
+  
   if (signal?.aborted) throw createAbortError()
 
-  // Extract the last user message
+  
   const userMessages = messages.filter((m) => m.role === "user")
   const lastUserMessage = userMessages[userMessages.length - 1]
   const userText = lastUserMessage?.content || ""
 
-  // Check for abort after extracting
+  
   if (signal?.aborted) throw createAbortError()
 
-  // Extract GPS data from the context message (if any)
-  // NOTE: This parsing depends on the format of buildContextMessage() in Dashboard.jsx
-  // If that function's line format changes, update this parsing accordingly.
+  
+  
+  
   let gpsData = null
   const systemMessages = messages.filter((m) => m.role === "system")
   for (const msg of systemMessages) {
@@ -963,7 +936,7 @@ export async function sendChatMessage(messages, options = {}) {
         if (match) {
           const key = match[1].trim().replace(/ /g, "_")
           const val = match[2].trim()
-          // Skip non-field lines
+          
           if (["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type", "Soil_Type", "Irrigation_Type", "Fertilizer_Type"].includes(key)) {
             gpsData[key] = val
           }
@@ -972,7 +945,7 @@ export async function sendChatMessage(messages, options = {}) {
     }
   }
 
-  // Fetch model data from backend
+  
   let metrics = {}
   let sortedNames = []
 
@@ -991,13 +964,13 @@ export async function sendChatMessage(messages, options = {}) {
     sortedNames = Object.keys(metrics).sort((a, b) => (metrics[b]?.r2 || 0) - (metrics[a]?.r2 || 0))
   } catch (err) {
     if (err.name === "AbortError") throw err
-    // If backend is unavailable, use cached/generic responses
+    
   }
 
-  // Check for abort right before generating response
+  
   if (signal?.aborted) throw createAbortError()
 
-  // Detect intent and generate response
+  
   const intent = detectIntent(userText)
 
   let response
@@ -1042,8 +1015,8 @@ export async function sendChatMessage(messages, options = {}) {
       response = generateGeneralResponse(userText, metrics, sortedNames)
   }
 
-  // If we detected field data in the user message but gpsData is empty,
-  // also auto-trigger the backend prediction call (handled in Dashboard.jsx via the response)
+  
+  
   const detectedFieldData = extractFieldData(userText)
   if (detectedFieldData && Object.keys(detectedFieldData).length > 0) {
     response += `\n\n---\n\n> 📊 *Running prediction with your field data... Check the banner above for results.*`
@@ -1052,21 +1025,15 @@ export async function sendChatMessage(messages, options = {}) {
   return response
 }
 
-/**
- * Parse a response — works with both the local AI (string) and the old Gemini API (ReadableStream).
- *
- * @param {string|ReadableStream} response - The response to parse
- * @param {Function} onToken - Callback with (token: string) => void
- * @returns {Promise<string>} - The full assembled content
- */
+
 export async function parseStreamingResponse(response, onToken) {
   if (typeof response === "string") {
-    // Local AI — full response at once
+    
     onToken(response)
     return response
   }
 
-  // Legacy: handle ReadableStream (from old Gemini API)
+  
   const reader = response.getReader()
   const decoder = new TextDecoder()
   let fullContent = ""
@@ -1091,7 +1058,7 @@ export async function parseStreamingResponse(response, onToken) {
             onToken(text)
           }
         } catch {
-          // skip
+          
         }
       }
     }
@@ -1099,9 +1066,7 @@ export async function parseStreamingResponse(response, onToken) {
   return fullContent
 }
 
-/**
- * System prompt for backward compatibility.
- */
+
 export const SYSTEM_PROMPT = `You are **CaneSense**, an AI assistant specialized in sugarcane yield prediction and agricultural analysis.
 
 You can answer questions about:
@@ -1112,9 +1077,7 @@ You can answer questions about:
 
 Keep responses focused, informative, and use markdown formatting.`
 
-/**
- * Local health check — always returns connected since no external API is needed.
- */
+
 export async function checkGeminiConnection() {
   return {
     status: "connected",

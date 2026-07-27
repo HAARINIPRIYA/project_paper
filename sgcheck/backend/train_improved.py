@@ -44,7 +44,6 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 
 TARGET = "Yield_Quintal_per_Acre"
 
-# Columns that are constant (single value) or purely geo-identity
 USELESS_COLS = [
     "Latitude",
     "Longitude",
@@ -56,25 +55,19 @@ USELESS_COLS = [
     "Region",
 ]
 
-# ---------------------------------------------------------------------------
-# 1. Load & clean with better imputation
-# ---------------------------------------------------------------------------
 
 
 def load_and_clean_improved(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
     print(f"Loaded dataset: {df.shape}")
 
-    # Drop useless constant/identity columns
     existing = [c for c in USELESS_COLS if c in df.columns]
     df.drop(columns=existing, inplace=True)
     print(f"Dropped {len(existing)} useless columns: {existing}")
 
-    # Parse dates
     df["Planting_Date"] = pd.to_datetime(df["Planting_Date"], errors="coerce")
     df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"], errors="coerce")
 
-    # Extract date features
     df["Planting_Year"] = df["Planting_Date"].dt.year
     df["Planting_Month"] = df["Planting_Date"].dt.month
     df["Planting_Day"] = df["Planting_Date"].dt.day
@@ -83,7 +76,6 @@ def load_and_clean_improved(path: str) -> pd.DataFrame:
     df["Harvest_Day"] = df["Harvesting_Date"].dt.day
     df.drop(["Planting_Date", "Harvesting_Date"], axis=1, inplace=True)
 
-    # Fill missing values more intelligently
     num_cols = df.select_dtypes(include=["int64", "float64"]).columns
     cat_cols = df.select_dtypes(include=["object"]).columns
 
@@ -96,16 +88,12 @@ def load_and_clean_improved(path: str) -> pd.DataFrame:
     return df
 
 
-# ---------------------------------------------------------------------------
-# 2. Feature engineering
-# ---------------------------------------------------------------------------
 
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """Create interaction and polynomial features from high-importance columns."""
     df_fe = df.copy()
 
-    # --- Interaction features for top numeric predictors ---
     top_numeric = ["Nitrogen_kg_per_acre", "Potassium_kg_per_acre",
                    "Soil_Moisture_%", "Temp_Avg_C",
                    "Phosphorus_kg_per_acre", "Crop_Duration_Days"]
@@ -118,7 +106,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             name = f"{col_a}_x_{col_b}"
             df_fe[name] = df_fe[col_a] * df_fe[col_b]
 
-    # --- Ratio features ---
     if "Nitrogen_kg_per_acre" in df_fe and "Phosphorus_kg_per_acre" in df_fe:
         df_fe["N_P_Ratio"] = (
             df_fe["Nitrogen_kg_per_acre"] / (df_fe["Phosphorus_kg_per_acre"] + 1e-5)
@@ -132,12 +119,10 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             df_fe["Rainfall_Total_mm"] / (df_fe["Evapotranspiration_mm_day"] + 1e-5)
         )
 
-    # --- Polynomial features for top 3 ---
     for col in existing_num[:3]:
         df_fe[f"{col}_sq"] = df_fe[col] ** 2
         df_fe[f"{col}_cubed"] = df_fe[col] ** 3
 
-    # --- Binned features ---
     if "Nitrogen_kg_per_acre" in df_fe:
         df_fe["Nitrogen_Binned"] = pd.qcut(
             df_fe["Nitrogen_kg_per_acre"], q=5, labels=False, duplicates="drop"
@@ -147,9 +132,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     return df_fe
 
 
-# ---------------------------------------------------------------------------
-# 3. Winsorize target outliers
-# ---------------------------------------------------------------------------
 
 
 def winsorize_target(y: pd.Series, limits=(0.01, 0.01)) -> pd.Series:
@@ -157,7 +139,6 @@ def winsorize_target(y: pd.Series, limits=(0.01, 0.01)) -> pd.Series:
     try:
         from scipy.stats.mstats import winsorize
     except ImportError:
-        # Fallback: manual winsorize
         def winsorize(arr, limits):
             arr = arr.copy()
             n = len(arr)
@@ -178,9 +159,6 @@ def winsorize_target(y: pd.Series, limits=(0.01, 0.01)) -> pd.Series:
     return pd.Series(clipped, index=y.index)
 
 
-# ---------------------------------------------------------------------------
-# 4. Encode categoricals
-# ---------------------------------------------------------------------------
 
 
 def encode_categoricals(df: pd.DataFrame) -> tuple:
@@ -197,9 +175,6 @@ def encode_categoricals(df: pd.DataFrame) -> tuple:
     return df_enc, encoders
 
 
-# ---------------------------------------------------------------------------
-# 5. Model training functions
-# ---------------------------------------------------------------------------
 
 METRICS = {}
 
@@ -219,15 +194,11 @@ def save_model(model, name, metadata):
     print(f"  -> Saved {path}")
 
 
-# ---------------------------------------------------------------------------
-# 5a. CatBoost with hyperparameter tuning
-# ---------------------------------------------------------------------------
 def train_catboost_tuned(X_train, X_test, y_train, y_test, cat_features):
     from catboost import CatBoostRegressor
 
     print("\n=== CatBoost (Tuned) ===")
 
-    # Quick randomized search
     param_dist = {
         "iterations": [500, 1000, 1500],
         "learning_rate": [0.01, 0.03, 0.05, 0.1],
@@ -260,7 +231,6 @@ def train_catboost_tuned(X_train, X_test, y_train, y_test, cat_features):
     print(f"  Best params: {best_params}")
     print(f"  CV R²: {rs.best_score_:.4f}")
 
-    # Refit best model
     model = CatBoostRegressor(
         **best_params,
         random_seed=42,
@@ -288,16 +258,12 @@ def train_catboost_tuned(X_train, X_test, y_train, y_test, cat_features):
     return model
 
 
-# ---------------------------------------------------------------------------
-# 5b. Stacking ensemble
-# ---------------------------------------------------------------------------
 def train_stacking_ensemble(X_train, X_test, y_train, y_test, cat_features):
     from catboost import CatBoostRegressor
     from xgboost import XGBRegressor
 
     print("\n=== Stacking Ensemble (CatBoost + XGBoost + RF → Ridge) ===")
 
-    # Base estimators
     estimators = [
         ("catboost", CatBoostRegressor(
             iterations=1000, learning_rate=0.05, depth=8,
@@ -315,7 +281,6 @@ def train_stacking_ensemble(X_train, X_test, y_train, y_test, cat_features):
         )),
     ]
 
-    # Meta-model
     meta = Ridge(alpha=1.0)
 
     stacking = StackingRegressor(
@@ -336,7 +301,6 @@ def train_stacking_ensemble(X_train, X_test, y_train, y_test, cat_features):
         "metrics": METRICS["Stacking_Ensemble"],
     })
 
-    # Also show individual model performances within the ensemble
     print("\n  --- Individual performance within ensemble ---")
     for name, model in estimators:
         if name == "catboost":
@@ -349,9 +313,6 @@ def train_stacking_ensemble(X_train, X_test, y_train, y_test, cat_features):
     return stacking
 
 
-# ---------------------------------------------------------------------------
-# 5c. XGBoost Tuned
-# ---------------------------------------------------------------------------
 def train_xgboost_tuned(X_train, X_test, y_train, y_test):
     from xgboost import XGBRegressor
 
@@ -383,7 +344,6 @@ def train_xgboost_tuned(X_train, X_test, y_train, y_test):
     print(f"  Best params: {best_params}")
     print(f"  CV R²: {rs.best_score_:.4f}")
 
-    # Remove early_stopping_rounds from params if present (not a constructor param)
     model = XGBRegressor(
         **best_params,
         objective="reg:squarederror",
@@ -408,9 +368,6 @@ def train_xgboost_tuned(X_train, X_test, y_train, y_test):
     return model
 
 
-# ---------------------------------------------------------------------------
-# 5d. Random Forest Tuned
-# ---------------------------------------------------------------------------
 def train_rf_tuned(X_train, X_test, y_train, y_test):
     print("\n=== Random Forest (Tuned) ===")
 
@@ -452,9 +409,6 @@ def train_rf_tuned(X_train, X_test, y_train, y_test):
     return model
 
 
-# ---------------------------------------------------------------------------
-# 5e. Ridge (replaces plain LinearRegression — handles multicollinearity)
-# ---------------------------------------------------------------------------
 def train_ridge(X_train, X_test, y_train, y_test):
     print("\n=== Ridge Regression ===")
 
@@ -478,9 +432,6 @@ def train_ridge(X_train, X_test, y_train, y_test):
     return model
 
 
-# ---------------------------------------------------------------------------
-# 6. Main
-# ---------------------------------------------------------------------------
 
 
 def main():
@@ -492,28 +443,21 @@ def main():
 
     t0 = time.time()
 
-    # ---- Load & clean ----
     df = load_and_clean_improved(args.data)
 
-    # ---- Engineer features ----
     df = engineer_features(df)
 
-    # ---- Separate X, y ----
     y = df[TARGET]
     X = df.drop(TARGET, axis=1)
 
-    # ---- Winsorize target outliers ----
     y = winsorize_target(y, limits=(0.01, 0.01))
 
-    # ---- Encode categoricals ----
     X_enc, encoders = encode_categoricals(X)
 
-    # Also keep raw for CatBoost
     X_raw = X.copy()
 
     print(f"\nFinal feature set: {X_enc.shape[1]} columns, {len(X_enc)} rows")
 
-    # ---- Train/test split ----
     rs = 42
     X_train, X_test, y_train, y_test = train_test_split(
         X_enc, y, test_size=0.2, random_state=rs
@@ -522,16 +466,12 @@ def main():
         X_raw, y, test_size=0.2, random_state=rs
     )
 
-    # ---- 5-fold CV baseline ----
     print("\n=== 5-Fold Cross-Validation (Random Forest baseline) ===")
     rf_base = RandomForestRegressor(n_estimators=500, random_state=42, n_jobs=-1)
     cv_scores = cross_val_score(rf_base, X_enc, y, cv=KFold(5, shuffle=True, random_state=42), scoring="r2")
     print(f"  RF CV R²: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
 
-    # Note: cross_val_score with CatBoost needs careful cat_features handling
-    # Skipping direct CB CV here to avoid issues
 
-    # ---- Train models ----
     cat_idx = [Xr_train.columns.get_loc(c) for c in Xr_train.select_dtypes(include=["object"]).columns]
 
     if not args.no_tune:
@@ -552,7 +492,6 @@ def main():
     train_ridge(X_train, X_test, y_train, y_test)
     train_stacking_ensemble(X_train, X_test, y_train, y_test, cat_idx)
 
-    # ---- Save artifacts ----
     joblib.dump(encoders, os.path.join(MODELS_DIR, "encoders_improved.joblib"))
     joblib.dump(list(X_enc.columns), os.path.join(MODELS_DIR, "features_improved.joblib"))
 
@@ -566,7 +505,6 @@ def main():
     print(f"  ✅ Training completed in {elapsed / 60:.1f} minutes!")
     print(f"{'='*50}\n")
 
-    # Final summary
     print("Final Metrics Summary:")
     print("-" * 50)
     for name, metrics in sorted(METRICS.items(), key=lambda x: -x[1]["r2"]):

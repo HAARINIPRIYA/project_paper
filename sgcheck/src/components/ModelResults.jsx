@@ -87,7 +87,7 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
         transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
         className="flex flex-col gap-4"
       >
-        {/* Hero Result — Glowing Emerald Card */}
+        {}
         <div className="aws-card prediction-hero" style={{ borderColor: "rgba(0, 214, 143, 0.25)", boxShadow: "0 0 30px rgba(0, 214, 143, 0.08), inset 0 1px 0 rgba(0, 214, 143, 0.06)" }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(0, 214, 143, 0.12)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
             <div className="flex items-center gap-3">
@@ -147,7 +147,7 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
           </div>
         </div>
 
-        {/* Individual Model Breakdown (ensemble) */}
+        {}
         {isEnsemble && sortedIndividual.length > 0 && (
           <div className="aws-card">
             <div className="aws-card-header">
@@ -169,7 +169,7 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
           </div>
         )}
 
-        {/* Metrics for single model */}
+        {}
         {!isEnsemble && metrics && (
           <div style={{
             display: "flex",

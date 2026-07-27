@@ -1,7 +1,4 @@
-/**
- * PredictionHero — a dramatic, animated hero card for yield prediction results.
- * Impossible to miss. Beautiful to look at.
- */
+
 
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -21,7 +18,7 @@ import {
   Zap,
 } from "lucide-react"
 
-// ─── Field parameter icon mapping ──────────────────────────────────────────
+
 const FIELD_CONFIG = {
   Planting_Date:      { icon: Calendar,     label: "Planting" },
   Harvesting_Date:    { icon: Calendar,     label: "Harvest" },
@@ -32,7 +29,7 @@ const FIELD_CONFIG = {
   Fertilizer_Type:    { icon: Beaker,       label: "Fertilizer" },
 }
 
-// ─── Format field values nicely ──────────────────────────────────────────
+
 function formatFieldValue(key, value) {
   if (!value) return "—"
   if (key === "Planting_Date" || key === "Harvesting_Date") {
@@ -44,7 +41,7 @@ function formatFieldValue(key, value) {
   return value.replace(/_/g, " ")
 }
 
-// ─── Color helpers ────────────────────────────────────────────────────────
+
 function modelColor(name) {
   const map = {
     cane_sugar:        "#FF6B35",
@@ -71,7 +68,7 @@ function modelLabel(name) {
   return map[name?.toLowerCase()] || name || "Auto"
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────
+
 export default function PredictionHero({ result, gpsData, onDismiss }) {
   if (!result) return null
 
@@ -82,7 +79,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
   const mae = metrics.mae
   const isEnsemble = modelName === "ensemble" || result.individual_predictions
 
-  // Build field chips from gpsData or result
+  
   const fieldKeys = Object.keys(FIELD_CONFIG)
   const fieldValues = {}
   if (gpsData) {
@@ -96,7 +93,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
   const hasFields = Object.keys(fieldValues).length > 0
   const color = modelColor(modelName)
 
-  // ──────────────── ENTRANCE ANIMATION ────────────────
+  
   const containerVariants = {
     hidden: { opacity: 0, y: -20, scale: 0.97 },
     visible: {
@@ -140,7 +137,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
         boxShadow: "0 0 40px rgba(0, 214, 143, 0.08), 0 8px 32px rgba(0, 0, 0, 0.4)",
       }}
     >
-      {/* ── Animated gradient border overlay ── */}
+      {}
       <div
         className="prediction-hero-border"
         style={{
@@ -158,7 +155,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
         }}
       />
 
-      {/* ── Sparkle dots ── */}
+      {}
       <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 1 }}>
         <motion.div
           animate={{ opacity: [0, 0.6, 0], scale: [0.8, 1.1, 0.8] }}
@@ -204,9 +201,9 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
         />
       </div>
 
-      {/* ── Content (above gradient overlay) ── */}
+      {}
       <div style={{ position: "relative", zIndex: 2, padding: "20px 24px" }}>
-        {/* ── Top bar: title + dismiss ── */}
+        {}
         <motion.div
           variants={childVariants}
           style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}
@@ -275,7 +272,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
           </div>
         </motion.div>
 
-        {/* ── Yield value — massive, glowing, impossible to miss ── */}
+        {}
         <motion.div
           variants={childVariants}
           style={{
@@ -317,7 +314,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
           )}
         </motion.div>
 
-        {/* ── Metrics row ── */}
+        {}
         {Object.keys(metrics).length > 0 && (
           <motion.div
             variants={childVariants}
@@ -353,7 +350,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
           </motion.div>
         )}
 
-        {/* ── Model badge ── */}
+        {}
         <motion.div
           variants={childVariants}
           style={{
@@ -386,7 +383,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
           </div>
         </motion.div>
 
-        {/* ── Field parameter chips ── */}
+        {}
         {hasFields && (
           <motion.div variants={childVariants}>
             <div

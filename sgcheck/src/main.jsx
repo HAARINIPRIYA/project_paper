@@ -1,4 +1,4 @@
-// Set saved theme immediately to prevent flash
+
 (function() {
   try {
     var theme = localStorage.getItem('canesense_theme')

@@ -30,12 +30,10 @@ def load_and_prep():
     df = pd.read_csv(os.path.join(os.path.dirname(__file__), "DataSet", "FINAL_SUGARCANE_DATASET.csv"))
     print(f"Loaded: {df.shape}")
 
-    # Drop ID columns
     for col in ["Latitude", "Longitude", "Khasra_No", "Sugar_Mill", "Tehsil", "District", "State", "Region"]:
         if col in df.columns:
             df.drop(col, axis=1, inplace=True)
 
-    # Date features
     df["Planting_Date"] = pd.to_datetime(df["Planting_Date"], errors="coerce")
     df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"], errors="coerce")
     df["Planting_Month"] = df["Planting_Date"].dt.month.fillna(1)
@@ -44,7 +42,6 @@ def load_and_prep():
     df["Crop_Duration"] = df["Crop_Duration"].fillna(df.get("Crop_Duration_Days", 250))
     df.drop(["Planting_Date", "Harvesting_Date"], axis=1, inplace=True)
 
-    # Sunshine
     if "Sunshine_Hours_hh_mm" in df.columns:
         try:
             parts = df["Sunshine_Hours_hh_mm"].astype(str).str.split(":", expand=True)
@@ -53,13 +50,11 @@ def load_and_prep():
         except:
             pass
 
-    # Fill missing
     for col in df.select_dtypes(include=["int64", "float64"]).columns:
         df[col] = df[col].fillna(df[col].median())
     for col in df.select_dtypes(include=["object"]).columns:
         df[col] = df[col].fillna("Unknown")
 
-    # Quick features
     eps = 1e-6
     if "Nitrogen_kg_per_acre" in df.columns and "Phosphorus_kg_per_acre" in df.columns:
         df["N_P"] = df["Nitrogen_kg_per_acre"] / (df["Phosphorus_kg_per_acre"] + eps)
@@ -82,7 +77,6 @@ def main():
     y = df[TARGET]
     X = df.drop(TARGET, axis=1)
 
-    # Encode categoricals
     for col in X.select_dtypes(include=["object"]).columns:
         le = LabelEncoder()
         X[col] = le.fit_transform(X[col].astype(str))
@@ -90,26 +84,21 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
     print(f"Train: {len(X_train)} | Test: {len(X_test)}\n")
 
-    # Target transform
     pt = PowerTransformer(method="yeo-johnson", standardize=False)
     y_train_t = pt.fit_transform(y_train.values.reshape(-1, 1)).ravel()
 
-    # Train models (fast settings)
     print("Training models...")
 
-    # RF
     rf = RandomForestRegressor(n_estimators=200, max_depth=15, random_state=SEED, n_jobs=-1)
     rf.fit(X_train, y_train_t)
     rf_pred = pt.inverse_transform(rf.predict(X_test).reshape(-1, 1)).ravel()
     print(f"  RF R² = {r2_score(y_test, rf_pred):.4f}")
 
-    # GB
     gb = GradientBoostingRegressor(n_estimators=200, learning_rate=0.1, max_depth=6, random_state=SEED)
     gb.fit(X_train, y_train_t)
     gb_pred = pt.inverse_transform(gb.predict(X_test).reshape(-1, 1)).ravel()
     print(f"  GB R² = {r2_score(y_test, gb_pred):.4f}")
 
-    # XGBoost (if available)
     try:
         from xgboost import XGBRegressor
         xgb = XGBRegressor(n_estimators=300, learning_rate=0.1, max_depth=8, random_state=SEED, verbosity=0)
@@ -119,7 +108,6 @@ def main():
     except:
         xgb_pred = rf_pred
 
-    # Optimize weights
     print("\nOptimizing ensemble...")
     preds = {"RF": rf_pred, "GB": gb_pred, "XGB": xgb_pred}
     best_r2, best_w = -1e9, None
@@ -146,7 +134,6 @@ def main():
     print(f"  RMSE = {rmse:.2f}")
     print(f"  Weights: {best_w}")
 
-    # Save
     results = {"CaneSugar Fast": {"r2": round(r2, 4), "mae": round(mae, 4), "rmse": round(rmse, 4)}, "weights": best_w}
     with open(os.path.join(MODELS_DIR, "cane_sugar_results.json"), "w") as f:
         json.dump(results, f, indent=2)

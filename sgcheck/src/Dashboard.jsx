@@ -53,7 +53,7 @@ const NAV_ITEMS = [
 
 const STORAGE_KEY = "canesense_conversations"
 
-// --- Quick Suggestions ---
+
 const SUGGESTIONS = [
   { icon: Trophy, label: "Which model is best?", query: "Which model is best?", color: "var(--accent-green)" },
   { icon: GitCompare, label: "Compare CatBoost vs XGBoost", query: "Compare CatBoost and XGBoost", color: "var(--accent-blue)" },
@@ -63,7 +63,7 @@ const SUGGESTIONS = [
   { icon: Sprout, label: "Predict my yield", query: "Predict my yield", color: "var(--accent-green)" },
 ]
 
-// --- Helpers ---
+
 function loadConversations() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)

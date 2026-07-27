@@ -20,7 +20,6 @@ def main():
 
     df = load_and_clean(args.data)
 
-    # CatBoost can handle categorical features natively — keep them as objects
     X, y = get_feature_target(df)
     categorical_features = X.select_dtypes(include=["object"]).columns
     cat_features = [X.columns.get_loc(col) for col in categorical_features]
@@ -30,7 +29,6 @@ def main():
         X, y, test_size=0.2, random_state=42
     )
 
-    # ---- Initial model ----
     model = CatBoostRegressor(
         iterations=1000,
         learning_rate=0.05,
@@ -52,14 +50,12 @@ def main():
     print(f"MAE      : {mae:.4f}")
     print(f"RMSE     : {rmse:.4f}")
 
-    # ---- Feature importance ----
     importance = model.get_feature_importance()
     fi = pd.DataFrame({"Feature": X.columns, "Importance": importance})
     fi = fi.sort_values("Importance", ascending=False)
     print("\n=== Top 20 Features ===")
     print(fi.head(20))
 
-    # ---- Refit on selected features ----
     selected_features = fi[fi["Importance"] > 1]["Feature"]
     print("\nSelected features:", list(selected_features))
     X_selected = X[selected_features]

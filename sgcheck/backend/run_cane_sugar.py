@@ -27,7 +27,6 @@ import sys
 import time
 import warnings
 
-# Fix Windows terminal encoding for UTF-8 characters
 if sys.platform == "win32":
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -60,33 +59,26 @@ SEED = 42
 N_FOLDS = 5
 
 
-# ═══════════════════════════════════════════════════════════════
-# 1. Load & clean
-# ═══════════════════════════════════════════════════════════════
 
 def load_and_clean(path: str) -> pd.DataFrame:
     """Load CSV, drop geo/id cols, parse dates, impute missing values intelligently."""
     df = pd.read_csv(path)
     print(f"[CaneSugar v4] Loaded dataset: {df.shape}")
 
-    # Drop useless identity/geo columns
     existing = [c for c in USELESS_COLS if c in df.columns]
     if existing:
         df.drop(columns=existing, inplace=True)
         print(f"  Dropped {len(existing)} useless columns: {existing}")
 
-    # Parse dates with coerce
     df["Planting_Date"] = pd.to_datetime(df["Planting_Date"], errors="coerce")
     df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"], errors="coerce")
 
-    # Extract rich date features
     for prefix, col in [("Planting", "Planting_Date"), ("Harvest", "Harvesting_Date")]:
         df[f"{prefix}_Year"] = df[col].dt.year
         df[f"{prefix}_Month"] = df[col].dt.month
         df[f"{prefix}_Day"] = df[col].dt.day
         df[f"{prefix}_DayOfYear"] = df[col].dt.dayofyear
 
-    # Calculated crop duration from actual dates
     df["Crop_Duration_Calc"] = (
         df["Harvesting_Date"] - df["Planting_Date"]
     ).dt.days
@@ -96,7 +88,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
 
     df.drop(["Planting_Date", "Harvesting_Date"], axis=1, inplace=True)
 
-    # Sunshine hours: parse "hh:mm" string to decimal
     if "Sunshine_Hours_hh_mm" in df.columns:
         try:
             parts = df["Sunshine_Hours_hh_mm"].astype(str).str.split(":", expand=True)
@@ -105,7 +96,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
         except Exception:
             pass
 
-    # Convert Month from string to int if categorical
     if "Month" in df.columns and df["Month"].dtype == "object":
         try:
             month_map = {
@@ -123,12 +113,10 @@ def load_and_clean(path: str) -> pd.DataFrame:
         except Exception:
             pass
 
-    # Impute missing numeric values with median
     num_cols = df.select_dtypes(include=["int64", "float64"]).columns
     for col in num_cols:
         df[col] = df[col].fillna(df[col].median())
 
-    # Impute missing categorical values with mode
     cat_cols = df.select_dtypes(include=["object"]).columns
     for col in cat_cols:
         mode_val = df[col].mode()
@@ -138,9 +126,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
     return df
 
 
-# ═══════════════════════════════════════════════════════════════
-# 2. Advanced feature engineering
-# ═══════════════════════════════════════════════════════════════
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -158,7 +143,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     eps = 1e-6
     created = []
 
-    # Core numeric features for feature engineering
     core_features = [
         "Nitrogen_kg_per_acre", "Potassium_kg_per_acre",
         "Soil_Moisture_%", "Temp_Avg_C",
@@ -168,7 +152,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     ]
     existing_core = [c for c in core_features if c in df_fe.columns]
 
-    # ---- 1. All pairwise interactions among top 10  ----
     for i in range(len(existing_core)):
         for j in range(i + 1, len(existing_core)):
             a, b = existing_core[i], existing_core[j]
@@ -177,7 +160,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[name] = df_fe[a] * df_fe[b]
                 created.append(name)
 
-    # ---- 2. Ratio features (capture nutrient balance) ----
     ratio_features = [
         ("Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "N_P_Ratio"),
         ("Potassium_kg_per_acre", "Phosphorus_kg_per_acre", "K_P_Ratio"),
@@ -197,7 +179,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             df_fe[name] = df_fe[a] / (df_fe[b] + eps)
             created.append(name)
 
-    # ---- 3. Polynomial features (squared + cubed) ----
     poly_features = [
         "Nitrogen_kg_per_acre", "Potassium_kg_per_acre",
         "Soil_Moisture_%", "Temp_Avg_C",
@@ -215,7 +196,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[cube_name] = df_fe[col] ** 3
                 created.append(cube_name)
 
-    # ---- 4. Log transforms (handle right-skewed features) ----
     log_features = [
         "Rainfall_Total_mm", "Nitrogen_kg_per_acre",
         "Phosphorus_kg_per_acre", "Potassium_kg_per_acre",
@@ -230,7 +210,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[log_name] = np.log1p(df_fe[col].clip(lower=0))
                 created.append(log_name)
 
-    # ---- 5. Temperature range and variation ----
     if "Temp_Max_C" in df_fe and "Temp_Min_C" in df_fe:
         if "Temp_Range_C" not in df_fe.columns:
             df_fe["Temp_Range_C"] = df_fe["Temp_Max_C"] - df_fe["Temp_Min_C"]
@@ -239,7 +218,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             df_fe["Temp_Avg_x_Range"] = df_fe["Temp_Avg_C"] * df_fe["Temp_Range_C"]
             created.append("Temp_Avg_x_Range")
 
-    # ---- 6. Moisture deficit (water balance indicator) ----
     if "Rainfall_Total_mm" in df_fe and "Evapotranspiration_mm_day" in df_fe:
         if "Moisture_Deficit" not in df_fe.columns:
             df_fe["Moisture_Deficit"] = (
@@ -247,7 +225,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             )
             created.append("Moisture_Deficit")
 
-    # ---- 7. Fertilizer efficiency ----
     if "Fertilizer_Quantity" in df_fe and "Nitrogen_kg_per_acre" in df_fe:
         if "Fertilizer_N_Efficiency" not in df_fe.columns:
             df_fe["Fertilizer_N_Efficiency"] = (
@@ -255,10 +232,8 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             )
             created.append("Fertilizer_N_Efficiency")
 
-    # ---- 8. Cyclical seasonal features (sine/cosine) ----
     for month_col in ["Month", "Planting_Month", "Harvest_Month"]:
         if month_col in df_fe.columns:
-            # Ensure numeric before trig operations
             month_vals = pd.to_numeric(df_fe[month_col], errors="coerce").fillna(0)
             sin_name = f"{month_col}_sin"
             cos_name = f"{month_col}_cos"
@@ -267,7 +242,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 df_fe[cos_name] = np.cos(2 * np.pi * month_vals / 12)
                 created.extend([sin_name, cos_name])
 
-    # ---- 9. Binned features for top predictors ----
     for col in ["Nitrogen_kg_per_acre", "Soil_pH", "Soil_Moisture_%", "Temp_Avg_C",
                  "Rainfall_Total_mm", "Potassium_kg_per_acre"]:
         if col in df_fe:
@@ -281,7 +255,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                 except ValueError:
                     pass
 
-    # ---- 10. Aggregated fertility scores ----
     if all(c in df_fe for c in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]):
         if "NPK_Total" not in df_fe.columns:
             df_fe["NPK_Total"] = (
@@ -291,30 +264,25 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
             )
             created.append("NPK_Total")
 
-    # ---- 11. Micronutrient sum (Zn + Fe + Cu + Mn) ----
     micro_cols = ["Zinc_mg_per_kg", "Iron_mg_per_kg", "Copper_mg_per_kg", "Manganese_mg_per_kg"]
     if all(c in df_fe for c in micro_cols):
         if "Micro_Nutrient_Sum" not in df_fe.columns:
             df_fe["Micro_Nutrient_Sum"] = sum(df_fe[c] for c in micro_cols)
             created.append("Micro_Nutrient_Sum")
 
-    # ---- 12. Water use efficiency (yield per unit water) ----
     if "Rainfall_Total_mm" in df_fe and "Water_Quantity_liters_per_acre" in df_fe:
         if "Water_Input_Total" not in df_fe.columns:
-            # Rough estimate: rainfall (mm) converted to liters/acre + irrigation
             df_fe["Water_Input_Total"] = (
-                df_fe["Rainfall_Total_mm"] * 4046.86  # mm to liters/acre
+                df_fe["Rainfall_Total_mm"] * 4046.86
                 + df_fe["Water_Quantity_liters_per_acre"].fillna(0)
             )
             created.append("Water_Input_Total")
 
-    # ---- 13. Crop density features ----
     if "Plant_Density" in df_fe and "Row_Spacing_cm" in df_fe:
         if "Density_x_Spacing" not in df_fe.columns:
             df_fe["Density_x_Spacing"] = df_fe["Plant_Density"] / (df_fe["Row_Spacing_cm"] + eps)
             created.append("Density_x_Spacing")
 
-    # ---- NaN check: replace any infinities or NaNs from division by near-zero ----
     nan_count = df_fe.select_dtypes(include=[np.number]).isna().sum().sum()
     inf_count = np.isinf(df_fe.select_dtypes(include=[np.number]).values).sum()
     if nan_count > 0 or inf_count > 0:
@@ -326,9 +294,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     return df_fe
 
 
-# ═══════════════════════════════════════════════════════════════
-# 3. Winsorize target (clip extreme outliers)
-# ═══════════════════════════════════════════════════════════════
 
 def winsorize_target(y: pd.Series, limits=(0.005, 0.005)) -> pd.Series:
     """Clip extreme yield values at given percentile limits."""
@@ -347,9 +312,6 @@ def winsorize_target(y: pd.Series, limits=(0.005, 0.005)) -> pd.Series:
     return pd.Series(arr, index=y.index)
 
 
-# ═══════════════════════════════════════════════════════════════
-# 4. Encode categoricals
-# ═══════════════════════════════════════════════════════════════
 
 def encode_categoricals(df: pd.DataFrame) -> tuple:
     """Label-encode all object columns. Returns (encoded_df, encoders_dict)."""
@@ -364,9 +326,6 @@ def encode_categoricals(df: pd.DataFrame) -> tuple:
     return df_enc, encoders
 
 
-# ═══════════════════════════════════════════════════════════════
-# 5. Evaluation helper
-# ═══════════════════════════════════════════════════════════════
 
 def evaluate(y_true, y_pred, name=""):
     r2 = r2_score(y_true, y_pred)
@@ -377,9 +336,6 @@ def evaluate(y_true, y_pred, name=""):
     return METRICS[name]
 
 
-# ═══════════════════════════════════════════════════════════════
-# 6. Model training functions
-# ═══════════════════════════════════════════════════════════════
 
 def train_catboost(X_train, y_train, cat_features_indices, X_val, y_val):
     """Train CatBoost with aggressive early stopping."""
@@ -519,9 +475,6 @@ def train_random_forest(X_train, y_train, X_val, y_val):
     return model, val_pred
 
 
-# ═══════════════════════════════════════════════════════════════
-# 7. Weighted ensemble optimizer
-# ═══════════════════════════════════════════════════════════════
 
 def find_optimal_weights(y_true, preds_dict, step=0.05):
     """
@@ -558,20 +511,17 @@ def find_optimal_weights(y_true, preds_dict, step=0.05):
                         best_r2 = r2
                         best_weights = weights
     else:
-        # For 4+ models, use equal weights as baseline, then try hill climbing
         equal_weights = {m: 1.0 / n_models for m in models}
         best_weights = equal_weights
         ensemble_pred = sum(preds_dict[m] * best_weights[m] for m in models)
         best_r2 = r2_score(y_true, ensemble_pred)
 
-        # Simple iterative refinement
         for _ in range(100):
             improved = False
             for m in models:
                 for delta in [step, -step]:
                     new_weights = best_weights.copy()
                     new_weights[m] = max(0, min(1, new_weights[m] + delta))
-                    # Normalize
                     total = sum(new_weights.values())
                     new_weights = {k: v / total for k, v in new_weights.items()}
                     ensemble_pred = sum(preds_dict[m] * new_weights[m] for m in models)
@@ -587,9 +537,6 @@ def find_optimal_weights(y_true, preds_dict, step=0.05):
     return best_weights, best_r2
 
 
-# ═══════════════════════════════════════════════════════════════
-# 8. Main
-# ═══════════════════════════════════════════════════════════════
 
 def main():
     parser = argparse.ArgumentParser(
@@ -613,21 +560,16 @@ def main():
     print("  Architecture: CatBoost + XGBoost + LightGBM + RF → Stacking → Weighted blend")
     print("=" * 70 + "\n")
 
-    # ---- Step 1: Load & clean ----
     df = load_and_clean(args.data)
 
-    # ---- Step 2: Feature engineering ----
     df = engineer_features(df)
 
-    # ---- Step 3: Separate features & target ----
     y_orig = df[TARGET].copy()
     X = df.drop(TARGET, axis=1).copy()
     print(f"\n  Total features: {X.shape[1]} columns × {len(X)} rows")
 
-    # ---- Step 4: Winsorize target ----
     y_winsorized = winsorize_target(y_orig, limits=(0.005, 0.005))
 
-    # ---- Step 5: Yeo-Johnson target transformation ----
     print("\n  Applying Yeo-Johnson target transformation...")
     pt = PowerTransformer(method="yeo-johnson", standardize=False)
     y_transformed = pt.fit_transform(y_winsorized.values.reshape(-1, 1)).ravel()
@@ -639,7 +581,6 @@ def main():
     print(f"    After transform:  mean={y.mean():.2f}, std={y.std():.2f}, "
           f"skew={pd.Series(y).skew():.2f}")
 
-    # ---- Step 6: Train/test split ----
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=SEED
     )
@@ -650,24 +591,20 @@ def main():
     print(f"\n  Train: {X_train.shape[0]} samples  |  Test: {X_test.shape[0]} samples")
     print(f"  Features: {X_train.shape[1]}")
 
-    # ---- Track categorical feature indices for CatBoost ----
     cat_col_names = X_train.select_dtypes(include=["object"]).columns.tolist()
     cat_features_indices = [X_train.columns.get_loc(c) for c in cat_col_names]
     print(f"  Categorical features: {len(cat_features_indices)}")
 
-    # ---- Step 7: Encode categoricals for sklearn/XGBoost/LightGBM ----
     X_enc, encoders = encode_categoricals(X)
     X_train_enc = X_enc.iloc[X_train.index]
     X_test_enc = X_enc.iloc[X_test.index]
 
-    # ---- Step 8: 5-fold Cross-Validation for all models ----
     print(f"\n{'=' * 70}")
     print("  5-FOLD CROSS-VALIDATION TRAINING")
     print(f"{'=' * 70}")
 
     kf = KFold(n_splits=N_FOLDS, shuffle=True, random_state=SEED)
 
-    # Store out-of-fold predictions for stacking
     oof_models = {"catboost": [], "xgboost": [], "lightgbm": [], "random_forest": []}
     oof_preds = {"catboost": [], "xgboost": [], "lightgbm": [], "random_forest": []}
     test_preds = {"catboost": [], "xgboost": [], "lightgbm": [], "random_forest": []}
@@ -687,7 +624,6 @@ def main():
         X_fold_train_enc = X_train_enc.iloc[train_idx]
         X_fold_val_enc = X_train_enc.iloc[val_idx]
 
-        # CatBoost
         cb_model, cb_val = train_catboost(
             X_fold_train, y_fold_train, cat_features_indices,
             X_fold_val, y_fold_val
@@ -696,7 +632,6 @@ def main():
         oof_preds["catboost"].append(cb_val)
         test_preds["catboost"].append(cb_model.predict(X_test))
 
-        # XGBoost
         xgb_model, xgb_val = train_xgboost(
             X_fold_train_enc, y_fold_train,
             X_fold_val_enc, y_fold_val
@@ -705,7 +640,6 @@ def main():
         oof_preds["xgboost"].append(xgb_val)
         test_preds["xgboost"].append(xgb_model.predict(X_test_enc))
 
-        # LightGBM
         lgb_model, lgb_val = train_lightgbm(
             X_fold_train_enc, y_fold_train,
             X_fold_val_enc, y_fold_val
@@ -715,7 +649,6 @@ def main():
             oof_preds["lightgbm"].append(lgb_val)
             test_preds["lightgbm"].append(lgb_model.predict(X_test_enc))
 
-        # Random Forest
         rf_model, rf_val = train_random_forest(
             X_fold_train_enc, y_fold_train,
             X_fold_val_enc, y_fold_val
@@ -724,32 +657,25 @@ def main():
         oof_preds["random_forest"].append(rf_val)
         test_preds["random_forest"].append(rf_model.predict(X_test_enc))
 
-    # ---- Step 9: Evaluate individual models on test set ----
     print(f"\n{'=' * 70}")
     print("  INDIVIDUAL MODEL EVALUATION ON TEST SET")
     print(f"{'=' * 70}")
 
-    # Compute OOF predictions (stacked vertically)
-    # Also compute test predictions (averaged across folds)
     model_test_preds = {}
     for model_name in oof_preds:
         if len(oof_preds[model_name]) > 0:
-            # Average test predictions across folds
             avg_test_pred = np.mean(test_preds[model_name], axis=0)
             model_test_preds[model_name] = avg_test_pred
 
-            # Evaluate on test set
             r2 = r2_score(y_test, avg_test_pred)
             mae = mean_absolute_error(y_test, avg_test_pred)
             rmse = np.sqrt(mean_squared_error(y_test, avg_test_pred))
             print(f"  {model_name:20s}  R²={r2:.4f}  MAE={mae:.2f}  RMSE={rmse:.2f}")
 
-    # ---- Step 10: Stacking ensemble (meta-model) ----
     print(f"\n{'=' * 70}")
     print("  STACKING ENSEMBLE (Ridge Meta-Model)")
     print(f"{'=' * 70}")
 
-    # Build OOF feature matrix for stacking
     oof_stack = []
     for model_name in oof_preds:
         if len(oof_preds[model_name]) > 0:
@@ -760,11 +686,9 @@ def main():
         oof_stack = np.column_stack(oof_stack)
         y_stack = y_train.values
 
-        # Train Ridge meta-model
         meta_model = Ridge(alpha=1.0)
         meta_model.fit(oof_stack, y_stack)
 
-        # Build test feature matrix for stacking
         test_stack = []
         for model_name in model_test_preds:
             test_stack.append(model_test_preds[model_name])
@@ -783,23 +707,19 @@ def main():
             "rmse": round(stacking_rmse, 4),
         }
 
-        # Add stacking to the ensemble pool
         model_test_preds["stacking"] = stacking_pred
     else:
         stacking_pred = None
         stacking_r2 = -1
 
-    # ---- Step 11: Weighted ensemble optimization ----
     print(f"\n{'=' * 70}")
     print("  WEIGHTED ENSEMBLE OPTIMIZATION")
     print(f"{'=' * 70}")
 
-    # Try all combinations to find the best ensemble
     best_ensemble_r2 = -1e9
     best_ensemble_pred = None
     best_ensemble_name = ""
 
-    # Use only individual models for weighted ensemble (avoid circular dependence)
     individual_preds = {k: v for k, v in model_test_preds.items() if k != "stacking"}
 
     if len(individual_preds) >= 2:
@@ -825,13 +745,11 @@ def main():
             best_ensemble_pred = ensemble_pred
             best_ensemble_name = "Weighted Ensemble"
     else:
-        # Fallback: use single best model
         best_model_name = max(individual_preds, key=lambda m: r2_score(y_test, individual_preds[m]))
         best_ensemble_pred = individual_preds[best_model_name]
         best_ensemble_r2 = r2_score(y_test, best_ensemble_pred)
         best_ensemble_name = best_model_name
 
-    # Try combining stacking + weighted ensemble
     if stacking_pred is not None:
         combo_preds = {
             "stacking": stacking_pred,
@@ -855,12 +773,10 @@ def main():
                 "rmse": round(final_rmse, 4),
             }
 
-    # ---- Step 12: Evaluate best ensemble on original (non-transformed) scale ----
     print(f"\n{'-' * 70}")
     print("  ORIGINAL SCALE EVALUATION (inverse transform predictions)")
     print(f"{'-' * 70}")
 
-    # Inverse transform best ensemble predictions back to original yield scale
     best_pred_orig = pt.inverse_transform(
         best_ensemble_pred.reshape(-1, 1)
     ).ravel()
@@ -877,7 +793,6 @@ def main():
         "rmse": round(best_orig_rmse, 4),
     }
 
-    # ---- Step 13: Show feature importance from CatBoost ----
     print(f"\n  Top 15 features (CatBoost fold 0):")
     cb_fold0 = oof_models["catboost"][0]
     importances = cb_fold0.get_feature_importance()
@@ -886,18 +801,15 @@ def main():
     for i, row in fi.head(15).iterrows():
         print(f"    {row['Feature']:40s}  {row['Importance']:.4f}")
 
-    # Save feature importance
     feature_importance_path = os.path.join(MODELS_DIR, "cane_sugar_feature_importance.json")
     fi_dict = dict(zip(fi["Feature"].head(50), fi["Importance"].head(50).round(4)))
     with open(feature_importance_path, "w") as f:
         json.dump(fi_dict, f, indent=2)
     print(f"  ✅ Saved top 50 feature importance → {feature_importance_path}")
 
-    # ---- Step 14: Save model & artifacts ----
-    # Save the first CatBoost fold model (production-ready) + meta-model + transformers
     model_path = os.path.join(MODELS_DIR, "cane_sugar.joblib")
     joblib.dump({
-        "model": oof_models["catboost"][0],  # Best single CatBoost for production
+        "model": oof_models["catboost"][0],
         "cv_models": {
             "catboost": oof_models["catboost"],
             "xgboost": oof_models["xgboost"],
@@ -962,13 +874,11 @@ def main():
     }, model_path)
     print(f"\n  ✅ Saved model → {model_path}")
 
-    # ---- Step 15: Save training results ----
     results_path = os.path.join(MODELS_DIR, "cane_sugar_results.json")
     with open(results_path, "w") as f:
         json.dump(METRICS, f, indent=2)
     print(f"  ✅ Saved results → {results_path}")
 
-    # ---- Step 16: Update training_results.json ----
     main_results_path = os.path.join(MODELS_DIR, "training_results.json")
     if os.path.exists(main_results_path):
         with open(main_results_path) as f:
@@ -983,9 +893,8 @@ def main():
         json.dump(main_results, f, indent=2)
     print(f"  ✅ Updated {main_results_path}")
 
-    # ---- Step 17: Summary ----
     elapsed = time.time() - t_start
-    improved_by = best_orig_r2 - 0.9093  # vs previous CatBoost best
+    improved_by = best_orig_r2 - 0.9093
 
     print(f"\n{'=' * 70}")
     print(f"  CaneSugar v4 — TRAINING COMPLETE!")
@@ -996,7 +905,6 @@ def main():
     print(f"  {'Model':35s}  {'R²':8s}  {'MAE':8s}  {'RMSE':8s}")
     print(f"  {'-' * 63}")
 
-    # Sort and display all models by R²
     sorted_metrics = sorted(METRICS.items(), key=lambda x: -x[1].get("r2", 0))
     for name, m in sorted_metrics:
         print(f"  {name:35s}  {m['r2']:8.4f}  {m.get('mae', 0):8.2f}  {m.get('rmse', 0):8.2f}")

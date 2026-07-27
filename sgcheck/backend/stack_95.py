@@ -22,7 +22,6 @@ SEED = 42
 def load_and_clean(path):
     df = pd.read_csv(path)
     
-    # Impute
     num_cols = df.select_dtypes(include=["int64", "float64"]).columns
     cat_cols = df.select_dtypes(include=["object"]).columns
     
@@ -31,14 +30,12 @@ def load_and_clean(path):
     for col in cat_cols:
         df[col] = df[col].fillna(df[col].mode()[0])
     
-    # Parse dates
     df["Planting_Date"] = pd.to_datetime(df["Planting_Date"])
     df["Harvesting_Date"] = pd.to_datetime(df["Harvesting_Date"])
     df["Planting_Month"] = df["Planting_Date"].dt.month
     df["Harvest_Month"] = df["Harvesting_Date"].dt.month
     df.drop(["Planting_Date", "Harvesting_Date"], axis=1, inplace=True)
     
-    # Drop geo
     existing = [c for c in DROP_COLUMNS if c in df.columns]
     if existing:
         df.drop(columns=existing, inplace=True)
@@ -51,52 +48,43 @@ def main():
     print("  Stacking Ensemble - 95% Accuracy")
     print("=" * 60 + "\n")
     
-    # Load data
     df = load_and_clean("DataSet/FINAL_SUGARCANE_DATASET.csv")
     print(f"Loaded: {df.shape}")
     
-    # Encode categoricals
     encoders = {}
     for col in df.select_dtypes(include=["object"]).columns:
         le = LabelEncoder()
         df[col] = le.fit_transform(df[col].astype(str))
         encoders[col] = le
     
-    # Prepare features for cane_sugar model
     cane_sugar_data = joblib.load("models/cane_sugar.joblib")
     features = cane_sugar_data["selected_features"]
     
     y = df[TARGET].values
     X = df[features].values
     
-    # Split
     indices = np.arange(len(df))
     idx_train, idx_test = train_test_split(indices, test_size=0.2, random_state=SEED)
     X_train, X_test, y_train, y_test = X[idx_train], X[idx_test], y[idx_train], y[idx_test]
     
     print(f"Train: {len(X_train)}, Test: {len(X_test)}")
     
-    # Load models
     print("\n  Loading models...")
     cane_sugar = cane_sugar_data["model"]
     
-    # Get predictions on test set
     cane_sugar_pred = cane_sugar.predict(X_test)
     print(f"  CaneSugar R² = {r2_score(y_test, cane_sugar_pred):.4f}")
     
-    # XGBoost prediction
     xgb_data = joblib.load("models/xgboost.joblib")
     xgb = xgb_data["model"]
     xgb_pred = xgb.predict(X_test)
     print(f"  XGBoost R²   = {r2_score(y_test, xgb_pred):.4f}")
     
-    # RF prediction
     rf_data = joblib.load("models/random_forest.joblib")
     rf = rf_data["model"]
     rf_pred = rf.predict(X_test)
     print(f"  RF R²        = {r2_score(y_test, rf_pred):.4f}")
     
-    # Simple ensemble: weighted average
     print("\n  Optimizing ensemble weights...")
     best_r2, best_w = -1e9, None
     for w1 in np.arange(0, 1.05, 0.1):
@@ -111,7 +99,6 @@ def main():
     
     final_pred = sum([cane_sugar_pred * best_w["CaneSugar"], xgb_pred * best_w["XGBoost"], rf_pred * best_w["RF"]])
     
-    # Bias correction
     bias = np.mean(y_test - final_pred)
     final_pred_adj = final_pred - bias
     
@@ -128,7 +115,6 @@ def main():
     print(f"  Weights: {best_w}")
     print(f"  Bias: {bias:.2f}")
     
-    # Save
     results = {
         "cane_sugar_v5": {"r2": round(r2, 4), "mae": round(mae, 4), "rmse": round(rmse, 4)},
         "weights": {k: round(v, 2) for k, v in best_w.items()},

@@ -72,7 +72,7 @@ const FIELD_LABELS = {
   harvesting_date: "Harvest",
 }
 
-/** Color a yield value from red → orange → green based on min/max range */
+
 function getYieldColor(val, minVal, maxVal) {
   if (minVal === maxVal) return "var(--accent-gold)"
   const ratio = (val - minVal) / (maxVal - minVal)
@@ -168,7 +168,7 @@ function HistoryPage({ onBack }) {
     return result
   }, [history, filterModel, sortBy, sortOrder])
 
-  // Compute yield range for color coding
+  
   const yieldRange = useMemo(() => {
     const vals = filteredHistory
       .map((h) => h.prediction)
@@ -247,7 +247,7 @@ function HistoryPage({ onBack }) {
       transition={{ duration: 0.25 }}
       className="flex flex-col gap-6"
     >
-      {/* Header */}
+      {}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
@@ -297,7 +297,7 @@ function HistoryPage({ onBack }) {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, idx) => {
           const Icon = stat.icon
@@ -318,7 +318,7 @@ function HistoryPage({ onBack }) {
         })}
       </div>
 
-      {/* Filter Bar */}
+      {}
       <div className="aws-card">
         <div className="aws-card-body compact">
           <div className="flex flex-wrap gap-4 items-center">
@@ -380,7 +380,7 @@ function HistoryPage({ onBack }) {
               </button>
             </div>
           </div>
-          {/* Selection info bar */}
+          {}
           {viewMode === "grid" && selectedIds.size > 0 && (
             <div className="flex items-center justify-between" style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px solid var(--border-subtle)" }}>
               <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
@@ -401,7 +401,7 @@ function HistoryPage({ onBack }) {
         </div>
       </div>
 
-      {/* History List / Grid */}
+      {}
       <div className="aws-card" style={{ minHeight: "400px" }}>
         <div className="aws-card-header">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -455,7 +455,7 @@ function HistoryPage({ onBack }) {
         </div>
       </div>
 
-      {/* Comparison Modal */}
+      {}
       <AnimatePresence>
         {showCompare && selectedItems.length > 0 && (
           <motion.div
@@ -493,7 +493,7 @@ function HistoryPage({ onBack }) {
               </div>
               <ScrollArea style={{ maxHeight: "calc(85vh - 60px)" }}>
                 <div className="compare-modal-body">
-                  {/* Yield Comparison Chart */}
+                  {}
                   <div className="compare-section">
                     <div className="compare-section-title">Yield Comparison (Quintal/Acre)</div>
                     <div className="compare-bar-chart">
@@ -527,7 +527,7 @@ function HistoryPage({ onBack }) {
                     </div>
                   </div>
 
-                  {/* Side-by-side Comparison Table */}
+                  {}
                   <div className="compare-section">
                     <div className="compare-section-title">Side-by-Side Details</div>
                     <div className="compare-table-wrap">
@@ -549,7 +549,7 @@ function HistoryPage({ onBack }) {
                           </tr>
                         </thead>
                         <tbody>
-                          {/* Yield row */}
+                          {}
                           <tr>
                             <td className="compare-field-label">
                               <TrendingUp className="size-3" />
@@ -566,7 +566,7 @@ function HistoryPage({ onBack }) {
                               )
                             })}
                           </tr>
-                          {/* Model row */}
+                          {}
                           <tr>
                             <td className="compare-field-label">
                               <Cpu className="size-3" />
@@ -580,7 +580,7 @@ function HistoryPage({ onBack }) {
                               </td>
                             ))}
                           </tr>
-                          {/* Mode row */}
+                          {}
                           {selectedItems.some((i) => i.mode) && (
                             <tr>
                               <td className="compare-field-label">
@@ -596,7 +596,7 @@ function HistoryPage({ onBack }) {
                               ))}
                             </tr>
                           )}
-                          {/* Status row */}
+                          {}
                           <tr>
                             <td className="compare-field-label">
                               <Clock className="size-3" />
@@ -614,7 +614,7 @@ function HistoryPage({ onBack }) {
                               </td>
                             ))}
                           </tr>
-                          {/* Date row */}
+                          {}
                           <tr>
                             <td className="compare-field-label">
                               <Calendar className="size-3" />
@@ -626,9 +626,9 @@ function HistoryPage({ onBack }) {
                               </td>
                             ))}
                           </tr>
-                          {/* Input fields — dynamically generated */}
+                          {}
                           {(() => {
-                            // Collect all input field keys across selected items
+                            
                             const allKeys = new Set()
                             selectedItems.forEach((item) => {
                               if (item.input) Object.keys(item.input).forEach((k) => allKeys.add(k))
@@ -670,7 +670,7 @@ function HistoryPage({ onBack }) {
   )
 }
 
-/* ========= List View Card ========= */
+
 function HistoryCard({ item }) {
   const modelColor = MODEL_COLORS[item.model] || "var(--text-secondary)"
   const modeLabel = item.mode === "auto" ? "Auto" : item.mode === "manual" ? "Manual" : null
@@ -762,7 +762,7 @@ function HistoryCard({ item }) {
   )
 }
 
-/* ========= Grid View Card (visual comparison optimized) ========= */
+
 function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
   const modelColor = MODEL_COLORS[item.model] || "var(--text-secondary)"
   const val = Number(item.prediction) || 0
@@ -775,7 +775,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
     if (!item.input) return []
     return Object.entries(item.input)
       .filter(([, v]) => v && v.toString().trim() !== "" && v.toString().trim() !== "N/A")
-      .slice(0, 3) // Show max 3 in grid card
+      .slice(0, 3) 
       .map(([key, val]) => {
         const label = FIELD_LABELS[key] || key.replace(/_/g, " ")
         return { key, label, value: val }
@@ -799,7 +799,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
       }}
       onClick={onToggle}
     >
-      {/* Selection checkbox */}
+      {}
       <div
         className="grid-select-btn"
         style={{
@@ -821,7 +821,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
       </div>
 
       <div style={{ padding: "14px" }}>
-        {/* Model badge */}
+        {}
         <div className="flex items-center gap-2" style={{ marginBottom: "10px" }}>
           <span className="size-2 rounded-full" style={{ background: modelColor }} />
           <span style={{ fontSize: "10px", fontWeight: 600, color: modelColor, textTransform: "uppercase", letterSpacing: "0.04em" }}>
@@ -834,7 +834,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
           )}
         </div>
 
-        {/* Big yield number */}
+        {}
         <div style={{ textAlign: "center", padding: "8px 0 6px" }}>
           <div style={{ fontSize: "32px", fontWeight: 700, fontFamily: "var(--font-heading)", color: yieldColor, lineHeight: 1, letterSpacing: "-0.02em" }}>
             {val.toFixed(1)}
@@ -842,7 +842,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
           <div style={{ fontSize: "9px", color: "var(--text-muted)", marginTop: "2px" }}>Quintal/Acre</div>
         </div>
 
-        {/* Yield bar */}
+        {}
         <div className="compare-bar-track" style={{ height: "4px", margin: "8px 0" }}>
           <motion.div
             initial={{ width: 0 }}
@@ -853,7 +853,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
           />
         </div>
 
-        {/* Yield label + date */}
+        {}
         <div className="flex items-center justify-between" style={{ marginBottom: "10px" }}>
           <Badge
             variant="secondary"
@@ -873,7 +873,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
           </span>
         </div>
 
-        {/* Input tags */}
+        {}
         {inputTags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {inputTags.map(({ key, label, value }) => (
@@ -902,7 +902,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
           </div>
         )}
 
-        {/* Status */}
+        {}
         {item.status && (
           <div className="flex items-center justify-end" style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px solid var(--border-subtle)" }}>
             <Badge variant={item.status === "success" ? "green" : "red"} className="text-[7px]" style={{ height: "16px" }}>

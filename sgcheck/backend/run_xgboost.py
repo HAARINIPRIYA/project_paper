@@ -27,7 +27,6 @@ def main():
         X, y, test_size=0.2, random_state=42
     )
 
-    # ---- Initial model ----
     model = XGBRegressor(
         n_estimators=500, learning_rate=0.05, max_depth=8,
         subsample=0.8, colsample_bytree=0.8,
@@ -41,7 +40,6 @@ def main():
     print(f"MAE      : {mean_absolute_error(y_test, y_pred):.4f}")
     print(f"RMSE     : {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}")
 
-    # ---- Feature importance ----
     importance = model.feature_importances_
     fi = pd.DataFrame({"Feature": X.columns, "Importance": importance})
     fi = fi.sort_values("Importance", ascending=False)
