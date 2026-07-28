@@ -55,12 +55,12 @@ const STORAGE_KEY = "canesense_conversations"
 
 
 const SUGGESTIONS = [
-  { icon: Trophy, label: "Which model is best?", query: "Which model is best?", color: "var(--accent-green)" },
+  { icon: Trophy, label: "Which model is best?", query: "Which model is best?", color: "var(--accent-primary)" },
   { icon: GitCompare, label: "Compare CatBoost vs XGBoost", query: "Compare CatBoost and XGBoost", color: "var(--accent-blue)" },
   { icon: Target, label: "What should I choose?", query: "What model should I choose?", color: "var(--accent-orange)" },
   { icon: BarChartHorizontal, label: "Show all metrics", query: "Show me all model metrics", color: "#7c3aed" },
   { icon: BookOpen, label: "What is R²?", query: "What does R² mean?", color: "#06b6d4" },
-  { icon: Sprout, label: "Predict my yield", query: "Predict my yield", color: "var(--accent-green)" },
+  { icon: Sprout, label: "Predict my yield", query: "Predict my yield", color: "var(--accent-primary)" },
 ]
 
 
@@ -554,13 +554,13 @@ To get started, enter your field details in the **Tools** panel (right side), th
       {/* AI Status */}
       <div className="flex items-center gap-3" style={{ border: "1px solid var(--border-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)" }}>
         {aiStatus === "streaming" || aiStatus === "connecting" ? (
-          <Loader2 className="size-3 animate-spin" style={{ color: "var(--accent-green)" }} />
+          <Loader2 className="size-3 animate-spin" style={{ color: "var(--accent-primary)" }} />
         ) : aiStatus === "error" ? (
           <XCircle className="size-3" style={{ color: "var(--accent-red)" }} />
         ) : aiStatus === "complete" ? (
-          <CheckCircle2 className="size-3" style={{ color: "var(--accent-green)" }} />
+          <CheckCircle2 className="size-3" style={{ color: "var(--accent-primary)" }} />
         ) : (
-          <BrainCircuit className="size-3" style={{ color: "var(--accent-green)" }} />
+          <BrainCircuit className="size-3" style={{ color: "var(--accent-primary)" }} />
         )}
         <div className="min-w-0">
           <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>
@@ -605,7 +605,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                 const isBest = idx === 0
                 const colors = {
                   cane_sugar: "#FF6B35",
-                  catboost: "var(--accent-green)",
+                  catboost: "var(--accent-primary)",
                   xgboost: "var(--accent-blue)",
                   random_forest: "var(--accent-orange)",
                   linear_regression: "#7c3aed",
@@ -631,7 +631,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                       {name.replace(/_/g, " ")}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--accent-green)" }}>
+                      <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--accent-primary)" }}>
                         R² {m.r2 ? m.r2.toFixed(3) : "—"}
                       </span>
                       {/* Always keep badge space for alignment */}
@@ -714,7 +714,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
             <>
               <div className="sidebar-section-label" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: "12px" }}>
                 <span>Chat History</span>
-                <button type="button" onClick={createNewConversation} style={{ background: "none", border: "none", color: "var(--accent-green)", cursor: "pointer", fontSize: "11px", fontWeight: 600, display: "flex", alignItems: "center", gap: "3px", padding: "2px 4px", borderRadius: "2px", transition: "background 120ms" }} className="hover:bg-muted">
+                <button type="button" onClick={createNewConversation} style={{ background: "none", border: "none", color: "var(--accent-primary)", cursor: "pointer", fontSize: "11px", fontWeight: 600, display: "flex", alignItems: "center", gap: "3px", padding: "2px 4px", borderRadius: "2px", transition: "background 120ms" }} className="hover:bg-muted">
                   <Plus className="size-3" /> New
                 </button>
               </div>
@@ -729,7 +729,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                       <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "2px" }}>
                         <button type="button" onClick={() => switchConversation(c.id)}
                           className={"chat-item" + (activeChatId === c.id ? " active" : "")}
-                          style={{ flex: 1, minWidth: 0, padding: "8px 12px", textAlign: "left", border: "none", background: "none", cursor: "pointer", transition: "background 120ms", color: activeChatId === c.id ? "var(--accent-green)" : "var(--text-secondary)", borderLeft: activeChatId === c.id ? "2px solid var(--accent-green)" : "2px solid transparent" }}>
+                          style={{ flex: 1, minWidth: 0, padding: "8px 12px", textAlign: "left", border: "none", background: "none", cursor: "pointer", transition: "background 120ms", color: activeChatId === c.id ? "var(--accent-primary)" : "var(--text-secondary)", borderLeft: activeChatId === c.id ? "2px solid var(--accent-primary)" : "2px solid transparent" }}>
                           <div className="chat-item-title" style={{ fontSize: "12px", fontWeight: activeChatId === c.id ? 600 : 500, color: activeChatId === c.id ? "var(--text-primary)" : "var(--text-secondary)", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {c.title}
                           </div>
@@ -749,7 +749,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                   )}
                 </div>
               </ScrollArea>
-              <style>{`.chat-item:hover .chat-delete-btn { opacity: 0.6 !important; } .chat-delete-btn:hover { opacity: 1 !important; color: var(--accent-red) !important; } .suggestion-chip:hover { border-color: var(--accent-green) !important; background: var(--accent-green-bg) !important; }`}</style>
+              <style>{`.chat-item:hover .chat-delete-btn { opacity: 0.6 !important; } .chat-delete-btn:hover { opacity: 1 !important; color: var(--accent-red) !important; } .suggestion-chip:hover { border-color: var(--accent-primary) !important; background: var(--accent-primary-bg) !important; }`}</style>
             </>
           )}
           {view === "dashboard" && (
@@ -806,7 +806,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
               {view === "analysis" ? (
                 <>
                   <Badge variant={aiStatus === "error" ? "red" : "outline"} className="text-[9px] gap-1">
-                    <span className="size-1.5 rounded-full" style={{ background: aiStatus === "streaming" || aiStatus === "connecting" ? "var(--accent-orange)" : aiStatus === "complete" ? "var(--accent-green)" : aiStatus === "error" ? "var(--accent-red)" : "var(--accent-green)" }} />
+                    <span className="size-1.5 rounded-full" style={{ background: aiStatus === "streaming" || aiStatus === "connecting" ? "var(--accent-orange)" : aiStatus === "complete" ? "var(--accent-primary)" : aiStatus === "error" ? "var(--accent-red)" : "var(--accent-primary)" }} />
                     {aiStatus === "streaming" ? "Typing..." : aiStatus === "connecting" ? "Connecting..." : aiStatus === "complete" ? "Done" : aiStatus === "error" ? "Offline" : "AI Ready"}
                   </Badge>
                   <Button variant="default" size="icon-sm" aria-label="New chat" onClick={createNewConversation}>
@@ -877,7 +877,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                       return (
                         <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: Math.min(0.02 * idx, 0.15) }}
                           className={"message-row" + (isUser ? " user" : " assistant")} style={{ marginBottom: "8px" }}>
-                          {!isUser ? (<Avatar><AvatarFallback style={{ background: "var(--accent-green)", color: "#fff" }}>CS</AvatarFallback></Avatar>) : null}
+                          {!isUser ? (<Avatar><AvatarFallback style={{ background: "var(--accent-primary)", color: "#1A1A1A" }}>CS</AvatarFallback></Avatar>) : null}
                           <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
                             {isUser ? m.content : <MarkdownRenderer content={m.content} />}
                           </div>
@@ -937,7 +937,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
                         <Avatar><AvatarFallback style={{ background: "var(--accent-gold)", color: "#1A1A1A" }}>CS</AvatarFallback></Avatar>
                         <div className="message-bubble assistant">
-                          {streamingContent ? <MarkdownRenderer content={streamingContent} /> : ''}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-green)" }}>▌</span>
+                          {streamingContent ? <MarkdownRenderer content={streamingContent} /> : ''}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-primary)" }}>▌</span>
                         </div>
                       </motion.div>
                     )}
@@ -945,7 +945,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
                         <Avatar><AvatarFallback style={{ background: "var(--accent-gold)", color: "#1A1A1A" }}>CS</AvatarFallback></Avatar>
                         <div className="message-bubble assistant flex items-center gap-3">
-                          <Loader2 className="size-4 animate-spin" style={{ color: "var(--accent-green)" }} />
+                          <Loader2 className="size-4 animate-spin" style={{ color: "var(--accent-primary)" }} />
                           <div className="flex flex-col gap-0.5">
                             <span style={{ fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>Connecting to AI...</span>
                             <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Sending your query to the prediction model</span>
@@ -955,7 +955,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                     )}
                     {streamingContent && (
                       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2" style={{ padding: "6px 14px", margin: "0 0 8px 44px", fontSize: "10px", color: "var(--text-muted)" }}>
-                        <span className="size-1.5 rounded-full animate-pulse" style={{ background: "var(--accent-green)" }} />
+                        <span className="size-1.5 rounded-full animate-pulse" style={{ background: "var(--accent-primary)" }} />
                         Processing your prediction request...
                       </motion.div>
                     )}

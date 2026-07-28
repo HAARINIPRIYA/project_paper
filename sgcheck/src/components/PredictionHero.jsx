@@ -328,7 +328,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
           >
             {r2 !== undefined && (
               <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)" }}>
-                <BarChart3 className="size-3" style={{ color: "var(--accent-green)" }} />
+                <BarChart3 className="size-3" style={{ color: "var(--accent-primary)" }} />
                 <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>R²</span>
                 <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>{r2.toFixed(4)}</span>
               </div>
@@ -414,7 +414,7 @@ export default function PredictionHero({ result, gpsData, onDismiss }) {
                       lineHeight: 1,
                     }}
                   >
-                    <Icon className="size-3" style={{ color: "var(--accent-green)", opacity: 0.7 }} />
+                    <Icon className="size-3" style={{ color: "var(--accent-primary)", opacity: 0.7 }} />
                     <span style={{ fontWeight: 500, marginRight: "2px", color: "var(--text-muted)" }}>
                       {config.label}:
                     </span>

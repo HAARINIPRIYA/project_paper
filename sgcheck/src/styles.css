@@ -71,10 +71,10 @@
   --accent-blue-bg: rgba(0, 214, 143, 0.12);
   --accent-blue-border: rgba(0, 214, 143, 0.3);
 
-  --accent-green: #00D68F;
-  --accent-green-hover: #00F5A0;
-  --accent-green-bg: rgba(0, 214, 143, 0.12);
-  --accent-green-border: rgba(0, 214, 143, 0.3);
+  --accent-green: #2D6A4F;
+  --accent-green-hover: #35845F;
+  --accent-green-bg: rgba(45, 106, 79, 0.18);
+  --accent-green-border: rgba(45, 106, 79, 0.35);
   
   --accent-red: #FF6B6B;
   --accent-red-hover: #FF5252;
@@ -96,7 +96,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 6px 10px rgba(0, 0, 0, 0.3);
-  --shadow-glow-green: 0 0 20px rgba(0, 214, 143, 0.25);
+  --shadow-glow-green: 0 0 20px rgba(212, 168, 67, 0.25);
 
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -116,12 +116,12 @@
   --topbar-height: 56px;
 
   /* Sugarcane accents */
-  --cane-green: #00D68F;
-  --cane-green-bg: rgba(0, 214, 143, 0.12);
-  --cane-green-border: rgba(0, 214, 143, 0.35);
-  --cane-gold: #FFB547;
-  --cane-gold-bg: rgba(255, 181, 71, 0.12);
-  --cane-gold-border: rgba(255, 181, 71, 0.35);
+  --cane-green: #2D6A4F;
+  --cane-green-bg: rgba(45, 106, 79, 0.15);
+  --cane-green-border: rgba(45, 106, 79, 0.35);
+  --cane-gold: #D4A843;
+  --cane-gold-bg: rgba(212, 168, 67, 0.15);
+  --cane-gold-border: rgba(212, 168, 67, 0.35);
 }
 
 /* ============================================
@@ -139,7 +139,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-::selection { background: rgba(0, 204, 102, 0.35); }
+::selection { background: rgba(212, 168, 67, 0.3); }
 a { color: var(--accent-blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
@@ -154,8 +154,8 @@ h1, h2, h3, h4, h5, h6 {
    ============================================ */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0, 204, 102, 0.3); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0, 204, 102, 0.5); }
+::-webkit-scrollbar-thumb { background: rgba(212, 168, 67, 0.18); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(212, 168, 67, 0.35); }
 
 /* ============================================
    UTILITY CLASSES
@@ -648,8 +648,8 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-secondary);
   position: relative;
 }
-.chat-item:hover { background: rgba(0, 204, 102, 0.08); color: var(--text-primary); }
-.chat-item.active { background: var(--accent-blue-bg); color: var(--accent-blue); }
+.chat-item:hover { background: var(--accent-primary-bg); color: var(--text-primary); }
+.chat-item.active { background: var(--accent-primary-bg); color: var(--accent-primary); }
 .chat-item.active::before {
   content: '';
   position: absolute;
@@ -1376,10 +1376,10 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 18px;
 }
 .message-row.user .message-bubble {
-  background: linear-gradient(135deg, #00CC66, #006030);
-  color: #fff;
+  background: linear-gradient(135deg, var(--accent-primary), #B88A30);
+  color: #1A1A1A;
   border-bottom-right-radius: 6px;
-  box-shadow: 0 2px 12px rgba(0, 204, 102, 0.4);
+  box-shadow: var(--shadow-md);
 }
 .message-row.assistant .message-bubble {
   background: var(--bg-card);
@@ -1403,8 +1403,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 200ms ease;
 }
 .composer-box:focus-within {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.2);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-bg);
 }
 .composer-flex { display: flex; align-items: flex-end; gap: 8px; }
 .composer-input-wrap { flex: 1; }
