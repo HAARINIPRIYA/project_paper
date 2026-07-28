@@ -1090,6 +1090,30 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 13px;
   color: var(--text-primary);
   font-family: var(--font-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ensure long model names don't break layout */
+.model-chip {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge safety - prevent text overflow in chips */
+.badge {
+  max-width: 250px;
+}
+
+/* Flex safety: prevent flex children from overflowing their parent */
+.flex-1 {
+  min-width: 0;
+}
+
+/* Ensure flex items with truncation have constrained width */
+.min-w-0 {
+  min-width: 0;
 }
 
 /* ============================================
@@ -1125,6 +1149,8 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   color: var(--text-primary);
   font-family: var(--font-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ============================================

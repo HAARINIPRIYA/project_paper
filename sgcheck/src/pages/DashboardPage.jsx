@@ -2,8 +2,10 @@ import { useMemo } from "react"
 import { motion } from "framer-motion"
 import {
   Activity,
+  Award,
   BarChart3,
   BrainCircuit,
+  CheckCircle2,
   ChevronRight,
   Cpu,
   FileSpreadsheet,
@@ -44,7 +46,14 @@ const MODEL_GRADIENTS = {
   elastic_net: "linear-gradient(90deg, #E55858, #CC4040)",
 }
 
-function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, backendStatus, predictionResult, ensembleResult }) {
+function getAccuracyRating(r2) {
+  if (r2 >= 0.90) return { label: "Excellent", color: "var(--accent-green)", icon: CheckCircle2 }
+  if (r2 >= 0.80) return { label: "Good", color: "var(--accent-gold)", icon: Award }
+  if (r2 >= 0.70) return { label: "Fair", color: "var(--accent-orange)", icon: TrendingUp }
+  return { label: "Poor", color: "var(--accent-red)", icon: TrendingUp }
+}
+
+function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, trainingSummary, backendStatus, predictionResult, ensembleResult }) {
   const sortedModels = useMemo(() => {
     if (!availableModels || !modelMetrics) return []
     return [...availableModels]
@@ -54,6 +63,19 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
 
   const bestModel = sortedModels[0]
   const maxR2 = sortedModels.length > 0 ? Math.max(...sortedModels.map((m) => m.r2 || 0), 0.1) : 1
+  
+  // Build training summary metrics from backend data
+  const accuracySummary = useMemo(() => {
+    if (!trainingSummary) return null
+    const entries = Object.entries(trainingSummary)
+      .filter(([k]) => !k.startsWith("_"))
+      .map(([name, m]) => ({ name, ...m }))
+      .sort((a, b) => (b.r2 || 0) - (a.r2 || 0))
+    if (entries.length === 0) return null
+    const best = entries[0]
+    const rating = getAccuracyRating(best.r2)
+    return { best, entries, rating }
+  }, [trainingSummary])
 
   const stats = useMemo(() => [
     {
@@ -206,13 +228,16 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 8px 8px" }}>
                     <div style={{ width: "160px", flexShrink: 0 }} />
                     <div className="flex-1" />
-                    <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
+                    <div style={{ width: "52px", flexShrink: 0, textAlign: "right" }}>
                       <span className="divider-label-text">R²</span>
                     </div>
-                    <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
+                    <div style={{ width: "52px", flexShrink: 0, textAlign: "right" }}>
+                      <span className="divider-label-text">MAE</span>
+                    </div>
+                    <div style={{ width: "52px", flexShrink: 0, textAlign: "right" }}>
                       <span className="divider-label-text">RMSE</span>
                     </div>
-                    <div style={{ width: "44px", flexShrink: 0 }} />
+                    <div style={{ width: "56px", flexShrink: 0 }} />
                   </div>
 
                   {}
@@ -221,10 +246,10 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     const isBest = idx === 0
                     return (
                       <div key={model.name} className={"model-rank-item" + (isBest ? " best" : "")}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "160px", flexShrink: 0, overflow: "visible" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "160px", flexShrink: 0, overflow: "hidden" }}>
                           <div className="model-rank-badge">{idx + 1}</div>
                           <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
-                          <span style={{ fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap", overflow: "visible" }}>
+                          <span style={{ fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                             {MODEL_LABELS[model.name] || model.name}
                           </span>
                         </div>
@@ -236,18 +261,23 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                             }} />
                           </div>
                         </div>
-                        <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
+                        <div style={{ width: "52px", flexShrink: 0, textAlign: "right" }}>
                           <span style={{ fontSize: "12px", fontWeight: 600 }} className="tabular-nums">
                             {model.r2 ? model.r2.toFixed(3) : "—"}
                           </span>
                         </div>
-                        <div style={{ width: "56px", flexShrink: 0, textAlign: "right" }}>
+                        <div style={{ width: "52px", flexShrink: 0, textAlign: "right" }}>
+                          <span style={{ fontSize: "11px", color: "var(--text-secondary)" }} className="tabular-nums">
+                            {model.mae ? model.mae.toFixed(1) : "—"}
+                          </span>
+                        </div>
+                        <div style={{ width: "52px", flexShrink: 0, textAlign: "right" }}>
                           <span style={{ fontSize: "11px", color: "var(--text-secondary)" }} className="tabular-nums">
                             {model.rmse ? model.rmse.toFixed(1) : "—"}
                           </span>
                         </div>
                         {}
-                        <div style={{ width: "44px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
+                        <div style={{ width: "56px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
                           {isBest && (
                             <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
                           )}
@@ -298,6 +328,115 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
           {(predictionResult || ensembleResult) && (
             <div className="animate-slide-up">
               <ModelResults result={ensembleResult || predictionResult} isEnsemble={!!ensembleResult} />
+            </div>
+          )}
+
+          {}
+          {accuracySummary && (
+            <div className="aws-card" style={{ borderColor: "rgba(0, 214, 143, 0.2)" }}>
+              <div className="aws-card-header">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div className="aws-card-title">
+                    <Award className="size-4" style={{ color: "var(--accent-green)" }} />
+                    Model Accuracy Summary
+                  </div>
+                  <Badge variant="green" className="text-[9px]">Training Results</Badge>
+                </div>
+                <div className="aws-card-subtitle">Overall performance on held-out test set</div>
+              </div>
+              <div className="aws-card-body">
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {}
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 14px",
+                    borderRadius: "2px",
+                    background: `linear-gradient(135deg, rgba(0,214,143,0.08), rgba(0,214,143,0.02))`,
+                    border: "1px solid rgba(0,214,143,0.15)",
+                  }}>
+                    <div className="flex items-center gap-3">
+                      <div style={{
+                        width: "36px", height: "36px",
+                        background: `linear-gradient(135deg, ${accuracySummary.rating.color}, ${accuracySummary.rating.color}66)`,
+                        borderRadius: "2px",
+                        display: "grid", placeItems: "center",
+                      }}>
+                        <accuracySummary.rating.icon className="size-4" style={{ color: "#fff" }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                          {MODEL_LABELS[accuracySummary.best.name] || accuracySummary.best.name}
+                        </div>
+                        <div style={{ fontSize: "11px", color: accuracySummary.rating.color, fontWeight: 600 }}>
+                          {accuracySummary.rating.label} accuracy
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "28px", fontWeight: 700, fontFamily: "var(--font-heading)", color: accuracySummary.rating.color, lineHeight: 1 }}>
+                      {(accuracySummary.best.r2 * 100).toFixed(1)}%
+                      <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-secondary)", marginLeft: "4px" }}>R²</span>
+                    </div>
+                  </div>
+
+                  {}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+                    {[
+                      { label: "R² Score", value: accuracySummary.best.r2?.toFixed(4), color: "var(--accent-green)" },
+                      { label: "MAE", value: accuracySummary.best.mae?.toFixed(2), color: "var(--accent-orange)" },
+                      { label: "RMSE", value: accuracySummary.best.rmse?.toFixed(2), color: "var(--accent-purple)" },
+                    ].map((metric) => (
+                      <div key={metric.label} style={{
+                        padding: "10px",
+                        borderRadius: "2px",
+                        background: "var(--bg-deep)",
+                        border: "1px solid var(--border-subtle)",
+                        textAlign: "center",
+                      }}>
+                        <div style={{ fontSize: "10px", color: "var(--text-secondary)", marginBottom: "2px", fontWeight: 500 }}>{metric.label}</div>
+                        <div style={{ fontSize: "15px", fontWeight: 700, color: metric.color, fontFamily: "var(--font-heading)" }}>{metric.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <div style={{ fontSize: "10px", color: "var(--text-secondary)", fontWeight: 500, marginBottom: "2px" }}>ALL MODELS RANKING</div>
+                    {accuracySummary.entries.map((entry, idx) => {
+                      const RatingIcon = getAccuracyRating(entry.r2).icon
+                      return (
+                        <div key={entry.name} style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          padding: "6px 8px",
+                          borderRadius: "2px",
+                          background: idx === 0 ? "rgba(0,214,143,0.05)" : "transparent",
+                          border: idx === 0 ? "1px solid rgba(0,214,143,0.12)" : "1px solid transparent",
+                        }}>
+                          <div className="model-rank-badge" style={{
+                            width: "18px", height: "18px",
+                            fontSize: "9px",
+                            background: idx === 0 ? "var(--accent-green)" : "var(--bg-deep)",
+                            color: idx === 0 ? "#fff" : "var(--text-secondary)",
+                          }}>{idx + 1}</div>
+                          <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[entry.name] || "var(--text-secondary)" }} />
+                          <span style={{ fontSize: "11px", fontWeight: 500, flex: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+                            {MODEL_LABELS[entry.name] || entry.name}
+                          </span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <RatingIcon className="size-3" style={{ color: getAccuracyRating(entry.r2).color }} />
+                            <span style={{ fontSize: "11px", fontWeight: 600, color: getAccuracyRating(entry.r2).color }} className="tabular-nums">
+                              {(entry.r2 * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -429,9 +568,9 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     borderRadius: "2px",
                     transition: "background 120ms",
                   }} className="hover:bg-muted">
-                    <div className="flex items-center gap-2" style={{ overflow: "visible", minWidth: 0 }}>
+                    <div className="flex items-center gap-2" style={{ overflow: "hidden", minWidth: 0 }}>
                       <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
-                      <span style={{ fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap", overflow: "visible" }}>
+                      <span style={{ fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {MODEL_LABELS[model.name] || model.name}
                       </span>
                     </div>

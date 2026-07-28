@@ -737,10 +737,10 @@ function HistoryCard({ item }) {
             <div className="flex-1" style={{ minWidth: "140px" }}>
               <div className="flex flex-wrap gap-1.5">
                 {inputFields.map(({ key, label, value, Icon }) => (
-                  <div key={key} style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 8px", background: "var(--bg-deep)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)", fontSize: "11px", color: "var(--text-secondary)" }}>
-                    <Icon className="size-3" style={{ color: "var(--accent-gold)" }} />
-                    <span style={{ fontWeight: 500, color: "var(--text-muted)", marginRight: "2px" }}>{label}:</span>
-                    <span style={{ color: "var(--text-primary)" }}>{value}</span>
+                  <div key={key} style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 8px", background: "var(--bg-deep)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)", fontSize: "11px", color: "var(--text-secondary)", maxWidth: "100%" }}>
+                    <Icon className="size-3 shrink-0" style={{ color: "var(--accent-gold)" }} />
+                    <span style={{ fontWeight: 500, color: "var(--text-muted)", marginRight: "2px", whiteSpace: "nowrap" }}>{label}:</span>
+                    <span className="truncate" style={{ color: "var(--text-primary)", maxWidth: "160px" }}>{value}</span>
                   </div>
                 ))}
               </div>
@@ -824,7 +824,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
         {}
         <div className="flex items-center gap-2" style={{ marginBottom: "10px" }}>
           <span className="size-2 rounded-full" style={{ background: modelColor }} />
-          <span style={{ fontSize: "10px", fontWeight: 600, color: modelColor, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          <span className="truncate" style={{ fontSize: "10px", fontWeight: 600, color: modelColor, textTransform: "uppercase", letterSpacing: "0.04em" }}>
             {MODEL_LABELS[item.model] || item.model}
           </span>
           {modeLabel && (
@@ -876,8 +876,7 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
         {}
         {inputTags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {inputTags.map(({ key, label, value }) => (
-              <span
+            {inputTags.map(({ key, label, value }) => (                <span
                 key={key}
                 style={{
                   fontSize: "8px",
@@ -886,9 +885,13 @@ function GridCard({ item, index, isSelected, onToggle, yieldMin, yieldMax }) {
                   background: "var(--bg-deep)",
                   border: "1px solid var(--border-subtle)",
                   color: "var(--text-muted)",
+                  maxWidth: "100%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {label}: <strong style={{ color: "var(--text-secondary)" }}>{value}</strong>
+                {label}: <strong className="truncate" style={{ color: "var(--text-secondary)", maxWidth: "80px" }}>{value}</strong>
               </span>
             ))}
             {Object.keys(item.input || {}).filter((k) => {
