@@ -10,6 +10,7 @@ function App() {
   const [backendStatus, setBackendStatus] = useState("checking")
   const [availableModels, setAvailableModels] = useState([])
   const [modelMetrics, setModelMetrics] = useState({})
+  const [trainingSummary, setTrainingSummary] = useState(null)
   const [backendError, setBackendError] = useState(null)
 
   useEffect(() => {
@@ -33,6 +34,11 @@ function App() {
           }
         })
         setModelMetrics(metrics)
+        
+        // Load training summary if available
+        if (raw._training_summary) {
+          setTrainingSummary(raw._training_summary)
+        }
       } catch (err) {
         if (cancelled) return
         setBackendStatus("error")
@@ -74,6 +80,7 @@ function App() {
         backendStatus={backendStatus}
         availableModels={availableModels}
         modelMetrics={modelMetrics}
+        trainingSummary={trainingSummary}
         backendError={backendError}
       />
     </div>

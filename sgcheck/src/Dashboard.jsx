@@ -172,6 +172,7 @@ function Dashboard({
   backendStatus,
   availableModels,
   modelMetrics,
+  trainingSummary,
   backendError,
 }) {
   const { toasts, addToast, removeToast } = useToast()
@@ -824,7 +825,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
               {view === "dashboard" ? (
                 <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                   <div className="main-content">
-                    <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} availableModels={availableModels} modelMetrics={modelMetrics} backendStatus={backendStatus} predictionResult={predictionResult} ensembleResult={ensembleResult} />
+                    <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} availableModels={availableModels} modelMetrics={modelMetrics} trainingSummary={trainingSummary} backendStatus={backendStatus} predictionResult={predictionResult} ensembleResult={ensembleResult} />
                   </div>
                 </motion.div>
               ) : view === "history" ? (
