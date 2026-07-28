@@ -1014,6 +1014,28 @@ h1, h2, h3, h4, h5, h6 {
   text-overflow: ellipsis;
 }
 
+/* Ensure long model names don't break layout */
+.model-chip {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge safety - prevent text overflow in chips */
+.badge {
+  max-width: 250px;
+}
+
+/* Flex safety: prevent flex children from overflowing their parent */
+.flex-1 {
+  min-width: 0;
+}
+
+/* Ensure flex items with truncation have constrained width */
+.min-w-0 {
+  min-width: 0;
+}
+
 /* ----- Model Comparison Bars ----- */
 .model-rank-item {
   display: flex;

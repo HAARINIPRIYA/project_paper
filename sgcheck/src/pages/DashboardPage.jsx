@@ -221,10 +221,10 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     const isBest = idx === 0
                     return (
                       <div key={model.name} className={"model-rank-item" + (isBest ? " best" : "")}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "160px", flexShrink: 0, overflow: "visible" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "160px", flexShrink: 0, overflow: "hidden" }}>
                           <div className="model-rank-badge">{idx + 1}</div>
                           <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
-                          <span style={{ fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap", overflow: "visible" }}>
+                          <span style={{ fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                             {MODEL_LABELS[model.name] || model.name}
                           </span>
                         </div>
@@ -429,9 +429,9 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     borderRadius: "2px",
                     transition: "background 120ms",
                   }} className="hover:bg-muted">
-                    <div className="flex items-center gap-2" style={{ overflow: "visible", minWidth: 0 }}>
+                    <div className="flex items-center gap-2" style={{ overflow: "hidden", minWidth: 0 }}>
                       <span className="size-2 shrink-0 rounded-full" style={{ background: MODEL_COLORS[model.name] || "var(--text-secondary)" }} />
-                      <span style={{ fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap", overflow: "visible" }}>
+                      <span style={{ fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {MODEL_LABELS[model.name] || model.name}
                       </span>
                     </div>

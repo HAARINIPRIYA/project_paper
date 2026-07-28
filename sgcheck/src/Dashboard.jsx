@@ -626,7 +626,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                     className="hover:bg-muted"
                   >
                     <span className="size-2 shrink-0 rounded-full" style={{ background: colors[name] || "var(--text-secondary)" }} />
-                    <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, overflow: "visible", whiteSpace: "nowrap" }} className="capitalize">
+                    <span style={{ fontSize: "12px", fontWeight: 500, flex: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }} className="capitalize">
                       {name.replace(/_/g, " ")}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
