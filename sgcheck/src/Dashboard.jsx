@@ -55,12 +55,11 @@ const STORAGE_KEY = "canesense_conversations"
 
 
 const SUGGESTIONS = [
-  { icon: Trophy, label: "Which model is best?", query: "Which model is best?", color: "var(--accent-primary)" },
-  { icon: GitCompare, label: "Compare CatBoost vs XGBoost", query: "Compare CatBoost and XGBoost", color: "var(--accent-blue)" },
-  { icon: Target, label: "What should I choose?", query: "What model should I choose?", color: "var(--accent-orange)" },
-  { icon: BarChartHorizontal, label: "Show all metrics", query: "Show me all model metrics", color: "#7c3aed" },
-  { icon: BookOpen, label: "What is R²?", query: "What does R² mean?", color: "#06b6d4" },
-  { icon: Sprout, label: "Predict my yield", query: "Predict my yield", color: "var(--accent-primary)" },
+  { icon: Trophy, label: "Why is CaneSugar v6 the best model?", query: "Why is CaneSugar v6 the most accurate model and how does its 8-fold stacking ensemble work?", color: "var(--accent-gold)" },
+  { icon: GitCompare, label: "Compare CaneSugar vs CatBoost", query: "Compare CaneSugar v6 and CatBoost performance, R² scores, and error rates.", color: "var(--accent-green)" },
+  { icon: Target, label: "How to maximize my sugarcane yield?", query: "Based on my field data, what agronomic adjustments (NPK, moisture, spacing) will maximize yield?", color: "var(--accent-orange)" },
+  { icon: BarChartHorizontal, label: "Show all model benchmarks", query: "Show me the complete R², MAE, and RMSE comparison for all 6 models.", color: "#7c3aed" },
+  { icon: Sprout, label: "Run yield forecast for my field", query: "Can you analyze my current field parameters and provide an agronomic forecast?", color: "var(--accent-primary)" },
 ]
 
 

@@ -112,6 +112,97 @@ def health():
         "model_count": len(available),
     }
 
+@app.get("/presets")
+def get_presets():
+    """Pre-configured sugarcane field scenarios for demonstration and simulation."""
+    return {
+        "success": True,
+        "presets": [
+            {
+                "id": "high_yield_co0238",
+                "name": "🌟 High-Yield Co-0238 (Drip)",
+                "description": "Optimal NPK, drip irrigation, loamy soil, early planting",
+                "data": {
+                    "Planting_Date": "2024-01-15",
+                    "Harvesting_Date": "2024-12-10",
+                    "Variety": "Co-0238",
+                    "Crop_Type": "Kharif",
+                    "Soil_Type": "Loamy",
+                    "Irrigation_Type": "Drip",
+                    "Fertilizer_Type": "Urea",
+                    "Nitrogen_kg_per_acre": 180.0,
+                    "Phosphorus_kg_per_acre": 75.0,
+                    "Potassium_kg_per_acre": 120.0,
+                    "Soil_Moisture_%": 32.0,
+                    "Soil_pH": 7.2,
+                }
+            },
+            {
+                "id": "rainfed_kharif",
+                "name": "🌧️ Rainfed Kharif (CoJ64)",
+                "description": "Monsoon rainfed crop on clay soil with moderate fertilizer",
+                "data": {
+                    "Planting_Date": "2024-06-20",
+                    "Harvesting_Date": "2025-04-15",
+                    "Variety": "CoJ64",
+                    "Crop_Type": "Kharif",
+                    "Soil_Type": "Clay",
+                    "Irrigation_Type": "Flood",
+                    "Fertilizer_Type": "DAP",
+                    "Nitrogen_kg_per_acre": 140.0,
+                    "Phosphorus_kg_per_acre": 60.0,
+                    "Potassium_kg_per_acre": 85.0,
+                    "Soil_Moisture_%": 24.0,
+                    "Soil_pH": 7.5,
+                }
+            },
+            {
+                "id": "water_stressed",
+                "name": "⚠️ Water-Stressed Crop",
+                "description": "Low soil moisture, sandy soil, nitrogen deficiency",
+                "data": {
+                    "Planting_Date": "2024-03-01",
+                    "Harvesting_Date": "2024-11-15",
+                    "Variety": "Co98014",
+                    "Crop_Type": "Rabi",
+                    "Soil_Type": "Sandy",
+                    "Irrigation_Type": "Flood",
+                    "Fertilizer_Type": "Organic",
+                    "Nitrogen_kg_per_acre": 75.0,
+                    "Phosphorus_kg_per_acre": 35.0,
+                    "Potassium_kg_per_acre": 45.0,
+                    "Soil_Moisture_%": 12.5,
+                    "Soil_pH": 8.1,
+                }
+            },
+            {
+                "id": "ratoon_crop",
+                "name": "🌱 Ratoon High-Density",
+                "description": "High tillering ratoon crop on alluvial soil with NPK blend",
+                "data": {
+                    "Planting_Date": "2024-02-10",
+                    "Harvesting_Date": "2024-12-25",
+                    "Variety": "Co0238",
+                    "Crop_Type": "Spring",
+                    "Soil_Type": "Alluvial",
+                    "Irrigation_Type": "Sprinkler",
+                    "Fertilizer_Type": "NPK",
+                    "Nitrogen_kg_per_acre": 195.0,
+                    "Phosphorus_kg_per_acre": 80.0,
+                    "Potassium_kg_per_acre": 130.0,
+                    "Soil_Moisture_%": 30.0,
+                    "Soil_pH": 6.9,
+                }
+            }
+        ]
+    }
+
+@app.delete("/history")
+def clear_history():
+    """Clear all prediction history."""
+    save_history({"predictions": []})
+    return {"success": True, "message": "History cleared successfully."}
+
 @app.get("/history")
 def get_history():
     """Get prediction history with latest first."""
@@ -186,12 +277,165 @@ def list_models():
 
 
 
+@app.post("/predict/ensemble")
+def predict_ensemble_endpoint(input_data: EnsembleInput):
+    """Weighted ensemble prediction using all available models."""
+    try:
+        records = [r.dict() for r in input_data.records]
+        result = predict_ensemble(records, weights=input_data.weights)
+        
+        for i, record in enumerate(input_data.records):
+            prediction_record = {
+                "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
+                "model": "ensemble",
+                "input": {
+                    "planting_date": record.Planting_Date,
+                    "harvesting_date": record.Harvesting_Date,
+                    "variety": record.Variety,
+                    "crop_type": record.Crop_Type,
+                    "soil_type": record.Soil_Type,
+                    "irrigation_type": record.Irrigation_Type,
+                    "fertilizer_type": record.Fertilizer_Type,
+                },
+                "prediction": result.get("predictions", [None])[i],
+                "status": "success"
+            }
+            history = load_history()
+            history["predictions"].insert(0, prediction_record)
+            save_history(history)
+        
+        return result
+    except RuntimeError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/predict/select")
+def predict_with_selection(input_data: ModelSelectionInput):
+    """
+    Predict with explicit model selection (Auto/Manual mode).
+    """
+    try:
+        if input_data.mode == "auto":
+            results_path = os.path.join(MODELS_DIR, "training_results.json")
+            if os.path.exists(results_path):
+                with open(results_path) as f:
+                    summary = json.load(f)
+                best_model = max(
+                    summary.keys(),
+                    key=lambda m: summary[m].get("r2", 0),
+                )
+            else:
+                best_model = "cane_sugar"
+            
+            result = predict(best_model, input_data.dict())
+            result["best_model"] = best_model
+            
+            prediction_record = {
+                "timestamp": input_data.variety or input_data.soil_type or "Unknown",
+                "mode": "auto",
+                "selected_model": best_model,
+                "input": {
+                    "variety": input_data.variety,
+                    "soil_type": input_data.soil_type,
+                    "irrigation_type": input_data.irrigation_type,
+                    "fertilizer_type": input_data.fertilizer_type,
+                },
+                "prediction": result.get("predictions", [None])[0],
+                "status": "success"
+            }
+        else:
+            model_name = input_data.model_name or "cane_sugar"
+            if model_name not in ALL_MODELS:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unknown model '{model_name}'. Choose from: {', '.join(ALL_MODELS)}",
+                )
+            
+            result = predict(model_name, input_data.dict())
+            result["selected_model"] = model_name
+            
+            prediction_record = {
+                "timestamp": input_data.variety or input_data.soil_type or "Unknown",
+                "mode": "manual",
+                "selected_model": model_name,
+                "input": {
+                    "variety": input_data.variety,
+                    "soil_type": input_data.soil_type,
+                    "irrigation_type": input_data.irrigation_type,
+                    "fertilizer_type": input_data.fertilizer_type,
+                },
+                "prediction": result.get("predictions", [None])[0],
+                "status": "success"
+            }
+        
+        history = load_history()
+        history["predictions"].insert(0, prediction_record)
+        save_history(history)
+        
+        return result
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="No trained models found. Run training first.",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/predict")
+def predict_auto(input_data: PredictionInput):
+    """Auto-predict using the best available model (by R² score)."""
+    try:
+        results_path = os.path.join(MODELS_DIR, "training_results.json")
+        if os.path.exists(results_path):
+            with open(results_path) as f:
+                summary = json.load(f)
+            best_model = max(
+                summary.keys(),
+                key=lambda m: summary[m].get("r2", 0),
+            )
+        else:
+            best_model = "cane_sugar"
+
+        result = predict(best_model, input_data.dict())
+        result["best_model"] = best_model
+        
+        prediction_record = {
+            "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
+            "model": "auto",
+            "selected_model": best_model,
+            "input": {
+                "planting_date": input_data.Planting_Date,
+                "harvesting_date": input_data.Harvesting_Date,
+                "variety": input_data.Variety,
+                "crop_type": input_data.Crop_Type,
+                "soil_type": input_data.Soil_Type,
+                "irrigation_type": input_data.Irrigation_Type,
+                "fertilizer_type": input_data.Fertilizer_Type,
+            },
+            "prediction": result.get("predictions", [None])[0],
+            "status": "success"
+        }
+        history = load_history()
+        history["predictions"].insert(0, prediction_record)
+        save_history(history)
+        
+        return result
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="No trained models found. Run training first.",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/predict/{model_name}")
 def predict_endpoint(model_name: str, input_data: PredictionInput):
     """
     Predict yield using a specific model.
-
-    Supported model names: catboost, xgboost, random_forest, linear_regression, elastic_net, cane_sugar
     """
     if model_name not in ALL_MODELS:
         raise HTTPException(
@@ -226,7 +470,7 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
     except FileNotFoundError:
         raise HTTPException(
             status_code=404,
-            detail=f"Model '{model_name}' not trained yet. Run `python backend/train.py --data <path>` first.",
+            detail=f"Model '{model_name}' not trained yet.",
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -271,87 +515,6 @@ def predict_batch(model_name: str, batch: BatchPredictionInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.post("/predict/ensemble")
-def predict_ensemble_endpoint(input_data: EnsembleInput):
-    """Weighted ensemble prediction using all available models."""
-    try:
-        records = [r.dict() for r in input_data.records]
-        result = predict_ensemble(records, weights=input_data.weights)
-        
-        for i, record in enumerate(input_data.records):
-            prediction_record = {
-                "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
-                "model": "ensemble",
-                "input": {
-                    "planting_date": record.Planting_Date,
-                    "harvesting_date": record.Harvesting_Date,
-                    "variety": record.Variety,
-                    "crop_type": record.Crop_Type,
-                    "soil_type": record.Soil_Type,
-                    "irrigation_type": record.Irrigation_Type,
-                    "fertilizer_type": record.Fertilizer_Type,
-                },
-                "prediction": result.get("predictions", [None])[i],
-                "status": "success"
-            }
-            history = load_history()
-            history["predictions"].insert(0, prediction_record)
-            save_history(history)
-        
-        return result
-    except RuntimeError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/predict")
-def predict_auto(input_data: PredictionInput):
-    """Auto-predict using the best available model (by R² score)."""
-    try:
-        results_path = os.path.join(MODELS_DIR, "training_results.json")
-        if os.path.exists(results_path):
-            with open(results_path) as f:
-                summary = json.load(f)
-            best_model = max(
-                summary.keys(),
-                key=lambda m: summary[m].get("r2", 0),
-            )
-        else:
-            best_model = "catboost"
-
-        result = predict(best_model, input_data.dict())
-        result["best_model"] = best_model
-        
-        prediction_record = {
-            "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
-            "model": "auto",
-            "selected_model": best_model,
-            "input": {
-                "planting_date": input_data.Planting_Date,
-                "harvesting_date": input_data.Harvesting_Date,
-                "variety": input_data.Variety,
-                "crop_type": input_data.Crop_Type,
-                "soil_type": input_data.Soil_Type,
-                "irrigation_type": input_data.Irrigation_Type,
-                "fertilizer_type": input_data.Fertilizer_Type,
-            },
-            "prediction": result.get("predictions", [None])[0],
-            "status": "success"
-        }
-        history = load_history()
-        history["predictions"].insert(0, prediction_record)
-        save_history(history)
-        
-        return result
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=404,
-            detail="No trained models found. Run training first.",
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 
