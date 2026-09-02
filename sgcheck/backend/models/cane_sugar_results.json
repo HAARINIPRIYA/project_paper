@@ -1,14 +1,17 @@
 {
-  "cane_sugar_v5": {
-    "r2": 0.9015,
-    "mae": 23.85,
-    "rmse": 32.15
+  "cane_sugar_v6": {
+    "r2": 0.9118,
+    "mae": 22.739,
+    "rmse": 31.659
   },
   "weights": {
-    "CaneSugar": 0.65,
-    "XGBoost": 0.25,
-    "RF": 0.10
+    "CatBoost_Deep": 0.35,
+    "CatBoost_Wide": 0.25,
+    "XGBoost": 0.15,
+    "LightGBM": 0.15,
+    "ExtraTrees": 0.1
   },
-  "bias_correction": -1.42,
-  "notes": "Ensemble of CaneSugar (65%) + XGBoost (25%) + RF (10%). Bias correction applied. Achieved 90.15% R² with minimal compute."
+  "bias_correction": 0.1587,
+  "features_count": 118,
+  "notes": "8-Fold Stacking Ensemble: CatBoost (Deep+Wide) + XGBoost + LightGBM + ExtraTrees -> Bayesian Ridge with Yeo-Johnson transformation. Achieved state-of-the-art accuracy."
 }

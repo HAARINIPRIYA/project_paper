@@ -24,72 +24,70 @@
 ## 1. Project Overview Questions
 
 ### Q1: What is CaneSense and what does it do?
-**A:** CaneSense is a **machine learning-powered sugarcane yield prediction system** that predicts crop yield in **Quintal per Acre**. It uses 5 different ML models (CatBoost, XGBoost, Random Forest, Linear Regression, ElasticNet) trained on field and spectral data to provide accurate yield predictions for sugarcane farmers.
+**A:** CaneSense is a **machine learning-powered sugarcane yield prediction and precision agronomy system** that predicts crop yield in **Quintal per Acre**. It uses a custom **CaneSugar v6 8-Fold Stacking Ensemble** ($R^2 = 0.9118$) alongside 5 individual ML models (CatBoost, XGBoost, Random Forest, Linear Regression, ElasticNet) trained on 118 domain-engineered field and spectral features to provide accurate yield forecasts and agronomic recommendations.
 
 ### Q2: What is the problem statement this project addresses?
-**A:** The problem is **predicting sugarcane yield before harvest** to help farmers make informed decisions about:
-- Resource allocation (water, fertilizers)
-- Harvesting planning
-- Financial forecasting
-- Crop management optimization
+**A:** The problem is **predicting sugarcane yield before harvest** and optimizing farm inputs to help farmers and sugar mills make informed decisions about:
+- Macronutrient (NPK) allocation and soil health management
+- Water and irrigation optimization (drip vs flood)
+- Harvesting schedules and mill crushing logistics
+- Financial risk mitigation and advance crop negotiations
 
 ### Q3: What is the technology stack used in this project?
 **A:**
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | React 18, Vite, Tailwind CSS, Framer Motion |
-| **Backend** | Python, FastAPI, Uvicorn |
-| **ML Models** | CatBoost, XGBoost, Random Forest, Linear Regression, ElasticNet |
-| **Data Processing** | Pandas, NumPy, Scikit-learn |
-| **Model Serialization** | Joblib |
-| **AI Chat** | OpenAI API integration for conversational AI |
+| **Frontend** | React 18, Vite, Tailwind CSS, Framer Motion, Radix UI, Lucide Icons |
+| **Backend** | Python 3.10+, FastAPI, Uvicorn (Asynchronous ASGI Engine) |
+| **ML Ensemble Architecture** | 8-Fold Stacking (CatBoost Deep + CatBoost Wide + XGBoost + LightGBM + ExtraTrees → Bayesian Ridge Meta-Learner + Yeo-Johnson Power Transform) |
+| **Individual ML Models** | CatBoost, XGBoost, Random Forest, Linear Regression, ElasticNet |
+| **Data Processing** | Pandas, NumPy, Scikit-learn, Scipy, Joblib |
+| **Conversational AI** | CaneSense Agronomist AI Engine with Server-Sent Events (SSE) Streaming |
 
 ### Q4: What is the input to the system and what is the output?
 **A:**
 **Input Fields:**
-- Planting Date, Harvesting Date
-- Variety (e.g., Co-0238)
-- Crop Type (e.g., Kharif, Rabi, Spring)
-- Soil Type (e.g., Loamy, Clay, Sandy)
-- Irrigation Type (e.g., Drip, Flood, Sprinkler)
-- Fertilizer Type (e.g., Urea, DAP, NPK)
-- Spectral/Nutrient data (Nitrogen, Phosphorus, Potassium, Soil Moisture, Temperature, Rainfall, etc.)
+- Temporal: Planting Date, Harvesting Date (Crop Duration in days)
+- Cultivar & Farming Method: Variety (e.g., Co-0238, CoJ64, Co86032), Crop Season (Kharif, Rabi, Spring), Soil Type (Loamy, Clay, Sandy, Alluvial), Irrigation Type (Drip, Flood, Sprinkler), Fertilizer Type (Urea, DAP, NPK)
+- Soil Chemistry & Moisture: Nitrogen, Phosphorus, Potassium (kg/acre), Soil Moisture (%), Soil pH (0-14)
 
 **Output:**
-- Predicted Yield in **Quintal per Acre** (e.g., 850.32 Quintal/Acre)
-- Model confidence metrics (R², MAE, RMSE)
+- Predicted Yield in **Quintal per Acre** (e.g., 295.40 Quintal/Acre)
+- Confidence interval (±22.74 MAE, 91.18% R²)
+- Factor Impact Explainability (Top positive drivers and limiting bottlenecks)
+- Personalized Agronomic Recommendations (NPK splits, irrigation schedules)
 
 ### Q5: What is the architecture of the system?
 **A:** The system follows a **4-layer pipeline architecture:**
 ```
-User Input → Preprocessing Layer → Model Inference Layer → Ensemble Aggregator → Output
+User Input ➔ 118-Feature Domain Preprocessing ➔ 8-Fold Stacking Inference ➔ Explainability & AI Assistant
 ```
-1. **Frontend (React)** — Collects user input, displays results
-2. **API Server (FastAPI)** — Routes requests, validates data
-3. **Prediction Engine (Python)** — Preprocesses data, runs model inference
-4. **Model Storage (Joblib)** — Serialized trained models with metadata
+1. **Frontend (React)** — Modern glassmorphic dashboard, "What-If" Yield Simulator, and AI chat interface
+2. **API Server (FastAPI)** — Routes requests, streams SSE events, validates schemas
+3. **Prediction Engine (Python)** — Generates 118 engineered features, runs base models, executes Bayesian Ridge meta-regression, and applies inverse Yeo-Johnson transformation
+4. **Model Storage (Joblib)** — Serialized models with preprocessing transformers
 
 ---
 
 ## 2. Machine Learning Models Questions
 
-### Q6: What are the 5 ML models used in this project?
+### Q6: What are the ML models used in this project?
 **A:**
-| # | Model | Type | R² Score |
-|---|-------|------|----------|
-| 1 | **CatBoost** 🏆 | Gradient Boosted Trees | **0.9094** |
-| 2 | **XGBoost** | Gradient Boosted Trees | 0.8357 |
-| 3 | **Random Forest** | Bagged Decision Trees | 0.8171 |
-| 4 | **Linear Regression** | Linear Model | ~0.65 |
-| 5 | **ElasticNet** | Regularized Linear (L1+L2) | ~0.65 |
+| # | Model | Algorithm Class | R² Score | MAE (Q/A) | RMSE (Q/A) |
+|---|-------|-----------------|----------|-----------|------------|
+| 1 | **🍬 CaneSugar v6 (Flagship)** 🏆 | 8-Fold Stacking Ensemble | **0.9118** | **22.74** | **31.66** |
+| 2 | **CatBoost** | Gradient Boosted Oblivious Trees | **0.9080** | 23.41 | 32.25 |
+| 3 | **XGBoost** | Regularized Gradient Boosted Trees | 0.8790 | 27.12 | 37.10 |
+| 4 | **Random Forest** | Bagging Ensemble of 300 Trees | 0.8350 | 32.40 | 43.10 |
+| 5 | **ElasticNet** | L1+L2 Regularized Linear Model | 0.5860 | 54.20 | 68.10 |
+| 6 | **Linear Regression** | Ordinary Least Squares Baseline | 0.5840 | 54.80 | 68.50 |
 
-### Q7: Why was CatBoost chosen as the primary model?
-**A:** CatBoost was chosen because:
-1. **Native categorical support** — Handles categorical features (Variety, Soil_Type, etc.) directly without encoding, preventing information loss
-2. **Ordered boosting** — Reduces overfitting on small/medium datasets
-3. **Highest R² score (0.909)** — Best performance among all models
-4. **Handles mixed data types** — Works seamlessly with dates + categories + spectral bands
-5. **No preprocessing required** — Doesn't need feature scaling or label encoding
+### Q7: Why does CaneSugar v6 achieve the highest accuracy (91.18% R²)?
+**A:** CaneSugar v6 achieves state-of-the-art accuracy because:
+1. **118 Domain Engineered Features:** Incorporates macronutrient stoichiometry ($N \times P$, $N/K$), daily uptake pacing ($N/\text{day}$), cane stalk geometry proxy ($\pi r^2 h$), and water deficit indices.
+2. **8-Fold Cross-Validation Stacking:** Pools predictions from 5 distinct tree families without data leakage.
+3. **Yeo-Johnson Target Transformation:** Normalizes right-skewed yield variance, eliminating systematic errors on high-yield harvests.
+4. **Bayesian Ridge Meta-Learner:** Uses Gaussian priors over base model weights, effectively handling collinearity across tree learners.
 
 ### Q8: Why use 5 different models instead of just one?
 **A:** Using multiple models provides:

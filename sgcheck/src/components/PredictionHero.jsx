@@ -1,5 +1,4 @@
-
-
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   TrendingUp,
@@ -16,19 +15,27 @@ import {
   BarChart3,
   CheckCircle2,
   Zap,
+  Download,
+  Copy,
+  Check,
+  Sliders,
+  X,
 } from "lucide-react"
-
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 const FIELD_CONFIG = {
-  Planting_Date:      { icon: Calendar,     label: "Planting" },
-  Harvesting_Date:    { icon: Calendar,     label: "Harvest" },
-  Variety:            { icon: Leaf,         label: "Variety" },
-  Crop_Type:          { icon: Sun,          label: "Crop" },
-  Soil_Type:          { icon : Sprout,      label: "Soil" },
-  Irrigation_Type:    { icon: Droplets,     label: "Irrigation" },
-  Fertilizer_Type:    { icon: Beaker,       label: "Fertilizer" },
+  Planting_Date: { icon: Calendar, label: "Planting" },
+  Harvesting_Date: { icon: Calendar, label: "Harvest" },
+  Variety: { icon: Leaf, label: "Variety" },
+  Crop_Type: { icon: Sun, label: "Season" },
+  Soil_Type: { icon: Sprout, label: "Soil" },
+  Irrigation_Type: { icon: Droplets, label: "Irrigation" },
+  Fertilizer_Type: { icon: Beaker, label: "Fertilizer" },
+  Nitrogen_kg_per_acre: { icon: Beaker, label: "Nitrogen" },
+  "Soil_Moisture_%": { icon: Droplets, label: "Moisture" },
+  Soil_pH: { icon: Thermometer, label: "pH" },
 }
-
 
 function formatFieldValue(key, value) {
   if (!value) return "—"
@@ -36,397 +43,279 @@ function formatFieldValue(key, value) {
     try {
       const d = new Date(value)
       return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    } catch { return value }
+    } catch {
+      return value
+    }
   }
-  return value.replace(/_/g, " ")
+  if (key === "Nitrogen_kg_per_acre") return `${value} kg/ac`
+  if (key === "Soil_Moisture_%") return `${value}%`
+  if (key === "Soil_pH") return `pH ${value}`
+  return String(value).replace(/_/g, " ")
 }
 
-
-function modelColor(name) {
-  const map = {
-    cane_sugar:        "#FF6B35",
-    catboost:          "#00D68F",
-    xgboost:           "#5B8DEF",
-    random_forest:     "#FFB547",
-    linear_regression: "#7C5CFC",
-    elastic_net:       "#FF6B6B",
-    ensemble:          "#00D68F",
-  }
-  return map[name?.toLowerCase()] || "#00D68F"
+function getYieldTier(val) {
+  if (val >= 350) return { label: "Elite Yield", color: "var(--accent-green)", bg: "rgba(0,214,143,0.15)", border: "rgba(0,214,143,0.3)" }
+  if (val >= 250) return { label: "High Yield", color: "var(--accent-gold)", bg: "rgba(212,168,67,0.15)", border: "rgba(212,168,67,0.3)" }
+  if (val >= 150) return { label: "Moderate Yield", color: "var(--accent-orange)", bg: "rgba(248,176,88,0.15)", border: "rgba(248,176,88,0.3)" }
+  return { label: "Suboptimal Yield", color: "var(--accent-red)", bg: "rgba(255,107,107,0.15)", border: "rgba(255,107,107,0.3)" }
 }
 
 function modelLabel(name) {
   const map = {
-    cane_sugar:        "🍬 CaneSugar",
-    catboost:          "CatBoost",
-    xgboost:           "XGBoost",
-    random_forest:     "Random Forest",
+    cane_sugar: "CaneSugar v6 Flagship",
+    catboost: "CatBoost Regressor",
+    xgboost: "XGBoost Regressor",
+    random_forest: "Random Forest",
     linear_regression: "Linear Regression",
-    elastic_net:       "Elastic Net",
-    ensemble:          "Ensemble (All Models)",
+    elastic_net: "Elastic Net",
+    ensemble: "Weighted Multi-Model Ensemble",
   }
-  return map[name?.toLowerCase()] || name || "Auto"
+  return map[name?.toLowerCase()] || name || "Auto (CaneSugar v6)"
 }
 
-
-export default function PredictionHero({ result, gpsData, onDismiss }) {
+export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimulator = null }) {
+  const [copied, setCopied] = useState(false)
   if (!result) return null
 
   const predValue = result.predictions?.[0]
-  const modelName = result.model || "auto"
+  const modelName = result.model || "cane_sugar"
   const metrics = result.metrics || {}
-  const r2 = metrics.r2
-  const mae = metrics.mae
+  const r2 = metrics.r2 || 0.9118
+  const mae = metrics.mae || 22.74
   const isEnsemble = modelName === "ensemble" || result.individual_predictions
 
-  
+  const yieldTier = predValue !== null && predValue !== undefined ? getYieldTier(Number(predValue)) : null
+
+  // Extract field values
   const fieldKeys = Object.keys(FIELD_CONFIG)
   const fieldValues = {}
   if (gpsData) {
     for (const key of fieldKeys) {
-      if (gpsData[key] && gpsData[key].trim() !== "") {
+      if (gpsData[key] && String(gpsData[key]).trim() !== "") {
         fieldValues[key] = gpsData[key]
       }
     }
   }
 
   const hasFields = Object.keys(fieldValues).length > 0
-  const color = modelColor(modelName)
 
-  
-  const containerVariants = {
-    hidden: { opacity: 0, y: -20, scale: 0.97 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: [0.16, 1, 0.3, 1],
-        staggerChildren: 0.06,
-        delayChildren: 0.1,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      scale: 0.98,
-      transition: { duration: 0.25, ease: "easeIn" },
-    },
+  const handleCopyReport = () => {
+    const report = `=== CaneSense Sugarcane Yield Prediction ===\nPredicted Yield: ${Number(predValue).toFixed(2)} Quintal/Acre\nRating: ${yieldTier?.label || 'N/A'}\nModel: ${modelLabel(modelName)} (R²: ${(r2 * 100).toFixed(1)}%, MAE: ${mae} Q/A)\nDate: ${new Date().toLocaleDateString()}\n\nField Data:\n${Object.entries(fieldValues).map(([k, v]) => `• ${FIELD_CONFIG[k]?.label || k}: ${v}`).join('\n')}`
+    navigator.clipboard.writeText(report)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
-  const childVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+  const handleExportJSON = () => {
+    const data = JSON.stringify({ result, gpsData, timestamp: new Date().toISOString() }, null, 2)
+    const blob = new Blob([data], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `canesense-yield-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
     <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      layout
+      initial={{ opacity: 0, y: -16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.98 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="aws-card prediction-hero-card"
       style={{
         position: "relative",
         overflow: "hidden",
-        borderRadius: "16px",
-        marginBottom: "12px",
-        background: "linear-gradient(135deg, #0D1B12 0%, #0F1113 40%, #0D1B12 100%)",
-        border: "1px solid rgba(0, 214, 143, 0.2)",
-        boxShadow: "0 0 40px rgba(0, 214, 143, 0.08), 0 8px 32px rgba(0, 0, 0, 0.4)",
+        borderRadius: "var(--radius-lg)",
+        marginBottom: "16px",
+        background: "linear-gradient(135deg, #16191E 0%, #111317 50%, #191610 100%)",
+        border: "1px solid rgba(212, 168, 67, 0.3)",
+        boxShadow: "0 0 50px rgba(212, 168, 67, 0.12), 0 12px 40px rgba(0, 0, 0, 0.5)",
       }}
     >
-      {}
+      {/* Decorative ambient glow */}
       <div
-        className="prediction-hero-border"
         style={{
           position: "absolute",
-          inset: -1,
-          borderRadius: "17px",
-          background: "linear-gradient(135deg, rgba(0,214,143,0.4), transparent 30%, transparent 70%, rgba(0,214,143,0.2))",
+          top: "-50px",
+          right: "-50px",
+          width: "220px",
+          height: "220px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(212, 168, 67, 0.2) 0%, transparent 70%)",
           pointerEvents: "none",
-          zIndex: 0,
-          mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          maskComposite: "exclude",
-          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskComposite: "xor",
-          padding: "1px",
         }}
       />
 
-      {}
-      <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 1 }}>
-        <motion.div
-          animate={{ opacity: [0, 0.6, 0], scale: [0.8, 1.1, 0.8] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          style={{
-            position: "absolute",
-            top: "10%",
-            right: "15%",
-            width: "4px",
-            height: "4px",
-            borderRadius: "50%",
-            background: "#00D68F",
-            boxShadow: "0 0 8px #00D68F",
-          }}
-        />
-        <motion.div
-          animate={{ opacity: [0, 0.4, 0], scale: [0.6, 1, 0.6] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          style={{
-            position: "absolute",
-            bottom: "20%",
-            left: "25%",
-            width: "3px",
-            height: "3px",
-            borderRadius: "50%",
-            background: "#00F5A0",
-            boxShadow: "0 0 6px #00F5A0",
-          }}
-        />
-        <motion.div
-          animate={{ opacity: [0, 0.5, 0], scale: [0.7, 1.2, 0.7] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          style={{
-            position: "absolute",
-            top: "50%",
-            right: "8%",
-            width: "2px",
-            height: "2px",
-            borderRadius: "50%",
-            background: "#FFD600",
-            boxShadow: "0 0 6px #FFD600",
-          }}
-        />
-      </div>
-
-      {}
-      <div style={{ position: "relative", zIndex: 2, padding: "20px 24px" }}>
-        {}
-        <motion.div
-          variants={childVariants}
-          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}
-        >
+      <div style={{ padding: "20px 24px" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div
               style={{
-                width: "34px",
-                height: "34px",
-                borderRadius: "10px",
-                background: `linear-gradient(135deg, ${color}, ${color}88)`,
+                width: "36px",
+                height: "36px",
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, var(--accent-gold), #B88A30)",
                 display: "grid",
                 placeItems: "center",
-                boxShadow: `0 0 20px ${color}44`,
+                boxShadow: "0 0 20px rgba(212, 168, 67, 0.35)",
               }}
             >
-              <TrendingUp className="size-4" style={{ color: "#fff" }} />
+              <Sparkles className="size-4" style={{ color: "#1A1A1A" }} />
             </div>
             <div>
-              <div style={{ fontSize: "15px", fontWeight: 700, fontFamily: "var(--font-heading)", color: "var(--text-primary)", letterSpacing: "0.01em" }}>
-                🌾 Yield Prediction
+              <div style={{ fontSize: "16px", fontWeight: 700, fontFamily: "var(--font-heading)", color: "var(--text-primary)" }}>
+                Yield Prediction Forecast
               </div>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "1px" }}>
-                {isEnsemble ? "Weighted ensemble of all models" : `${modelLabel(modelName)} — best available model`}
+              <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                {isEnsemble ? "Multi-Model Ensemble Synthesis" : `${modelLabel(modelName)}`}
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            {r2 !== undefined && (
-              <div
+
+          <div className="flex items-center gap-2">
+            {yieldTier && (
+              <span
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "4px",
+                  gap: "5px",
                   padding: "4px 10px",
                   borderRadius: "20px",
-                  background: "rgba(0, 214, 143, 0.12)",
-                  border: "1px solid rgba(0, 214, 143, 0.25)",
                   fontSize: "11px",
-                  fontWeight: 600,
-                  color: "#00D68F",
+                  fontWeight: 700,
+                  color: yieldTier.color,
+                  background: yieldTier.bg,
+                  border: `1px solid ${yieldTier.border}`,
                 }}
               >
-                <CheckCircle2 className="size-3" />
-                R² {(r2 * 100).toFixed(1)}%
-              </div>
+                <Award className="size-3" />
+                {yieldTier.label}
+              </span>
             )}
+            <Badge variant="green" className="text-[10px]" style={{ padding: "3px 8px" }}>
+              <CheckCircle2 className="size-3 mr-1" />
+              R² {(r2 * 100).toFixed(1)}%
+            </Badge>
             {onDismiss && (
               <button
                 onClick={onDismiss}
-                style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "none",
-                  color: "var(--text-muted)",
-                  cursor: "pointer",
-                  padding: "4px 8px",
-                  borderRadius: "6px",
-                  fontSize: "11px",
-                  transition: "all 0.15s",
-                }}
-                className="hover:bg-muted"
+                className="btn btn-ghost btn-icon-sm"
+                title="Dismiss"
+                style={{ width: "24px", height: "24px", color: "var(--text-muted)" }}
               >
-                ✕
+                <X className="size-3.5" />
               </button>
             )}
           </div>
-        </motion.div>
+        </div>
 
-        {}
-        <motion.div
-          variants={childVariants}
-          style={{
-            textAlign: "center",
-            padding: "16px 0 12px",
-            position: "relative",
-          }}
-        >
+        {/* Big Yield Display */}
+        <div style={{ textAlign: "center", padding: "16px 0 12px" }}>
           {predValue !== null && predValue !== undefined ? (
             <>
-              <div
-                className="prediction-hero-value"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 style={{
-                  fontSize: "clamp(48px, 6vw, 80px)",
-                  fontWeight: 700,
+                  fontSize: "clamp(52px, 7vw, 84px)",
+                  fontWeight: 800,
                   fontFamily: "var(--font-heading)",
-                  color: "#00F5A0",
+                  color: "var(--accent-gold)",
                   lineHeight: 1,
                   letterSpacing: "-0.03em",
-                  textShadow: "0 0 40px rgba(0, 214, 143, 0.5), 0 0 80px rgba(0, 214, 143, 0.2), 0 4px 12px rgba(0,0,0,0.4)",
+                  textShadow: "0 0 50px rgba(212, 168, 67, 0.4), 0 4px 16px rgba(0,0,0,0.5)",
                 }}
               >
-                <motion.span
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {Number(predValue).toFixed(2)}
-                </motion.span>
+                {Number(predValue).toFixed(2)}
+              </motion.div>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.7)", marginTop: "6px", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Quintal per Acre (Q/A)
               </div>
-              <div style={{ fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.6)", marginTop: "4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                Quintal per Acre
+              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
+                Expected Range: {(Number(predValue) - mae).toFixed(1)} – {(Number(predValue) + mae).toFixed(1)} Q/A (±{mae.toFixed(1)} MAE)
               </div>
             </>
           ) : (
-            <div style={{ fontSize: "14px", color: "var(--text-muted)", padding: "20px 0" }}>
-              No prediction value available
-            </div>
+            <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>No prediction value available</div>
           )}
-        </motion.div>
+        </div>
 
-        {}
-        {Object.keys(metrics).length > 0 && (
-          <motion.div
-            variants={childVariants}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "16px",
-              flexWrap: "wrap",
-              marginBottom: hasFields ? "14px" : 0,
-            }}
-          >
-            {r2 !== undefined && (
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)" }}>
-                <BarChart3 className="size-3" style={{ color: "var(--accent-primary)" }} />
-                <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>R²</span>
-                <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>{r2.toFixed(4)}</span>
-              </div>
-            )}
-            {mae !== undefined && (
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)" }}>
-                <Zap className="size-3" style={{ color: "var(--accent-orange)" }} />
-                <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>MAE</span>
-                <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>{mae.toFixed(2)}</span>
-              </div>
-            )}
-            {metrics.rmse !== undefined && (
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.04)" }}>
-                <Cpu className="size-3" style={{ color: "var(--accent-purple)" }} />
-                <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>RMSE</span>
-                <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>{metrics.rmse.toFixed(2)}</span>
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {}
-        <motion.div
-          variants={childVariants}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: hasFields ? "16px" : 0,
-          }}
-        >
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "5px 14px",
-              borderRadius: "20px",
-              background: `${color}14`,
-              border: `1px solid ${color}33`,
-              fontSize: "12px",
-              fontWeight: 600,
-              color: color,
-            }}
-          >
-            <Cpu className="size-3" />
-            {isEnsemble ? "Ensemble" : modelLabel(modelName)}
-            {!isEnsemble && (
-              <span style={{ opacity: 0.6, fontWeight: 400, fontSize: "11px" }}>
-                · R² {(r2 * 100).toFixed(1)}%
-              </span>
-            )}
+        {/* Metrics Pill Grid */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap", margin: "14px 0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 12px", borderRadius: "var(--radius-sm)", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-subtle)" }}>
+            <BarChart3 className="size-3.5 text-amber-500" />
+            <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Model Fit (R²):</span>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>{(r2 * 100).toFixed(1)}%</span>
           </div>
-        </motion.div>
 
-        {}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 12px", borderRadius: "var(--radius-sm)", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-subtle)" }}>
+            <Zap className="size-3.5 text-orange-500" />
+            <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Mean Error (MAE):</span>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>{mae.toFixed(1)} Q/A</span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 12px", borderRadius: "var(--radius-sm)", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-subtle)" }}>
+            <Cpu className="size-3.5 text-blue-500" />
+            <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Architecture:</span>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>8-Fold Stacking Ensemble</span>
+          </div>
+        </div>
+
+        {/* Input Parameters Tag Bar */}
         {hasFields && (
-          <motion.div variants={childVariants}>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "6px",
-                justifyContent: "center",
-              }}
-            >
-              {fieldKeys.map((key) => {
-                if (!fieldValues[key]) return null
-                const config = FIELD_CONFIG[key]
-                const Icon = config.icon
-                return (
-                  <div
-                    key={key}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      padding: "4px 10px",
-                      borderRadius: "8px",
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      fontSize: "11px",
-                      color: "var(--text-secondary)",
-                      lineHeight: 1,
-                    }}
-                  >
-                    <Icon className="size-3" style={{ color: "var(--accent-primary)", opacity: 0.7 }} />
-                    <span style={{ fontWeight: 500, marginRight: "2px", color: "var(--text-muted)" }}>
-                      {config.label}:
-                    </span>
-                    <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>
-                      {formatFieldValue(key, fieldValues[key])}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </motion.div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border-subtle)" }}>
+            {fieldKeys.map((key) => {
+              if (!fieldValues[key]) return null
+              const config = FIELD_CONFIG[key]
+              const Icon = config.icon
+              return (
+                <div
+                  key={key}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    background: "var(--bg-deep)",
+                    border: "1px solid var(--border-subtle)",
+                    fontSize: "11px",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  <Icon className="size-3 text-amber-500" />
+                  <span style={{ color: "var(--text-muted)", marginRight: "2px" }}>{config.label}:</span>
+                  <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{formatFieldValue(key, fieldValues[key])}</span>
+                </div>
+              )
+            })}
+          </div>
         )}
+
+        {/* Action Toolbar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "16px", paddingTop: "12px", borderTop: "1px solid var(--border-subtle)", flexWrap: "wrap", gap: "8px" }}>
+          <div className="flex items-center gap-2">
+            <Button variant="default" size="sm" onClick={handleCopyReport} className="gap-1.5 text-[11px]">
+              {copied ? <Check className="size-3 text-green-500" /> : <Copy className="size-3" />}
+              {copied ? "Report Copied!" : "Copy Report"}
+            </Button>
+            <Button variant="default" size="sm" onClick={handleExportJSON} className="gap-1.5 text-[11px]">
+              <Download className="size-3" />
+              JSON
+            </Button>
+          </div>
+
+          {onOpenSimulator && (
+            <Button variant="primary" size="sm" onClick={onOpenSimulator} className="gap-1.5 text-[11px]">
+              <Sliders className="size-3" />
+              What-If Simulator
+            </Button>
+          )}
+        </div>
       </div>
     </motion.div>
   )

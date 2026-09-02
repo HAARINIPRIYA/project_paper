@@ -26,7 +26,7 @@ const components = {
   ),
   h3: ({ children, ...props }) => {
     const text = typeof children === 'string' ? children : ''
-    const isPredictionHeader = text.includes('📈 Predicted Yield')
+    const isPredictionHeader = text.includes('Predicted Yield')
     return (
       <h3
         style={{

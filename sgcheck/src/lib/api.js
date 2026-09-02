@@ -58,9 +58,15 @@ export async function predictEnsemble(records, weights = null) {
 }
 
 
-export async function predictBatch(modelName, records) {
-  return request(`/predict/batch/${modelName}`, {
-    method: "POST",
-    body: JSON.stringify({ records }),
-  })
+export async function getPresets() {
+  return request("/presets")
 }
+
+export async function getHistory() {
+  return request("/history")
+}
+
+export async function clearHistoryApi() {
+  return request("/history", { method: "DELETE" })
+}
+

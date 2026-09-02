@@ -31,25 +31,25 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 const MODEL_LABELS = {
+  cane_sugar: "CaneSugar v6",
   catboost: "CatBoost",
   xgboost: "XGBoost",
   random_forest: "Random Forest",
   linear_regression: "Linear Regression",
   elastic_net: "ElasticNet",
-  cane_sugar: "CaneSugar",
   ensemble: "Ensemble",
-  auto: "Auto Best",
+  auto: "Auto (CaneSugar v6)",
 }
 
 const MODEL_COLORS = {
+  cane_sugar: "var(--accent-gold)",
   catboost: "var(--accent-green)",
   xgboost: "var(--accent-blue)",
   random_forest: "var(--accent-orange)",
-  linear_regression: "#7c3aed",
+  linear_regression: "#9B7ED8",
   elastic_net: "var(--accent-red)",
-  cane_sugar: "var(--accent-terracotta)",
-  ensemble: "var(--accent-purple)",
-  auto: "var(--accent-sage)",
+  ensemble: "var(--accent-gold)",
+  auto: "var(--accent-gold)",
 }
 
 const FIELD_ICONS = {
