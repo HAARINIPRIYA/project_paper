@@ -158,7 +158,8 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
                   <select
                     value={manualModel}
                     onChange={(e) => handleManualModelChange(e.target.value)}
-                    className="w-full px-3 py-2 rounded-md border border-input bg-transparent text-sm"
+                    className="input select"
+                    style={{ height: "40px", fontSize: "13px", cursor: "pointer" }}
                   >
                     {Object.keys(MODEL_INFO).map((key) => (
                       <option key={key} value={key}>
