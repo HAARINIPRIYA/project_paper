@@ -19,6 +19,9 @@ import {
   Bookmark,
   Beaker,
   Thermometer,
+  CloudRain,
+  AlertTriangle,
+  Award,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,7 +32,7 @@ import ModelResults from "./ModelResults"
 
 const MODEL_OPTIONS = [
   { value: "auto", label: "Auto (Best: CaneSugar v6)" },
-  { value: "cane_sugar", label: "🍬 CaneSugar v6 (Ensemble)" },
+  { value: "cane_sugar", label: "CaneSugar v6 (Ensemble)" },
   { value: "catboost", label: "CatBoost" },
   { value: "xgboost", label: "XGBoost" },
   { value: "random_forest", label: "Random Forest" },
@@ -49,7 +52,9 @@ const DROPDOWN_OPTIONS = {
 const DEFAULT_PRESETS = [
   {
     id: "high_yield_co0238",
-    name: "🌟 High-Yield Co-0238 (Drip)",
+    name: "High-Yield Co-0238 (Drip)",
+    icon: Sparkles,
+    iconColor: "var(--accent-gold)",
     description: "Optimal NPK, drip irrigation, loamy soil, early planting",
     data: {
       Planting_Date: "2024-01-15",
@@ -68,7 +73,9 @@ const DEFAULT_PRESETS = [
   },
   {
     id: "rainfed_kharif",
-    name: "🌧️ Rainfed Kharif (CoJ64)",
+    name: "Rainfed Kharif (CoJ64)",
+    icon: CloudRain,
+    iconColor: "#38BDF8",
     description: "Monsoon rainfed crop on clay soil with moderate fertilizer",
     data: {
       Planting_Date: "2024-06-20",
@@ -87,7 +94,9 @@ const DEFAULT_PRESETS = [
   },
   {
     id: "water_stressed",
-    name: "⚠️ Water-Stressed Field",
+    name: "Water-Stressed Field",
+    icon: AlertTriangle,
+    iconColor: "var(--accent-red)",
     description: "Low soil moisture, sandy soil, nitrogen deficiency",
     data: {
       Planting_Date: "2024-03-01",
@@ -106,7 +115,9 @@ const DEFAULT_PRESETS = [
   },
   {
     id: "ratoon_crop",
-    name: "🌱 Ratoon High-Density",
+    name: "Ratoon High-Density",
+    icon: Sprout,
+    iconColor: "var(--accent-green)",
     description: "High tillering ratoon crop on alluvial soil with NPK blend",
     data: {
       Planting_Date: "2024-02-10",
@@ -282,30 +293,34 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
           <span style={{ fontSize: "9px", color: "var(--text-muted)" }}>1-Click Load</span>
         </div>
         <div className="grid grid-cols-2 gap-1.5">
-          {presets.slice(0, 4).map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => handleApplyPreset(p)}
-              style={{
-                textAlign: "left",
-                padding: "6px 8px",
-                borderRadius: "var(--radius-sm)",
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-subtle)",
-                cursor: "pointer",
-                transition: "all 150ms",
-              }}
-              className="hover:border-primary hover:bg-muted"
-            >
-              <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {p.name}
-              </div>
-              <div style={{ fontSize: "9px", color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {p.description}
-              </div>
-            </button>
-          ))}
+          {presets.slice(0, 4).map((p) => {
+            const Icon = p.icon || Sparkles
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => handleApplyPreset(p)}
+                style={{
+                  textAlign: "left",
+                  padding: "6px 8px",
+                  borderRadius: "var(--radius-sm)",
+                  background: "var(--bg-surface)",
+                  border: "1px solid var(--border-subtle)",
+                  cursor: "pointer",
+                  transition: "all 150ms",
+                }}
+                className="hover:border-primary hover:bg-muted"
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <Icon className="size-3 shrink-0" style={{ color: p.iconColor || "var(--accent-primary)" }} />
+                  <span className="truncate">{p.name}</span>
+                </div>
+                <div style={{ fontSize: "9px", color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: "2px" }}>
+                  {p.description}
+                </div>
+              </button>
+            )
+          })}
         </div>
       </div>
 

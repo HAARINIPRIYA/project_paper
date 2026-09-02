@@ -25,6 +25,9 @@ import {
   Moon,
   Sun,
   History,
+  Copy,
+  Check,
+  RotateCcw,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -187,6 +190,13 @@ function Dashboard({
   const [showModelSelector, setShowModelSelector] = useState(false)
   const [selectedModel, setSelectedModel] = useState(null)
   const [isSelectingModel, setIsSelectingModel] = useState(false)
+  const [copiedId, setCopiedId] = useState(null)
+
+  const handleCopyMessage = (id, content) => {
+    navigator.clipboard.writeText(content)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
   const abortRef = useRef(null)
   const messagesEndRef = useRef(null)
   const composerRef = useRef("")
@@ -277,7 +287,7 @@ function Dashboard({
         {
           id: "sys_welcome",
           role: "assistant",
-          content: `Hi — I'm **CaneSense**. 🤖 I'm your AI assistant for sugarcane yield prediction.
+          content: `Hi — I'm **CaneSense**, your AI assistant for sugarcane yield prediction.
 
 I can help you:
 • **Predict yields** based on your field data
@@ -435,6 +445,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
           signal: abortRef.current.signal,
           temperature: 0.7,
           max_tokens: 4096,
+          fieldData: currentGps,
         })
 
         await parseStreamingResponse(response, (token) => {
@@ -499,7 +510,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
           return
         }
         setAiStatus("error")
-        const errorMsg = `⚠️ **Connection Error**\n\nI couldn't reach the AI service. This could mean:\n• The API endpoint is temporarily unavailable\n• Your network connection may be down\n• **CORS issue** — the browser blocked the request (restart the dev server if this persists)\n\n**Error details:** ${err.message}`
+        const errorMsg = `**Connection Notice**\n\nI couldn't reach the AI service. This could mean:\n• The API endpoint is temporarily unavailable\n• Your network connection may be down\n• **CORS issue** — the browser blocked the request (restart the dev server if this persists)\n\n**Error details:** ${err.message}`
 
         updateConversation(convoId, (c) => ({
           ...c,
@@ -873,89 +884,57 @@ To get started, enter your field details in the **Tools** panel (right side), th
                     )}
                     {messages.map((m, idx) => {
                       const isUser = m.role === "user"
+                      const isCopied = copiedId === m.id
                       return (
                         <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: Math.min(0.02 * idx, 0.15) }}
-                          className={"message-row" + (isUser ? " user" : " assistant")} style={{ marginBottom: "8px" }}>
-                          {!isUser ? (<Avatar><AvatarFallback style={{ background: "var(--accent-primary)", color: "#1A1A1A" }}>CS</AvatarFallback></Avatar>) : null}
-                          <div className={"message-bubble" + (isUser ? " user" : " assistant")}>
+                          className={"message-row" + (isUser ? " user" : " assistant")} style={{ marginBottom: "12px", position: "relative" }}>
+                          {!isUser ? (
+                            <Avatar>
+                              <AvatarFallback style={{ background: "linear-gradient(135deg, var(--accent-gold), #B88A30)", color: "#1A1A1A", fontWeight: 700 }}>
+                                CS
+                              </AvatarFallback>
+                            </Avatar>
+                          ) : null}
+                          <div className={"message-bubble" + (isUser ? " user" : " assistant")} style={{ position: "relative" }}>
                             {isUser ? m.content : <MarkdownRenderer content={m.content} />}
+                            
+                            {!isUser && (
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "6px", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid var(--border-subtle)", fontSize: "10px", color: "var(--text-muted)" }}>
+                                <span>{formatTime(m.timestamp)}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyMessage(m.id, m.content)}
+                                  className="btn btn-ghost btn-icon-sm"
+                                  style={{ width: "22px", height: "22px", padding: 0 }}
+                                  title="Copy response"
+                                >
+                                  {isCopied ? <Check className="size-3 text-green-500" /> : <Copy className="size-3" />}
+                                </button>
+                              </div>
+                            )}
                           </div>
                           {isUser ? (<Avatar size="sm"><AvatarFallback style={{ background: "var(--accent-blue-bg)", color: "var(--accent-blue)" }}>U</AvatarFallback></Avatar>) : null}
                         </motion.div>
                       )
                     })}
-                    {/* Suggestion Chips — shown when conversation is fresh */}
-                    {messages.length === 1 && messages[0]?.id === "sys_welcome" && !isPredicting && !streamingContent && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                        style={{ marginLeft: "44px", marginTop: "4px", marginBottom: "16px" }}
-                      >
-                        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "10px", fontWeight: 500, letterSpacing: "0.02em" }}>
-                          Try asking:
-                        </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                          {SUGGESTIONS.map((s, i) => {
-                            const Icon = s.icon
-                            return (
-                              <motion.button
-                                key={s.query}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.25, delay: 0.4 + i * 0.06 }}
-                                whileHover={{ scale: 1.04, y: -1 }}
-                                whileTap={{ scale: 0.97 }}
-                                onClick={() => handleSuggestionClick(s.query)}
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: "5px",
-                                  padding: "6px 12px",
-                                  border: "1px solid var(--border-subtle)",
-                                  borderRadius: "20px",
-                                  background: "var(--bg-card)",
-                                  color: "var(--text-primary)",
-                                  fontSize: "12px",
-                                  fontWeight: 500,
-                                  cursor: "pointer",
-                                  transition: "all 180ms",
-                                  boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-                                }}
-                                className="suggestion-chip hover:border-green"
-                              >
-                                <Icon className="size-3.5" style={{ color: s.color }} />
-                                <span>{s.label}</span>
-                              </motion.button>
-                            )
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
                     {streamingContent && (
-                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
-                        <Avatar><AvatarFallback style={{ background: "var(--accent-gold)", color: "#1A1A1A" }}>CS</AvatarFallback></Avatar>
+                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="message-row assistant" style={{ marginBottom: "12px" }}>
+                        <Avatar><AvatarFallback style={{ background: "linear-gradient(135deg, var(--accent-gold), #B88A30)", color: "#1A1A1A", fontWeight: 700 }}>CS</AvatarFallback></Avatar>
                         <div className="message-bubble assistant">
-                          {streamingContent ? <MarkdownRenderer content={streamingContent} /> : ''}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-primary)" }}>▌</span>
+                          {streamingContent ? <MarkdownRenderer content={streamingContent} /> : ''}<span className="inline-block animate-pulse" style={{ marginLeft: "2px", color: "var(--accent-gold)" }}>▌</span>
                         </div>
                       </motion.div>
                     )}
                     {isPredicting && !streamingContent && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="message-row assistant" style={{ marginBottom: "8px" }}>
-                        <Avatar><AvatarFallback style={{ background: "var(--accent-gold)", color: "#1A1A1A" }}>CS</AvatarFallback></Avatar>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="message-row assistant" style={{ marginBottom: "12px" }}>
+                        <Avatar><AvatarFallback style={{ background: "linear-gradient(135deg, var(--accent-gold), #B88A30)", color: "#1A1A1A", fontWeight: 700 }}>CS</AvatarFallback></Avatar>
                         <div className="message-bubble assistant flex items-center gap-3">
-                          <Loader2 className="size-4 animate-spin" style={{ color: "var(--accent-primary)" }} />
+                          <Loader2 className="size-4 animate-spin text-amber-500" />
                           <div className="flex flex-col gap-0.5">
-                            <span style={{ fontSize: "13px", color: "var(--text-primary)", fontWeight: 500 }}>Connecting to AI...</span>
-                            <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Sending your query to the prediction model</span>
+                            <span style={{ fontSize: "13px", color: "var(--text-primary)", fontWeight: 600 }}>CaneSense AI is analyzing...</span>
+                            <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Generating domain agronomist forecast</span>
                           </div>
                         </div>
-                      </motion.div>
-                    )}
-                    {streamingContent && (
-                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2" style={{ padding: "6px 14px", margin: "0 0 8px 44px", fontSize: "10px", color: "var(--text-muted)" }}>
-                        <span className="size-1.5 rounded-full animate-pulse" style={{ background: "var(--accent-primary)" }} />
-                        Processing your prediction request...
                       </motion.div>
                     )}
                     <div ref={messagesEndRef} />
@@ -965,27 +944,60 @@ To get started, enter your field details in the **Tools** panel (right side), th
             </AnimatePresence>
           </ScrollArea>
           {view === "analysis" && (
-            <div className="composer-wrap">
+            <div className="composer-wrap" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {/* Quick Suggestion Chips Bar */}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", overflowX: "auto", padding: "2px 4px", scrollbarWidth: "none" }}>
+                {SUGGESTIONS.map((s) => {
+                  const Icon = s.icon
+                  return (
+                    <button
+                      key={s.query}
+                      type="button"
+                      onClick={() => handleSuggestionClick(s.query)}
+                      disabled={isPredicting}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        padding: "5px 10px",
+                        borderRadius: "20px",
+                        background: "var(--bg-surface)",
+                        border: "1px solid var(--border-subtle)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "var(--text-secondary)",
+                        whiteSpace: "nowrap",
+                        cursor: "pointer",
+                        transition: "all 150ms",
+                      }}
+                      className="hover:border-primary hover:text-primary hover:bg-muted shrink-0"
+                    >
+                      <Icon className="size-3" style={{ color: s.color }} />
+                      <span>{s.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
               <div className="composer-box">
-                <div className="composer-flex" style={{ padding: "6px" }}>
+                <div className="composer-flex" style={{ padding: "8px" }}>
                   <div className="composer-input-wrap">
                     <Textarea value={composer} onChange={(e) => setComposer(e.target.value)}
-                      placeholder="Ask about predictions, yield, or field analysis…"
-                      style={{ minHeight: "36px", border: "none", background: "transparent", padding: "4px 8px", fontSize: "13px", boxShadow: "none", borderRadius: 0 }}
+                      placeholder="Ask about predictions, fertilizer optimization, or crop diagnostics…"
+                      style={{ minHeight: "40px", border: "none", background: "transparent", padding: "6px 8px", fontSize: "13px", boxShadow: "none", borderRadius: 0 }}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend() } }} />
                   </div>
-                  <Button variant="primary" size="icon" aria-label="Send" onClick={onSend} disabled={!composer.trim() || isPredicting}>
-                    {isPredicting ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
+                  <Button variant="primary" size="icon" aria-label="Send" onClick={onSend} disabled={!composer.trim() || isPredicting} style={{ height: "36px", width: "36px" }}>
+                    {isPredicting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                   </Button>
                 </div>
-                <div className="composer-footer">
+                <div className="composer-footer" style={{ padding: "4px 12px 8px" }}>
                   <div className="composer-hint">Shift + Enter for new line</div>
-                  <div className="composer-status">
-                    {isPredicting && <Badge variant="blue" className="text-[9px]" style={{ height: "18px" }}>Processing...</Badge>}
-                    {hasImage && <Badge variant="outline" className="text-[9px]" style={{ height: "18px" }}>Image loaded</Badge>}
-                    {hasFieldData && <Badge variant="outline" className="text-[9px]" style={{ height: "18px" }}>Field ready</Badge>}
-                    {!gpsData && <Badge variant="outline" className="text-[9px]" style={{ height: "18px" }}>No field data</Badge>}
-                    {aiStatus === "streaming" && <Badge variant="green" className="text-[9px]" style={{ height: "18px" }}>AI responding...</Badge>}
+                  <div className="composer-status flex items-center gap-1.5">
+                    {isPredicting && <Badge variant="blue" className="text-[9px]" style={{ height: "18px" }}>Thinking...</Badge>}
+                    {hasFieldData && <Badge variant="green" className="text-[9px]" style={{ height: "18px" }}>Field Connected</Badge>}
+                    {!gpsData && <Badge variant="outline" className="text-[9px]" style={{ height: "18px" }}>Preset Ready</Badge>}
+                    {aiStatus === "streaming" && <Badge variant="green" className="text-[9px]" style={{ height: "18px" }}>Streaming...</Badge>}
                   </div>
                 </div>
               </div>

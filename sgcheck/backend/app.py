@@ -60,6 +60,20 @@ class PredictionInput(BaseModel):
     Fertilizer_Type: Optional[str] = Field(None, description="Fertilizer used")
 
 
+from fastapi.responses import StreamingResponse
+from chat_engine import generate_chat_response, stream_chat_response
+
+class ChatMessage(BaseModel):
+    role: str = Field("user", description="Message sender role: user, assistant, system")
+    content: str = Field(..., description="Message text")
+
+class ChatRequest(BaseModel):
+    messages: List[ChatMessage] = Field(..., description="List of messages in conversation")
+    field_data: Optional[Dict] = Field(None, description="Optional current field data context")
+    temperature: Optional[float] = Field(0.7, description="Generation temperature")
+    stream: Optional[bool] = Field(False, description="Stream response tokens")
+
+
 class BatchPredictionInput(BaseModel):
     model_config = {"extra": "allow"}
     records: List[PredictionInput]
@@ -72,6 +86,7 @@ class EnsembleInput(BaseModel):
         None,
         description="Optional per-model weights, e.g. {'catboost': 0.4, 'xgboost': 0.3, ...}",
     )
+
 
 
 
@@ -120,7 +135,7 @@ def get_presets():
         "presets": [
             {
                 "id": "high_yield_co0238",
-                "name": "🌟 High-Yield Co-0238 (Drip)",
+                "name": "High-Yield Co-0238 (Drip)",
                 "description": "Optimal NPK, drip irrigation, loamy soil, early planting",
                 "data": {
                     "Planting_Date": "2024-01-15",
@@ -139,7 +154,7 @@ def get_presets():
             },
             {
                 "id": "rainfed_kharif",
-                "name": "🌧️ Rainfed Kharif (CoJ64)",
+                "name": "Rainfed Kharif (CoJ64)",
                 "description": "Monsoon rainfed crop on clay soil with moderate fertilizer",
                 "data": {
                     "Planting_Date": "2024-06-20",
@@ -158,7 +173,7 @@ def get_presets():
             },
             {
                 "id": "water_stressed",
-                "name": "⚠️ Water-Stressed Crop",
+                "name": "Water-Stressed Crop",
                 "description": "Low soil moisture, sandy soil, nitrogen deficiency",
                 "data": {
                     "Planting_Date": "2024-03-01",
@@ -177,7 +192,7 @@ def get_presets():
             },
             {
                 "id": "ratoon_crop",
-                "name": "🌱 Ratoon High-Density",
+                "name": "Ratoon High-Density",
                 "description": "High tillering ratoon crop on alluvial soil with NPK blend",
                 "data": {
                     "Planting_Date": "2024-02-10",
@@ -196,6 +211,37 @@ def get_presets():
             }
         ]
     }
+
+@app.post("/chat")
+def chat_endpoint(request: ChatRequest):
+    """
+    Conversational AI endpoint for sugarcane agronomy, yield forecasting, and model reasoning.
+    """
+    try:
+        msgs = [{"role": m.role, "content": m.content} for m in request.messages]
+        reply = generate_chat_response(msgs, current_field_data=request.field_data)
+        return {
+            "success": True,
+            "response": reply,
+            "role": "assistant"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/chat/stream")
+def chat_stream_endpoint(request: ChatRequest):
+    """
+    Server-Sent Events (SSE) streaming chat endpoint.
+    """
+    try:
+        msgs = [{"role": m.role, "content": m.content} for m in request.messages]
+        def event_generator():
+            for token in stream_chat_response(msgs, current_field_data=request.field_data):
+                yield f"data: {json.dumps({'token': token})}\n\n"
+            yield "data: [DONE]\n\n"
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/history")
 def clear_history():

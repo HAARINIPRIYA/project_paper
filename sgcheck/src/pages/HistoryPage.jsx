@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 const MODEL_LABELS = {
-  cane_sugar: "🍬 CaneSugar v6",
+  cane_sugar: "CaneSugar v6",
   catboost: "CatBoost",
   xgboost: "XGBoost",
   random_forest: "Random Forest",

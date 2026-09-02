@@ -11,6 +11,7 @@ import {
   Sprout,
   Sun,
   Beaker,
+  AlertTriangle,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -292,12 +293,18 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
 
         {/* Insight note */}
         <div style={{ fontSize: "11px", color: "var(--text-secondary)", background: "rgba(212,168,67,0.06)", border: "1px solid rgba(212,168,67,0.15)", borderRadius: "var(--radius-sm)", padding: "8px 12px", display: "flex", alignItems: "center", gap: "8px" }}>
-          <Zap className="size-3.5 text-amber-500 shrink-0" />
+          {deltaPercent > 5 ? (
+            <TrendingUp className="size-3.5 text-emerald-500 shrink-0" />
+          ) : deltaPercent < -5 ? (
+            <AlertTriangle className="size-3.5 text-rose-500 shrink-0" />
+          ) : (
+            <Zap className="size-3.5 text-amber-500 shrink-0" />
+          )}
           <span>
             {deltaPercent > 5
-              ? `🚀 Optimization gain: Increasing Nitrogen to ${params.Nitrogen_kg_per_acre} kg/acre with ${params.Soil_Moisture}% moisture projects a ${deltaPercent.toFixed(1)}% yield increase!`
+              ? `Optimization gain: Increasing Nitrogen to ${params.Nitrogen_kg_per_acre} kg/acre with ${params.Soil_Moisture}% moisture projects a ${deltaPercent.toFixed(1)}% yield increase!`
               : deltaPercent < -5
-              ? `⚠️ Yield drop detected: Parameter combination reduces predicted yield by ${Math.abs(deltaPercent).toFixed(1)}%.`
+              ? `Yield drop detected: Parameter combination reduces predicted yield by ${Math.abs(deltaPercent).toFixed(1)}%.`
               : "Adjust the sliders to explore fertilizer and moisture trade-offs in real time."}
           </span>
         </div>

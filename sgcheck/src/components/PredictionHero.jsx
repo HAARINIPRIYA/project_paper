@@ -19,6 +19,7 @@ import {
   Copy,
   Check,
   Sliders,
+  X,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -61,7 +62,7 @@ function getYieldTier(val) {
 
 function modelLabel(name) {
   const map = {
-    cane_sugar: "🍬 CaneSugar v6 Flagship",
+    cane_sugar: "CaneSugar v6 Flagship",
     catboost: "CatBoost Regressor",
     xgboost: "XGBoost Regressor",
     random_forest: "Random Forest",
@@ -166,7 +167,7 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
             </div>
             <div>
               <div style={{ fontSize: "16px", fontWeight: 700, fontFamily: "var(--font-heading)", color: "var(--text-primary)" }}>
-                🌾 Yield Prediction Forecast
+                Yield Prediction Forecast
               </div>
               <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
                 {isEnsemble ? "Multi-Model Ensemble Synthesis" : `${modelLabel(modelName)}`}
@@ -205,7 +206,7 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
                 title="Dismiss"
                 style={{ width: "24px", height: "24px", color: "var(--text-muted)" }}
               >
-                ✕
+                <X className="size-3.5" />
               </button>
             )}
           </div>

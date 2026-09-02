@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import FactorImpactCard from "./FactorImpactCard"
 
 const MODEL_LABELS = {
-  cane_sugar: "🍬 CaneSugar v6 Flagship",
+  cane_sugar: "CaneSugar v6 Flagship",
   catboost: "CatBoost Regressor",
   xgboost: "XGBoost Regressor",
   random_forest: "Random Forest",
@@ -124,7 +124,7 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
               </div>
             </div>
             <Badge variant="green" className="text-[10px]" style={{ fontWeight: 600, padding: "2px 10px" }}>
-              {metrics?.r2 ? `R² ${(metrics.r2 * 100).toFixed(1)}%` : isEnsemble ? "Ensemble R² 91.5%" : "★ Flagship"}
+              {metrics?.r2 ? `R² ${(metrics.r2 * 100).toFixed(1)}%` : isEnsemble ? "Ensemble R² 91.5%" : <span className="inline-flex items-center"><Sparkles className="size-2.5 mr-1" /> Flagship</span>}
             </Badge>
           </div>
 

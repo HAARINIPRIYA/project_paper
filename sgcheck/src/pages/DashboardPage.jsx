@@ -26,7 +26,7 @@ import YieldSimulator from "@/components/YieldSimulator"
 import FactorImpactCard from "@/components/FactorImpactCard"
 
 const MODEL_LABELS = {
-  cane_sugar: "🍬 CaneSugar v6 Flagship",
+  cane_sugar: "CaneSugar v6 Flagship",
   catboost: "CatBoost Regressor",
   xgboost: "XGBoost Regressor",
   random_forest: "Random Forest",
@@ -277,7 +277,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                         </span>
                         {isFlagship && (
                           <Badge variant="green" className="text-[9px]" style={{ padding: "1px 5px" }}>
-                            ★ Flagship
+                            <span className="inline-flex items-center"><Sparkles className="size-2 mr-1" /> Flagship</span>
                           </Badge>
                         )}
                       </div>

@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button"
 
 const MODEL_INFO = {
   cane_sugar: {
-    label: "🍬 CaneSugar v6 (Recommended)",
+    label: "CaneSugar v6 (Recommended)",
     description: "Custom 8-Fold Stacking Ensemble with 118+ domain features",
     r2: "91.2%",
     speed: "Fast",
