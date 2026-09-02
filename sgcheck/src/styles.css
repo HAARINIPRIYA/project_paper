@@ -7,7 +7,23 @@
 @font-face {
   font-family: "GROBOLD";
   src: url("/fonts/GROBOLD.ttf") format("truetype");
-  font-weight: 700;
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GROBOLD";
+  src: url("/fonts/GROBOLD.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GROBOLD";
+  src: url("/fonts/GROBOLD.ttf") format("truetype");
+  font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
@@ -15,7 +31,7 @@
 @font-face {
   font-family: "ClashDisplay";
   src: url("/fonts/ClashDisplay.ttf") format("truetype");
-  font-weight: 400;
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
@@ -23,7 +39,7 @@
 @font-face {
   font-family: "ClashDisplay";
   src: url("/fonts/ClashDisplay.ttf") format("truetype");
-  font-weight: 500;
+  font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
@@ -31,15 +47,7 @@
 @font-face {
   font-family: "ClashDisplay";
   src: url("/fonts/ClashDisplay.ttf") format("truetype");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "ClashDisplay";
-  src: url("/fonts/ClashDisplay.ttf") format("truetype");
-  font-weight: 700;
+  font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
@@ -127,8 +135,15 @@
 /* ============================================
    RESET & BASE
    ============================================ */
-*, *::before, *::after { box-sizing: border-box; border-color: var(--border-default); }
-html { -webkit-text-size-adjust: 100%; }
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  border-color: var(--border-default); 
+  font-family: inherit;
+}
+html { 
+  -webkit-text-size-adjust: 100%; 
+  font-family: var(--font-body);
+}
 body {
   margin: 0;
   font-family: var(--font-body);
@@ -139,14 +154,49 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Explicit Form, Button, and Table Font Mapping */
+button,
+input,
+optgroup,
+select,
+textarea,
+table,
+th,
+td,
+label,
+span,
+p,
+a,
+li,
+small,
+strong,
+em,
+b,
+i,
+div {
+  font-family: var(--font-body);
+}
+
 ::selection { background: rgba(212, 168, 67, 0.3); }
 a { color: var(--accent-blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* Headings use GROBOLD */
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6,
+.font-heading,
+.main-header-title,
+.tools-header-title,
+.card-title,
+.dashboard-title,
+.sidebar-logo-text {
   font-family: var(--font-heading);
   letter-spacing: 0.02em;
+}
+
+/* Monospace & Code */
+code, kbd, samp, pre, .font-mono {
+  font-family: var(--font-mono);
 }
 
 /* ============================================
