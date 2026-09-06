@@ -1733,3 +1733,83 @@ optgroup {
 @media (max-width: 767px) {
   body { background: var(--bg-deep); }
 }
+
+.leaflet-container {
+  background: var(--bg-deep);
+  font-family: var(--font-body);
+}
+
+.leaflet-control-zoom a,
+.leaflet-control-attribution {
+  font-family: var(--font-body);
+}
+
+.leaflet-tile-pane {
+  filter: brightness(0.85) contrast(1.05);
+}
+
+.field-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.map-instruction-overlay {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .leaflet-container {
+    min-height: 250px;
+  }
+}
+
+.location-section .field-section {
+  gap: 10px;
+}
+
+.location-section .field-label-row {
+  margin-bottom: 2px;
+}
+
+.location-section .input,
+.location-section select.input,
+.location-section input[type="text"],
+.location-section input[type="number"],
+.location-section input[type="date"] {
+  height: 38px;
+  font-size: 13px;
+}
+
+.location-section .leaflet-container {
+  border-radius: var(--radius-sm);
+}
+
+.location-section .coordinate-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.location-section button[type="button"]:not(.leaflet-control-zoom a) {
+  height: 38px;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .location-section .leaflet-container {
+    min-height: 220px;
+    height: 220px;
+  }
+}

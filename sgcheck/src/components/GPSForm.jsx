@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Calendar,
@@ -22,6 +22,8 @@ import {
   CloudRain,
   AlertTriangle,
   Award,
+  MapPin,
+  CloudSun,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,6 +31,7 @@ import { Input } from "@/components/ui/input"
 import { predictAuto, predictEnsemble, predictWithModel, getPresets } from "@/lib/api"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ModelResults from "./ModelResults"
+import LocationSelector from "./location/LocationSelector"
 
 const MODEL_OPTIONS = [
   { value: "auto", label: "Auto (Best: CaneSugar v6)" },
@@ -180,6 +183,8 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
   const [selectedModel, setSelectedModel] = useState("cane_sugar")
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [weatherFeatures, setWeatherFeatures] = useState(null)
+  const [weatherLocation, setWeatherLocation] = useState(null)
 
   // Fetch presets from API if available
   useEffect(() => {
@@ -232,12 +237,26 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
     setIsSubmitting(false)
   }
 
+  const handleWeatherDataReady = useCallback((data) => {
+    setWeatherFeatures(data.features || {})
+    setWeatherLocation(data.location || {})
+  }, [])
+
   const buildFieldPayload = () => {
     const payload = {}
     for (const [k, v] of Object.entries(formData)) {
       if (v !== undefined && v !== null && String(v).trim() !== "") {
         payload[k] = v
       }
+    }
+    if (weatherFeatures) {
+      for (const [k, v] of Object.entries(weatherFeatures)) {
+        if (v != null && v !== 0 && v !== "") {
+          payload[k] = v
+        }
+      }
+      if (weatherLocation?.latitude) payload.latitude = weatherLocation.latitude
+      if (weatherLocation?.longitude) payload.longitude = weatherLocation.longitude
     }
     return payload
   }
@@ -323,6 +342,31 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
           })}
         </div>
       </div>
+
+      <LocationSelector
+        onWeatherDataReady={handleWeatherDataReady}
+        plantingDate={formData.Planting_Date}
+        harvestDate={formData.Harvesting_Date}
+      />
+
+      {weatherFeatures && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "6px 10px",
+            borderRadius: "var(--radius-sm)",
+            background: "rgba(45, 106, 79, 0.08)",
+            border: "1px solid rgba(45, 106, 79, 0.2)",
+          }}
+        >
+          <CloudSun className="size-3" style={{ color: "var(--accent-green)" }} />
+          <span style={{ fontSize: "11px", color: "var(--accent-green)", fontWeight: 600 }}>
+            Weather data linked to field location
+          </span>
+        </div>
+      )}
 
       <Tabs defaultValue="inputs" className="w-full">
         <TabsList className="w-full">

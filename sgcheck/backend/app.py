@@ -9,6 +9,7 @@ Or directly:
 
 import json
 import os
+import re
 import sys
 from typing import Dict, List, Optional
 
@@ -20,6 +21,10 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, os.path.dirname(__file__))
 
 from predict import predict, predict_ensemble, ALL_MODELS
+
+from services.geocoding_service import get_geocoding_service
+from services.weather_service import get_weather_service
+from services.weather_adapter import get_weather_adapter
 
 app = FastAPI(
     title="CaneSense — Sugarcane Yield Prediction API",
@@ -91,6 +96,35 @@ class EnsembleInput(BaseModel):
 
 
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
+
+_weather_cache = {}
+_WEATHER_CACHE_TTL = 3600
+
+
+def _cache_key(lat: float, lon: float, start: str, end: str) -> str:
+    return f"{round(lat, 4):.4f},{round(lon, 4):.4f},{start},{end}"
+
+
+def _get_cached_weather(lat: float, lon: float, start: str, end: str):
+    import time
+    key = _cache_key(lat, lon, start, end)
+    if key in _weather_cache:
+        entry = _weather_cache[key]
+        if time.time() - entry["ts"] < _WEATHER_CACHE_TTL:
+            return entry["data"]
+        else:
+            del _weather_cache[key]
+    return None
+
+
+def _set_cached_weather(lat: float, lon: float, start: str, end: str, data):
+    import time
+    key = _cache_key(lat, lon, start, end)
+    _weather_cache[key] = {"data": data, "ts": time.time()}
+    if len(_weather_cache) > 500:
+        oldest_keys = sorted(_weather_cache, key=lambda k: _weather_cache[k]["ts"])[:100]
+        for k in oldest_keys:
+            del _weather_cache[k]
 
 
 HISTORY_FILE = os.path.join(MODELS_DIR, "history.json")
@@ -670,6 +704,203 @@ def predict_with_selection(input_data: ModelSelectionInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+
+
+class GeocodeSearchRequest(BaseModel):
+    q: str = Field(..., description="Search query (place name)")
+    district: Optional[str] = Field(None, description="District to scope search")
+    state: Optional[str] = Field(None, description="State to scope search")
+    country: str = Field("India", description="Country filter")
+    limit: int = Field(10, description="Maximum results")
+
+
+class WeatherFetchRequest(BaseModel):
+    latitude: float = Field(..., ge=-90, le=90, description="Latitude")
+    longitude: float = Field(..., ge=-180, le=180, description="Longitude")
+    start_date: str = Field(..., description="Start date (YYYY-MM-DD)")
+    end_date: str = Field(..., description="End date (YYYY-MM-DD)")
+
+
+class WeatherAggregateRequest(BaseModel):
+    latitude: float = Field(..., ge=-90, le=90, description="Field latitude")
+    longitude: float = Field(..., ge=-180, le=180, description="Field longitude")
+    planting_date: str = Field(..., description="Crop planting date (YYYY-MM-DD)")
+    harvest_date: str = Field(..., description="Crop harvest date (YYYY-MM-DD)")
+
+
+@app.get("/geocode/search")
+def geocode_search(
+    q: str,
+    district: Optional[str] = None,
+    state: Optional[str] = None,
+    country: str = "India",
+    limit: int = 10,
+):
+    if not q or not q.strip():
+        raise HTTPException(status_code=400, detail="Search query 'q' is required.")
+
+    try:
+        service = get_geocoding_service()
+        results = service.search_places(
+            query=q, district=district, state=state, country=country, limit=limit
+        )
+        return {
+            "success": True,
+            "results": results,
+            "count": len(results),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Geocoding service error: {str(e)}")
+
+
+@app.post("/weather/fetch")
+def fetch_weather(input_data: WeatherFetchRequest):
+    try:
+        service = get_weather_service()
+        result = service.get_daily_weather(
+            latitude=input_data.latitude,
+            longitude=input_data.longitude,
+            start_date=input_data.start_date,
+            end_date=input_data.end_date,
+        )
+        
+        elevation = service.get_elevation(input_data.latitude, input_data.longitude)
+        
+        return {
+            "success": True,
+            "location": {
+                "latitude": input_data.latitude,
+                "longitude": input_data.longitude,
+                "elevation": elevation,
+            },
+            "weather": result,
+            "source": "Open-Meteo",
+            "status": "success",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Weather service error: {str(e)}")
+
+
+@app.post("/weather/aggregate-for-prediction")
+def aggregate_weather_for_prediction(input_data: WeatherAggregateRequest):
+    try:
+        cached = _get_cached_weather(
+            input_data.latitude, input_data.longitude,
+            input_data.planting_date, input_data.harvest_date,
+        )
+        if cached:
+            return cached
+
+        weather_service = get_weather_service()
+        adapter = get_weather_adapter()
+
+        raw_weather = weather_service.get_daily_weather(
+            latitude=input_data.latitude,
+            longitude=input_data.longitude,
+            start_date=input_data.planting_date,
+            end_date=input_data.harvest_date,
+        )
+
+        elevation = weather_service.get_elevation(
+            input_data.latitude, input_data.longitude
+        )
+
+        canesugar_features = adapter.aggregate_to_canesugar_features(
+            raw_weather=raw_weather,
+            planting_date=input_data.planting_date,
+            harvest_date=input_data.harvest_date,
+            elevation=elevation,
+        )
+
+        provenance = canesugar_features.get("_provenance", {})
+        clean_features = {
+            k: v for k, v in canesugar_features.items()
+            if not k.startswith("_")
+        }
+
+        result = {
+            "success": True,
+            "location": {
+                "latitude": input_data.latitude,
+                "longitude": input_data.longitude,
+                "elevation": elevation,
+            },
+            "canesugar_features": clean_features,
+            "available_features": provenance.get("available_features", []),
+            "missing_features": provenance.get("missing_features", []),
+            "weather_summary": {
+                "rainfall_mm": canesugar_features.get("Rainfall_Total_mm", 0),
+                "temperature_avg_c": canesugar_features.get("Temp_Avg_C", 0),
+                "temperature_max_c": canesugar_features.get("Temp_Max_C", 0),
+                "temperature_min_c": canesugar_features.get("Temp_Min_C", 0),
+                "humidity_pct": canesugar_features.get("Humidity_%", 0),
+                "soil_moisture_pct": canesugar_features.get("Soil_Moisture_%", 0),
+                "evapotranspiration_mm_day": canesugar_features.get("Evapotranspiration_mm_day", 0),
+                "soil_temperature_c": canesugar_features.get("soil_temperature_c", None),
+            },
+            "provenance": provenance,
+            "source": "Open-Meteo",
+            "status": "success",
+        }
+
+        _set_cached_weather(
+            input_data.latitude, input_data.longitude,
+            input_data.planting_date, input_data.harvest_date,
+            result,
+        )
+
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Weather aggregation error: {str(e)}",
+        )
+
+
+class ParseLocationRequest(BaseModel):
+    text: str
+
+
+@app.post("/parse-location")
+def parse_location(input_data: ParseLocationRequest):
+    text = input_data.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Text input is required.")
+
+    google_maps_q = re.search(r'(?:https?://)?(?:www\.)?google\.com/maps.*?[?&](?:q|query|center)=(-?\d+\.?\d*),\s*(-?\d+\.?\d*)', text, re.IGNORECASE)
+    if google_maps_q:
+        return {"latitude": float(google_maps_q.group(1)), "longitude": float(google_maps_q.group(2))}
+
+    google_maps_at = re.search(r'(?:https?://)?(?:www\.)?google\.com/maps/place/.*?@(-?\d+\.?\d*),\s*(-?\d+\.?\d*)', text, re.IGNORECASE)
+    if google_maps_at:
+        return {"latitude": float(google_maps_at.group(1)), "longitude": float(google_maps_at.group(2))}
+
+    osm_match = re.search(r'(?:https?://)?(?:www\.)?(?:osm|openstreetmap)\.org.*?[?&](?:mlat|lat)=(-?\d+\.?\d*).*?(?:mlon|lon)=(-?\d+\.?\d*)', text, re.IGNORECASE)
+    if osm_match:
+        return {"latitude": float(osm_match.group(1)), "longitude": float(osm_match.group(2))}
+
+    bing_match = re.search(r'(?:https?://)?(?:www\.)?bing\.com/maps.*?[?&]cp=(-?\d+\.?\d*)~(-?\d+\.?\d*)', text, re.IGNORECASE)
+    if bing_match:
+        return {"latitude": float(bing_match.group(1)), "longitude": float(bing_match.group(2))}
+
+    plain = re.match(r'^(-?\d{1,3}\.\d{2,8})\s*[,\s]\s*(-?\d{1,3}\.\d{2,8})$', text)
+    if plain:
+        lat, lon = float(plain.group(1)), float(plain.group(2))
+        if -90 <= lat <= 90 and -180 <= lon <= 180:
+            return {"latitude": lat, "longitude": lon}
+
+    try:
+        service = get_geocoding_service()
+        results = service.search_places(query=text, country="India", limit=1)
+        if results and len(results) > 0:
+            r = results[0]
+            return {"latitude": r["latitude"], "longitude": r["longitude"], "place_name": r.get("name", "")}
+    except Exception:
+        pass
+
+    raise HTTPException(status_code=422, detail="Could not extract coordinates from input.")
 
 
 if __name__ == "__main__":

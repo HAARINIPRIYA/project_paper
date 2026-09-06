@@ -112,6 +112,14 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
     new_cols = {}
     eps = 1e-6
 
+    for col in df.columns:
+        if df[col].dtype == object:
+            try:
+                converted = pd.to_numeric(df[col])
+                df[col] = converted
+            except (ValueError, TypeError):
+                pass
+
     # 1. Date features
     for col in ["Planting_Date", "Harvesting_Date"]:
         if col in df.columns:
