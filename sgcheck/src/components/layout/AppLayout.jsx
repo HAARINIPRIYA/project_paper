@@ -26,7 +26,6 @@ export default function AppLayout({
 }) {
   return (
     <div className="app-container">
-      {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
         onTabChange={onTabChange}
@@ -38,12 +37,10 @@ export default function AppLayout({
         onSelectPreset={onSelectPreset}
       />
 
-      {/* Main Responsive Canvas */}
       <main className="site-container flex-1 py-6">
         {children}
       </main>
 
-      {/* Floating AI Action Button (Bottom Right) */}
       <button
         type="button"
         onClick={() => onToggleAiDrawer(true)}
@@ -57,7 +54,6 @@ export default function AppLayout({
         <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
       </button>
 
-      {/* Global AI Agronomist Slide-over Drawer */}
       <AiAgronomistDrawer
         isOpen={isAiDrawerOpen}
         onClose={() => onToggleAiDrawer(false)}
@@ -69,7 +65,6 @@ export default function AppLayout({
         onClearChat={onClearAiChat}
       />
 
-      {/* Toast Notifications */}
       <ToastNotification toasts={toasts} removeToast={removeToast} />
     </div>
   )

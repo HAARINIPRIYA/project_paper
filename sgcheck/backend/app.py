@@ -43,8 +43,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
 class PredictionInput(BaseModel):
     """
     Single sugarcane field record for prediction.
@@ -64,7 +62,6 @@ class PredictionInput(BaseModel):
     Irrigation_Type: Optional[str] = Field(None, description="Irrigation method")
     Fertilizer_Type: Optional[str] = Field(None, description="Fertilizer used")
 
-
 from fastapi.responses import StreamingResponse
 from chat_engine import generate_chat_response, stream_chat_response
 
@@ -78,11 +75,9 @@ class ChatRequest(BaseModel):
     temperature: Optional[float] = Field(0.7, description="Generation temperature")
     stream: Optional[bool] = Field(False, description="Stream response tokens")
 
-
 class BatchPredictionInput(BaseModel):
     model_config = {"extra": "allow"}
     records: List[PredictionInput]
-
 
 class EnsembleInput(BaseModel):
     model_config = {"extra": "allow"}
@@ -92,18 +87,13 @@ class EnsembleInput(BaseModel):
         description="Optional per-model weights, e.g. {'catboost': 0.4, 'xgboost': 0.3, ...}",
     )
 
-
-
-
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 
 _weather_cache = {}
 _WEATHER_CACHE_TTL = 3600
 
-
 def _cache_key(lat: float, lon: float, start: str, end: str) -> str:
     return f"{round(lat, 4):.4f},{round(lon, 4):.4f},{start},{end}"
-
 
 def _get_cached_weather(lat: float, lon: float, start: str, end: str):
     import time
@@ -116,7 +106,6 @@ def _get_cached_weather(lat: float, lon: float, start: str, end: str):
             del _weather_cache[key]
     return None
 
-
 def _set_cached_weather(lat: float, lon: float, start: str, end: str, data):
     import time
     key = _cache_key(lat, lon, start, end)
@@ -125,7 +114,6 @@ def _set_cached_weather(lat: float, lon: float, start: str, end: str, data):
         oldest_keys = sorted(_weather_cache, key=lambda k: _weather_cache[k]["ts"])[:100]
         for k in oldest_keys:
             del _weather_cache[k]
-
 
 HISTORY_FILE = os.path.join(MODELS_DIR, "history.json")
 
@@ -298,7 +286,7 @@ def get_history_stats():
     """Get prediction statistics."""
     history = load_history()
     predictions = history.get("predictions", [])
-    
+
     if not predictions:
         return {
             "success": True,
@@ -306,11 +294,11 @@ def get_history_stats():
             "models_used": [],
             "date_range": None
         }
-    
+
     models_used = list(set(p.get("model") for p in predictions if p.get("model")))
-    
+
     dates = [p.get("timestamp") for p in predictions if p.get("timestamp")]
-    
+
     return {
         "success": True,
         "total_predictions": len(predictions),
@@ -320,7 +308,6 @@ def get_history_stats():
             "last": max(dates) if dates else None
         }
     }
-
 
 @app.get("/models")
 def list_models():
@@ -354,16 +341,13 @@ def list_models():
         "count": len([k for k in models_info if not k.startswith("_")]),
     }
 
-
-
-
 @app.post("/predict/ensemble")
 def predict_ensemble_endpoint(input_data: EnsembleInput):
     """Weighted ensemble prediction using all available models."""
     try:
         records = [r.dict() for r in input_data.records]
         result = predict_ensemble(records, weights=input_data.weights)
-        
+
         for i, record in enumerate(input_data.records):
             prediction_record = {
                 "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
@@ -383,13 +367,12 @@ def predict_ensemble_endpoint(input_data: EnsembleInput):
             history = load_history()
             history["predictions"].insert(0, prediction_record)
             save_history(history)
-        
+
         return result
     except RuntimeError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/predict/select")
 def predict_with_selection(input_data: ModelSelectionInput):
@@ -408,10 +391,10 @@ def predict_with_selection(input_data: ModelSelectionInput):
                 )
             else:
                 best_model = "cane_sugar"
-            
+
             result = predict(best_model, input_data.dict())
             result["best_model"] = best_model
-            
+
             prediction_record = {
                 "timestamp": input_data.variety or input_data.soil_type or "Unknown",
                 "mode": "auto",
@@ -432,10 +415,10 @@ def predict_with_selection(input_data: ModelSelectionInput):
                     status_code=400,
                     detail=f"Unknown model '{model_name}'. Choose from: {', '.join(ALL_MODELS)}",
                 )
-            
+
             result = predict(model_name, input_data.dict())
             result["selected_model"] = model_name
-            
+
             prediction_record = {
                 "timestamp": input_data.variety or input_data.soil_type or "Unknown",
                 "mode": "manual",
@@ -449,11 +432,11 @@ def predict_with_selection(input_data: ModelSelectionInput):
                 "prediction": result.get("predictions", [None])[0],
                 "status": "success"
             }
-        
+
         history = load_history()
         history["predictions"].insert(0, prediction_record)
         save_history(history)
-        
+
         return result
     except FileNotFoundError:
         raise HTTPException(
@@ -462,7 +445,6 @@ def predict_with_selection(input_data: ModelSelectionInput):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/predict")
 def predict_auto(input_data: PredictionInput):
@@ -481,7 +463,7 @@ def predict_auto(input_data: PredictionInput):
 
         result = predict(best_model, input_data.dict())
         result["best_model"] = best_model
-        
+
         prediction_record = {
             "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
             "model": "auto",
@@ -501,7 +483,7 @@ def predict_auto(input_data: PredictionInput):
         history = load_history()
         history["predictions"].insert(0, prediction_record)
         save_history(history)
-        
+
         return result
     except FileNotFoundError:
         raise HTTPException(
@@ -510,7 +492,6 @@ def predict_auto(input_data: PredictionInput):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/predict/{model_name}")
 def predict_endpoint(model_name: str, input_data: PredictionInput):
@@ -525,7 +506,7 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
 
     try:
         result = predict(model_name, input_data.dict())
-        
+
         prediction_record = {
             "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
             "model": model_name,
@@ -541,11 +522,11 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
             "prediction": result.get("predictions", [None])[0],
             "status": "success"
         }
-        
+
         history = load_history()
         history["predictions"].insert(0, prediction_record)
         save_history(history)
-        
+
         return result
     except FileNotFoundError:
         raise HTTPException(
@@ -554,7 +535,6 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/predict/batch/{model_name}")
 def predict_batch(model_name: str, batch: BatchPredictionInput):
@@ -565,7 +545,7 @@ def predict_batch(model_name: str, batch: BatchPredictionInput):
     try:
         records = [r.dict() for r in batch.records]
         result = predict(model_name, records)
-        
+
         for i, record in enumerate(batch.records):
             prediction_record = {
                 "timestamp": record.Planting_Date or record.Harvesting_Date or record.Variety or "Unknown",
@@ -585,7 +565,7 @@ def predict_batch(model_name: str, batch: BatchPredictionInput):
             history = load_history()
             history["predictions"].insert(0, prediction_record)
             save_history(history)
-        
+
         return result
     except FileNotFoundError:
         raise HTTPException(
@@ -594,10 +574,6 @@ def predict_batch(model_name: str, batch: BatchPredictionInput):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-
-
 
 @app.get("/features/{model_name}")
 def get_model_features(model_name: str):
@@ -618,7 +594,6 @@ def get_model_features(model_name: str):
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail=f"Model '{model_name}' not trained yet.")
 
-
 class ModelSelectionInput(BaseModel):
     """Input for model selection with auto/manual mode."""
     mode: str = Field("auto", description="Mode: 'auto' (best model) or 'manual' (select specific model)")
@@ -628,12 +603,11 @@ class ModelSelectionInput(BaseModel):
     irrigation_type: Optional[str] = Field(None, description="Irrigation type (optional)")
     fertilizer_type: Optional[str] = Field(None, description="Fertilizer type (optional)")
 
-
 @app.post("/predict/select")
 def predict_with_selection(input_data: ModelSelectionInput):
     """
     Predict with explicit model selection (Auto/Manual mode).
-    
+
     Auto mode: Uses the best model based on R² score.
     Manual mode: Uses the specified model name.
     """
@@ -649,10 +623,10 @@ def predict_with_selection(input_data: ModelSelectionInput):
                 )
             else:
                 best_model = "catboost"
-            
+
             result = predict(best_model, input_data.dict())
             result["best_model"] = best_model
-            
+
             prediction_record = {
                 "timestamp": input_data.variety or input_data.soil_type or "Unknown",
                 "mode": "auto",
@@ -673,10 +647,10 @@ def predict_with_selection(input_data: ModelSelectionInput):
                     status_code=400,
                     detail=f"Unknown model '{model_name}'. Choose from: {', '.join(ALL_MODELS)}",
                 )
-            
+
             result = predict(model_name, input_data.dict())
             result["selected_model"] = model_name
-            
+
             prediction_record = {
                 "timestamp": input_data.variety or input_data.soil_type or "Unknown",
                 "mode": "manual",
@@ -690,11 +664,11 @@ def predict_with_selection(input_data: ModelSelectionInput):
                 "prediction": result.get("predictions", [None])[0],
                 "status": "success"
             }
-        
+
         history = load_history()
         history["predictions"].insert(0, prediction_record)
         save_history(history)
-        
+
         return result
     except FileNotFoundError:
         raise HTTPException(
@@ -704,10 +678,6 @@ def predict_with_selection(input_data: ModelSelectionInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-
-
-
 class GeocodeSearchRequest(BaseModel):
     q: str = Field(..., description="Search query (place name)")
     district: Optional[str] = Field(None, description="District to scope search")
@@ -715,20 +685,17 @@ class GeocodeSearchRequest(BaseModel):
     country: str = Field("India", description="Country filter")
     limit: int = Field(10, description="Maximum results")
 
-
 class WeatherFetchRequest(BaseModel):
     latitude: float = Field(..., ge=-90, le=90, description="Latitude")
     longitude: float = Field(..., ge=-180, le=180, description="Longitude")
     start_date: str = Field(..., description="Start date (YYYY-MM-DD)")
     end_date: str = Field(..., description="End date (YYYY-MM-DD)")
 
-
 class WeatherAggregateRequest(BaseModel):
     latitude: float = Field(..., ge=-90, le=90, description="Field latitude")
     longitude: float = Field(..., ge=-180, le=180, description="Field longitude")
     planting_date: str = Field(..., description="Crop planting date (YYYY-MM-DD)")
     harvest_date: str = Field(..., description="Crop harvest date (YYYY-MM-DD)")
-
 
 @app.get("/geocode/search")
 def geocode_search(
@@ -754,7 +721,6 @@ def geocode_search(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Geocoding service error: {str(e)}")
 
-
 @app.post("/weather/fetch")
 def fetch_weather(input_data: WeatherFetchRequest):
     try:
@@ -765,9 +731,9 @@ def fetch_weather(input_data: WeatherFetchRequest):
             start_date=input_data.start_date,
             end_date=input_data.end_date,
         )
-        
+
         elevation = service.get_elevation(input_data.latitude, input_data.longitude)
-        
+
         return {
             "success": True,
             "location": {
@@ -781,7 +747,6 @@ def fetch_weather(input_data: WeatherFetchRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Weather service error: {str(e)}")
-
 
 @app.post("/weather/aggregate-for-prediction")
 def aggregate_weather_for_prediction(input_data: WeatherAggregateRequest):
@@ -849,10 +814,8 @@ def aggregate_weather_for_prediction(input_data: WeatherAggregateRequest):
             detail=f"Weather aggregation error: {str(e)}",
         )
 
-
 class ParseLocationRequest(BaseModel):
     text: str
-
 
 @app.post("/parse-location")
 def parse_location(input_data: ParseLocationRequest):
@@ -860,7 +823,6 @@ def parse_location(input_data: ParseLocationRequest):
     if not text:
         raise HTTPException(status_code=400, detail="Text input is required.")
 
-    # Degree-Minute-Second (DMS) format: e.g. 11°04'58.3"N 77°59'30.9"E
     dms_match = re.search(
         r'(-?\d{1,3})[°\s]\s*(\d{1,2})[\'′\s]\s*([\d.]+)["″]?\s*([NSEW])\s*[,;\s]+\s*(-?\d{1,3})[°\s]\s*(\d{1,2})[\'′\s]\s*([\d.]+)["″]?\s*([NSEW])',
         text,
@@ -910,7 +872,6 @@ def parse_location(input_data: ParseLocationRequest):
         pass
 
     raise HTTPException(status_code=422, detail="Could not extract coordinates from input.")
-
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

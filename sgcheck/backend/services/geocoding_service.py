@@ -9,14 +9,12 @@ logger = logging.getLogger(__name__)
 _MIN_REQUEST_INTERVAL = 1.0
 _last_request_time = 0.0
 
-
 def _rate_limit():
     global _last_request_time
     elapsed = time.time() - _last_request_time
     if elapsed < _MIN_REQUEST_INTERVAL:
         time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
     _last_request_time = time.time()
-
 
 class GeocodingService:
     BASE_URL = "https://nominatim.openstreetmap.org"
@@ -161,9 +159,7 @@ class GeocodingService:
             return display.split(",")[0].strip()
         return ""
 
-
 _geocoding_service = None
-
 
 def get_geocoding_service() -> GeocodingService:
     global _geocoding_service

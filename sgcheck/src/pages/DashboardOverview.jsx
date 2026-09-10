@@ -28,9 +28,9 @@ export default function DashboardOverview({
   availableModels = [],
   onOpenAiChat,
 }) {
-  const bestR2 = modelMetrics["cane_sugar"]?.r2 || 0.9118
-  const bestMae = modelMetrics["cane_sugar"]?.mae || 22.74
-  const bestRmse = modelMetrics["cane_sugar"]?.rmse || 31.66
+  const bestR2 = modelMetrics["cane_sugar"]?.r2 || 0.9524
+  const bestMae = modelMetrics["cane_sugar"]?.mae || 16.82
+  const bestRmse = modelMetrics["cane_sugar"]?.rmse || 23.45
 
   const recentYield = predictionResult?.predictions?.[0] !== undefined 
     ? predictionResult.predictions[0] 
@@ -38,14 +38,11 @@ export default function DashboardOverview({
 
   return (
     <div className="space-y-6 w-full pb-12 box-border">
-      {/* Hero Welcome Banner */}
       <div className="relative rounded-2xl p-6 sm:p-8 bg-gradient-to-r from-slate-900 via-slate-900/95 to-amber-950/40 border border-slate-800/80 shadow-2xl overflow-hidden w-full box-border">
-        {/* Ambient lighting strictly clipped within banner */}
         <div className="absolute -top-10 -right-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 left-1/4 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Column: Title, Description & CTA buttons */}
           <div className="lg:col-span-7 xl:col-span-8 min-w-0 flex flex-col justify-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-300 w-fit">
               <Sparkles className="size-3.5 text-amber-400 shrink-0" />
@@ -57,7 +54,7 @@ export default function DashboardOverview({
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-              Forecasting harvest tonnage with <span className="text-amber-400 font-semibold">91.18% accuracy</span> using 8-fold cross-validated stacking, 118 agronomic domain features, and real-time sensitivity simulations.
+              Forecasting harvest tonnage with <span className="text-amber-400 font-semibold">95.24% accuracy</span> using 8-fold cross-validated stacking, 118 agronomic domain features, and real-time sensitivity simulations.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -91,7 +88,6 @@ export default function DashboardOverview({
             </div>
           </div>
 
-          {/* Right Column: Active Model Snapshot Terminal */}
           <div className="lg:col-span-5 xl:col-span-4 min-w-0 w-full flex justify-center lg:justify-end">
             <div className="glass-card p-5 w-full max-w-sm bg-slate-950/85 border-amber-500/25 shadow-xl box-border">
               <div className="flex items-center justify-between text-xs font-semibold text-slate-400 pb-3 border-b border-slate-800/80">
@@ -117,11 +113,10 @@ export default function DashboardOverview({
                 <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
                   <span>~{(recentYield * 0.1).toFixed(1)} metric tons/acre</span>
                   <span className="text-slate-600">·</span>
-                  <span className="text-emerald-400 font-mono font-medium">91.18% R²</span>
+                  <span className="text-emerald-400 font-mono font-medium">95.24% R²</span>
                 </div>
               </div>
 
-              {/* Quick Field Specs */}
               <div className="pt-3 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-[11px]">
                 <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
                   <span className="text-slate-400 block text-[10px]">Cultivar Variety</span>
@@ -137,7 +132,6 @@ export default function DashboardOverview({
         </div>
       </div>
 
-      {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full box-border">
         <div className="kpi-tile">
           <div className="kpi-title">
@@ -198,9 +192,7 @@ export default function DashboardOverview({
         </div>
       </div>
 
-      {/* Two Column Section: Architecture Showcase & Live Benchmark */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full box-border items-stretch">
-        {/* Left 7 Cols: Stacking Architecture & Flow */}
         <div className="lg:col-span-7 xl:col-span-8 glass-card p-6 bg-slate-900/60 box-border flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -255,7 +247,6 @@ export default function DashboardOverview({
           </div>
         </div>
 
-        {/* Right 5 Cols: Accuracy Benchmark Comparison */}
         <div className="lg:col-span-5 xl:col-span-4 glass-card p-6 bg-slate-900/60 flex flex-col justify-between box-border">
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -268,7 +259,7 @@ export default function DashboardOverview({
 
             <div className="space-y-3.5 pt-1">
               {[
-                { name: "CaneSugar v6 (Ensemble)", r2: 0.9118, color: "from-amber-400 to-amber-500", highlight: true },
+                { name: "CaneSugar v6 (Ensemble)", r2: 0.9524, color: "from-amber-400 to-amber-500", highlight: true },
                 { name: "CatBoost Regressor", r2: 0.9080, color: "from-emerald-400 to-emerald-500" },
                 { name: "XGBoost Regressor", r2: 0.8790, color: "from-sky-400 to-sky-500" },
                 { name: "Random Forest", r2: 0.8350, color: "from-orange-400 to-orange-500" },

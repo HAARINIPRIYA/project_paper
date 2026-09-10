@@ -115,7 +115,6 @@ export default function HistoryPage({ onBack }) {
         setHistory(data.predictions)
       }
     } catch (error) {
-      // Local fallback demo records if backend history endpoint is cold
       setHistory([
         {
           timestamp: new Date(Date.now() - 3600000).toISOString(),
@@ -232,7 +231,6 @@ export default function HistoryPage({ onBack }) {
 
   return (
     <div className="space-y-6 w-full pb-12 box-border">
-      {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
         <div>
           <h1 className="font-heading text-2xl font-bold text-white flex items-center gap-2.5">
@@ -268,7 +266,6 @@ export default function HistoryPage({ onBack }) {
         </div>
       </div>
 
-      {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full box-border">
         {stats.map((s) => {
           const Icon = s.icon
@@ -285,10 +282,8 @@ export default function HistoryPage({ onBack }) {
         })}
       </div>
 
-      {/* Filter and View Controls Bar */}
       <div className="glass-card p-4 bg-slate-900/70 flex flex-wrap items-center justify-between gap-4 box-border">
         <div className="flex items-center gap-4 flex-wrap">
-          {/* Model Filter */}
           <div className="flex items-center gap-2">
             <Filter className="size-3.5 text-slate-400" />
             <span className="text-xs font-semibold text-slate-300">Model:</span>
@@ -304,7 +299,6 @@ export default function HistoryPage({ onBack }) {
             </select>
           </div>
 
-          {/* Sort By */}
           <div className="flex items-center gap-2">
             <ArrowDownUp className="size-3.5 text-slate-400" />
             <span className="text-xs font-semibold text-slate-300">Sort:</span>
@@ -329,7 +323,6 @@ export default function HistoryPage({ onBack }) {
           </div>
         </div>
 
-        {/* View Mode Toggle (List / Grid) */}
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800">
           <button
             type="button"
@@ -354,7 +347,6 @@ export default function HistoryPage({ onBack }) {
         </div>
       </div>
 
-      {/* Selected Items Bar in Grid View */}
       {viewMode === "grid" && selectedIds.size > 0 && (
         <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs text-amber-300">
           <span className="flex items-center gap-2 font-medium">
@@ -380,7 +372,6 @@ export default function HistoryPage({ onBack }) {
         </div>
       )}
 
-      {/* Main Records List / Grid */}
       {filteredHistory.length === 0 ? (
         <div className="glass-card p-12 text-center flex flex-col items-center justify-center bg-slate-900/60">
           <History className="size-10 text-slate-600 mb-3" />
@@ -514,7 +505,6 @@ export default function HistoryPage({ onBack }) {
         </div>
       )}
 
-      {/* Side-by-Side Compare Modal */}
       <AnimatePresence>
         {showCompare && selectedItems.length > 0 && (
           <div
@@ -528,7 +518,6 @@ export default function HistoryPage({ onBack }) {
               className="glass-card max-w-4xl w-full max-h-[85vh] flex flex-col bg-slate-900 border-slate-700 shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
               <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
                 <div className="flex items-center gap-2.5">
                   <Eye className="size-5 text-amber-400" />
@@ -548,9 +537,7 @@ export default function HistoryPage({ onBack }) {
                 </button>
               </div>
 
-              {/* Modal Body: Scrollable Table */}
               <div className="flex-1 overflow-auto p-5 space-y-6">
-                {/* Horizontal Bar Chart Comparison */}
                 <div className="space-y-2 pb-4 border-b border-slate-800">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Yield Comparison (Q/A)</h4>
                   <div className="space-y-2">
@@ -580,7 +567,6 @@ export default function HistoryPage({ onBack }) {
                   </div>
                 </div>
 
-                {/* Diff Table */}
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>

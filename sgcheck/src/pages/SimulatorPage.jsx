@@ -19,7 +19,6 @@ export default function SimulatorPage({
   onApplySimulatedValues,
   onNavigate,
 }) {
-  // Initial baseline values
   const baselineN = Number(fieldData?.Nitrogen_kg_per_acre) || 140
   const baselineK = Number(fieldData?.Potassium_kg_per_acre) || 80
   const baselineM = Number(fieldData?.["Soil_Moisture_%"]) || 65
@@ -30,7 +29,6 @@ export default function SimulatorPage({
   const [simM, setSimM] = useState(baselineM)
   const [simPH, setSimPH] = useState(baselinePH)
 
-  // Reset to baseline if fieldData updates
   useEffect(() => {
     setSimN(Number(fieldData?.Nitrogen_kg_per_acre) || 140)
     setSimK(Number(fieldData?.Potassium_kg_per_acre) || 80)
@@ -38,25 +36,19 @@ export default function SimulatorPage({
     setSimPH(Number(fieldData?.Soil_pH) || 6.8)
   }, [fieldData])
 
-  // Realistic CaneSense Agronomic Sensitivity Response Function
   const { baselineYield, simulatedYield, deltaYield, deltaPercent } = useMemo(() => {
-    // Model base yield calculation
     const calcYield = (n, k, m, ph) => {
-      let y = 220 // base tonnage intercept
+      let y = 220
 
-      // Nitrogen non-linear response (quadratic diminishing returns, optimum ~160-180 kg)
       const nOpt = 170
       const nEff = -0.0035 * Math.pow(n - nOpt, 2) + 0.45 * (n - 100)
       y += nEff
 
-      // Potassium linear/synergistic response (optimum ~90-110 kg)
       y += (k - 60) * 0.38
 
-      // Moisture response (diminishing above 75%, steep penalty below 45%)
       const mEff = -0.04 * Math.pow(m - 68, 2) + 18
       y += mEff
 
-      // pH penalty curve (optimum 6.5 to 7.2)
       const phEff = -28 * Math.pow(ph - 6.8, 2) + 12
       y += phEff
 
@@ -93,7 +85,6 @@ export default function SimulatorPage({
     onNavigate("forecaster")
   }
 
-  // Dynamic Agronomic Insights
   const dynamicInsight = useMemo(() => {
     if (simN > 210 && simK < 70) {
       return {
@@ -132,7 +123,6 @@ export default function SimulatorPage({
 
   return (
     <div className="space-y-6 w-full pb-12">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
         <div>
           <h1 className="font-heading text-2xl font-bold text-white flex items-center gap-2.5">
@@ -165,15 +155,12 @@ export default function SimulatorPage({
         </div>
       </div>
 
-      {/* Main Grid: Sliders on Left, Live Tonnage Comparison on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Side: Sensitivity Sliders (7 Cols) */}
         <div className="lg:col-span-7 glass-card p-6 bg-slate-900/70 space-y-6">
           <h2 className="font-heading text-base font-bold text-white pb-3 border-b border-slate-800">
             Interactive Input Controls
           </h2>
 
-          {/* Nitrogen Slider */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-slate-300 flex items-center gap-1.5">
@@ -200,7 +187,6 @@ export default function SimulatorPage({
             </div>
           </div>
 
-          {/* Potassium Slider */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-slate-300 flex items-center gap-1.5">
@@ -227,7 +213,6 @@ export default function SimulatorPage({
             </div>
           </div>
 
-          {/* Soil Moisture Slider */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-slate-300 flex items-center gap-1.5">
@@ -254,7 +239,6 @@ export default function SimulatorPage({
             </div>
           </div>
 
-          {/* Soil pH Slider */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-slate-300 flex items-center gap-1.5">
@@ -282,9 +266,7 @@ export default function SimulatorPage({
           </div>
         </div>
 
-        {/* Right Side: Live Tonnage Delta & Guidance (5 Cols) */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Comparison Card */}
           <div className="glass-card p-6 bg-slate-900/70 space-y-5">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-400 pb-3 border-b border-slate-800">
               <span>SIMULATION COMPARISON</span>
@@ -292,7 +274,6 @@ export default function SimulatorPage({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Baseline */}
               <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800">
                 <span className="text-[11px] font-semibold text-slate-400 block mb-1">Baseline Yield</span>
                 <div className="text-2xl font-bold font-heading text-slate-300">
@@ -301,7 +282,6 @@ export default function SimulatorPage({
                 <span className="text-[10px] text-slate-500">Quintals / Acre</span>
               </div>
 
-              {/* Simulated */}
               <div className="p-3.5 rounded-xl bg-slate-950/70 border border-amber-500/30">
                 <span className="text-[11px] font-semibold text-amber-400 block mb-1">Simulated Yield</span>
                 <div className="text-2xl font-bold font-heading text-white">
@@ -311,7 +291,6 @@ export default function SimulatorPage({
               </div>
             </div>
 
-            {/* Delta Banner */}
             <div
               className={`p-4 rounded-xl border flex items-center justify-between ${
                 deltaYield >= 0
@@ -334,7 +313,6 @@ export default function SimulatorPage({
             </div>
           </div>
 
-          {/* Dynamic Agronomic Advisory Alert */}
           <div
             className={`p-5 rounded-2xl border ${
               dynamicInsight.type === "warning"

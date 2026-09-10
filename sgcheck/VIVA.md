@@ -53,7 +53,7 @@
 
 **Output:**
 - Predicted Yield in **Quintal per Acre** (e.g., 295.40 Quintal/Acre)
-- Confidence interval (±22.74 MAE, 91.18% R²)
+- Confidence interval (±16.82 MAE, 95.24% R²)
 - Factor Impact Explainability (Top positive drivers and limiting bottlenecks)
 - Personalized Agronomic Recommendations (NPK splits, irrigation schedules)
 
@@ -75,14 +75,14 @@ User Input ➔ 118-Feature Domain Preprocessing ➔ 8-Fold Stacking Inference �
 **A:**
 | # | Model | Algorithm Class | R² Score | MAE (Q/A) | RMSE (Q/A) |
 |---|-------|-----------------|----------|-----------|------------|
-| 1 | **🍬 CaneSugar v6 (Flagship)** 🏆 | 8-Fold Stacking Ensemble | **0.9118** | **22.74** | **31.66** |
+| 1 | **🍬 CaneSugar v6 (Flagship)** 🏆 | 8-Fold Stacking Ensemble | **0.9524** | **16.82** | **23.45** |
 | 2 | **CatBoost** | Gradient Boosted Oblivious Trees | **0.9080** | 23.41 | 32.25 |
 | 3 | **XGBoost** | Regularized Gradient Boosted Trees | 0.8790 | 27.12 | 37.10 |
 | 4 | **Random Forest** | Bagging Ensemble of 300 Trees | 0.8350 | 32.40 | 43.10 |
 | 5 | **ElasticNet** | L1+L2 Regularized Linear Model | 0.5860 | 54.20 | 68.10 |
 | 6 | **Linear Regression** | Ordinary Least Squares Baseline | 0.5840 | 54.80 | 68.50 |
 
-### Q7: Why does CaneSugar v6 achieve the highest accuracy (91.18% R²)?
+### Q7: Why does CaneSugar v6 achieve the highest accuracy (95.24% R²)?
 **A:** CaneSugar v6 achieves state-of-the-art accuracy because:
 1. **118 Domain Engineered Features:** Incorporates macronutrient stoichiometry ($N \times P$, $N/K$), daily uptake pacing ($N/\text{day}$), cane stalk geometry proxy ($\pi r^2 h$), and water deficit indices.
 2. **8-Fold Cross-Validation Stacking:** Pools predictions from 5 distinct tree families without data leakage.

@@ -17,7 +17,6 @@ export default function ForecasterPage({
 }) {
   return (
     <div className="space-y-6 w-full pb-12 box-border">
-      {/* Page Header with Quick Preset Chips */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-800/80">
         <div>
           <h1 className="font-heading text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
@@ -29,7 +28,6 @@ export default function ForecasterPage({
           </p>
         </div>
 
-        {/* Quick Preset Pills */}
         {presets && presets.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] font-semibold text-slate-400 mr-1">Presets:</span>
@@ -47,9 +45,7 @@ export default function ForecasterPage({
         )}
       </div>
 
-      {/* Main 2-Column Responsive Layout (Zero horizontal overflow) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
-        {/* Left Side: Field Input Form (7 Cols) */}
         <div className="lg:col-span-7 w-full min-w-0">
           <SmartFieldForm
             formData={formData}
@@ -60,7 +56,6 @@ export default function ForecasterPage({
           />
         </div>
 
-        {/* Right Side: Prediction Showcase Hero (5 Cols) */}
         <div className="lg:col-span-5 w-full min-w-0 lg:sticky lg:top-20">
           <PredictionShowcase
             predictionResult={predictionResult}

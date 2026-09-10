@@ -61,11 +61,56 @@ export default function SmartFieldForm({
   const handleChange = (e) => {
     const { name, value } = e.target
     onChange && onChange(name, value)
+
+    if (name === "Planting_Date" || name === "Harvesting_Date") {
+      const pDate = name === "Planting_Date" ? value : values.Planting_Date
+      const hDate = name === "Harvesting_Date" ? value : values.Harvesting_Date
+      if (pDate && hDate) {
+        const p = new Date(pDate)
+        const h = new Date(hDate)
+        const diff = Math.ceil((h - p) / (1000 * 60 * 60 * 24))
+        if (!isNaN(diff) && diff > 0) {
+          let estH = 285
+          let estB = "19.5"
+          if (diff < 90) {
+            estH = Math.round(40 + diff * 0.8)
+            estB = "10.5"
+          } else if (diff < 180) {
+            estH = Math.round(112 + (diff - 90) * 1.25)
+            estB = (11.5 + ((diff - 90) / 90) * 3.5).toFixed(1)
+          } else if (diff < 270) {
+            estH = Math.round(225 + (diff - 180) * 0.6)
+            estB = (15.0 + ((diff - 180) / 90) * 3.0).toFixed(1)
+          } else if (diff <= 360) {
+            estH = Math.round(279 + Math.min(diff - 270, 70) * 0.15)
+            estB = (18.0 + ((diff - 270) / 90) * 2.2).toFixed(1)
+          } else {
+            estH = Math.min(345, Math.round(300 + Math.min(diff - 360, 360) * 0.08))
+            estB = Math.min(23.0, +(20.2 + Math.min(diff - 360, 360) * 0.005).toFixed(1))
+          }
+          onChange && onChange("Cane_Height_cm", String(estH))
+          onChange && onChange("Brix_Value", String(estB))
+
+          if (inferredInfo) {
+            const durationFactor = diff > 360
+              ? Math.min(1.40, 1.0 + ((diff - 360) / 365) * 0.25)
+              : diff < 240
+              ? Math.max(0.80, diff / 300)
+              : 1.0
+            const baseN = Number(inferredInfo.inferredFields?.Nitrogen_kg_per_acre || 140)
+            const baseP = Number(inferredInfo.inferredFields?.Phosphorus_kg_per_acre || 55)
+            const baseK = Number(inferredInfo.inferredFields?.Potassium_kg_per_acre || 80)
+            onChange && onChange("Nitrogen_kg_per_acre", String(Math.round(baseN * durationFactor)))
+            onChange && onChange("Phosphorus_kg_per_acre", String(Math.round(baseP * durationFactor)))
+            onChange && onChange("Potassium_kg_per_acre", String(Math.round(baseK * durationFactor)))
+          }
+        }
+      }
+    }
   }
 
   const values = { ...FIELD_DEFAULTS, ...formData }
 
-  // Phenological Crop Duration and Daily Metric Calculations
   const cropDuration = useMemo(() => {
     if (!values.Planting_Date || !values.Harvesting_Date) return null
     const p = new Date(values.Planting_Date)
@@ -102,8 +147,8 @@ export default function SmartFieldForm({
     } else {
       stage = "Adsali / Extended Maturity (>360d)"
       stageColor = "text-purple-400"
-      estHeight = 310
-      estBrix = "20.8"
+      estHeight = Math.min(345, Math.round(300 + Math.min(diff - 360, 360) * 0.08))
+      estBrix = Math.min(23.0, +(20.2 + Math.min(diff - 360, 360) * 0.005).toFixed(1))
     }
 
     return {
@@ -125,7 +170,6 @@ export default function SmartFieldForm({
     values.Potassium_kg_per_acre,
   ])
 
-  // Explicit weather sync for this specific date range
   const handleSyncDateRangeWeather = async () => {
     if (!cropDuration || !cropDuration.valid) return
     setIsInferring(true)
@@ -161,7 +205,6 @@ export default function SmartFieldForm({
     }
   }
 
-  // Safe submit preventing default form behavior & page reload
   const handlePredictSubmit = (e) => {
     if (e) {
       e.preventDefault?.()
@@ -199,10 +242,8 @@ export default function SmartFieldForm({
 
       if (result.success) {
         setInferredInfo(result)
-        // Batch update all inferred fields
         if (typeof onChange === "function") {
           onChange(result.inferredFields)
-          // Also invoke individual key updates for safety
           Object.entries(result.inferredFields).forEach(([k, v]) => {
             onChange(k, v)
           })
@@ -210,7 +251,7 @@ export default function SmartFieldForm({
             onChange(result.weatherResult.canesugar_features)
           }
         }
-        setShowAdvanced(true) // Automatically reveal advanced biometrics (pH, height, brix)
+        setShowAdvanced(true)
       } else {
         setInferError("Could not infer agro data for these coordinates.")
       }
@@ -248,7 +289,6 @@ export default function SmartFieldForm({
         </button>
       </div>
 
-      {/* Quick Autofill from Map Location / Coordinates Bar */}
       <div className="p-4 rounded-xl bg-slate-950/80 border border-amber-500/30 mb-6 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
           <div className="flex items-center gap-2">
@@ -311,7 +351,6 @@ export default function SmartFieldForm({
           </button>
         </div>
 
-        {/* Quick coordinate chips */}
         <div className="flex items-center gap-2 flex-wrap pt-0.5">
           <span className="text-[10px] text-slate-400 font-semibold">Try sample:</span>
           <button
@@ -349,7 +388,6 @@ export default function SmartFieldForm({
           </button>
         </div>
 
-        {/* Inferred Status & Provenance Confirmation Badge */}
         {inferredInfo && (
           <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 space-y-2 animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 font-semibold">
@@ -385,9 +423,7 @@ export default function SmartFieldForm({
         }}
         className="space-y-6"
       >
-        {/* Core Field Section: 2-Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Planting Date */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Calendar className="size-3.5 text-amber-400" />
@@ -403,7 +439,6 @@ export default function SmartFieldForm({
             />
           </div>
 
-          {/* Harvesting Date */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Calendar className="size-3.5 text-amber-400" />
@@ -419,7 +454,6 @@ export default function SmartFieldForm({
             />
           </div>
 
-          {/* Date Range & Phenological Duration Intelligence */}
           {cropDuration && (
             <div
               className={`md:col-span-2 p-3 rounded-xl border transition-all ${
@@ -477,7 +511,6 @@ export default function SmartFieldForm({
                     </div>
                   </div>
 
-                  {/* Daily Agronomic Consumption Rates & Phenological Height/Brix */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] border-t border-slate-800/80">
                     <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800/80">
                       <span className="text-slate-400 block text-[10px] font-medium">Daily N-Demand</span>
@@ -519,7 +552,6 @@ export default function SmartFieldForm({
             </div>
           )}
 
-          {/* Variety */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Leaf className="size-3.5 text-emerald-400" />
@@ -540,7 +572,6 @@ export default function SmartFieldForm({
             </select>
           </div>
 
-          {/* Crop Type */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Sun className="size-3.5 text-amber-400" />
@@ -560,7 +591,6 @@ export default function SmartFieldForm({
             </select>
           </div>
 
-          {/* Soil Type */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Sprout className="size-3.5 text-amber-500" />
@@ -580,7 +610,6 @@ export default function SmartFieldForm({
             </select>
           </div>
 
-          {/* Irrigation System */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Droplets className="size-3.5 text-sky-400" />
@@ -600,7 +629,6 @@ export default function SmartFieldForm({
           </div>
         </div>
 
-        {/* Macronutrient NPK & Soil Chemistry Grid */}
         <div className="pt-4 border-t border-slate-800">
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -615,7 +643,6 @@ export default function SmartFieldForm({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {/* Nitrogen */}
             <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
               <span className="text-[11px] font-semibold text-slate-400 block">Nitrogen (N)</span>
               <div className="flex items-center gap-1">
@@ -632,7 +659,6 @@ export default function SmartFieldForm({
               </div>
             </div>
 
-            {/* Phosphorus */}
             <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
               <span className="text-[11px] font-semibold text-slate-400 block">Phosphorus (P)</span>
               <div className="flex items-center gap-1">
@@ -649,7 +675,6 @@ export default function SmartFieldForm({
               </div>
             </div>
 
-            {/* Potassium */}
             <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
               <span className="text-[11px] font-semibold text-slate-400 block">Potassium (K)</span>
               <div className="flex items-center gap-1">
@@ -666,7 +691,6 @@ export default function SmartFieldForm({
               </div>
             </div>
 
-            {/* Soil Moisture */}
             <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
               <span className="text-[11px] font-semibold text-slate-400 block">Soil Moisture</span>
               <div className="flex items-center gap-1">
@@ -685,7 +709,6 @@ export default function SmartFieldForm({
           </div>
         </div>
 
-        {/* Collapsible Advanced Biometrics */}
         <div className="pt-2">
           <button
             type="button"
@@ -696,9 +719,9 @@ export default function SmartFieldForm({
               {showAdvanced ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
               <span>{showAdvanced ? "Hide Advanced Biometrics (Stalk Geometry & Brix)" : "Show Advanced Biometrics (Stalk Geometry & Brix)"}</span>
             </span>
-            {inferredInfo && (
+            {cropDuration && cropDuration.valid && (
               <span className="text-[10px] text-emerald-400 font-normal bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                Crop Age: {inferredInfo.biometricsDetails?.cropDurationDays || 320} Days ({inferredInfo.biometricsDetails?.phenologicalStage})
+                Crop Age: {cropDuration.days} Days ({cropDuration.stage})
               </span>
             )}
           </button>
@@ -743,7 +766,6 @@ export default function SmartFieldForm({
           )}
         </div>
 
-        {/* Submit Prediction Button */}
         <div className="pt-2">
           <button
             type="button"

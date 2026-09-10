@@ -68,7 +68,6 @@ export default function ThemeSwitcher() {
     } catch {}
   }, [activeTheme])
 
-  // Close on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -100,7 +99,6 @@ export default function ThemeSwitcher() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Dropdown Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -124,7 +122,6 @@ export default function ThemeSwitcher() {
         />
       </button>
 
-      {/* Floating Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-64 p-2 rounded-2xl bg-slate-950/95 border border-slate-700/90 shadow-2xl backdrop-blur-xl z-50 space-y-1 animate-in fade-in zoom-in-95 duration-150 box-border">
           <div className="px-2 py-1.5 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800/80 mb-1">
@@ -147,7 +144,6 @@ export default function ThemeSwitcher() {
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    {/* Mini Swatch Bar */}
                     <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-slate-950 border border-slate-800 shrink-0">
                       {theme.colors.map((c, i) => (
                         <div
@@ -158,7 +154,6 @@ export default function ThemeSwitcher() {
                       ))}
                     </div>
 
-                    {/* Theme Label */}
                     <div className="min-w-0">
                       <div
                         className="text-xs font-semibold leading-tight truncate"
@@ -172,7 +167,6 @@ export default function ThemeSwitcher() {
                     </div>
                   </div>
 
-                  {/* Active Checkmark */}
                   {isActive && (
                     <Check
                       className="size-3.5 shrink-0 ml-1"

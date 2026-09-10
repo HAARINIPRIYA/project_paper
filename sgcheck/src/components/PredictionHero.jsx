@@ -80,13 +80,12 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
   const predValue = result.predictions?.[0]
   const modelName = result.model || "cane_sugar"
   const metrics = result.metrics || {}
-  const r2 = metrics.r2 || 0.9118
-  const mae = metrics.mae || 22.74
+  const r2 = metrics.r2 || 0.9524
+  const mae = metrics.mae || 16.82
   const isEnsemble = modelName === "ensemble" || result.individual_predictions
 
   const yieldTier = predValue !== null && predValue !== undefined ? getYieldTier(Number(predValue)) : null
 
-  // Extract field values
   const fieldKeys = Object.keys(FIELD_CONFIG)
   const fieldValues = {}
   if (gpsData) {
@@ -134,7 +133,6 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
         boxShadow: "0 0 50px rgba(212, 168, 67, 0.12), 0 12px 40px rgba(0, 0, 0, 0.5)",
       }}
     >
-      {/* Decorative ambient glow */}
       <div
         style={{
           position: "absolute",
@@ -149,7 +147,6 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
       />
 
       <div style={{ padding: "20px 24px" }}>
-        {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div
@@ -212,7 +209,6 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
           </div>
         </div>
 
-        {/* Big Yield Display */}
         <div style={{ textAlign: "center", padding: "16px 0 12px" }}>
           {predValue !== null && predValue !== undefined ? (
             <>
@@ -244,7 +240,6 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
           )}
         </div>
 
-        {/* Metrics Pill Grid */}
         <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap", margin: "14px 0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 12px", borderRadius: "var(--radius-sm)", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-subtle)" }}>
             <BarChart3 className="size-3.5 text-amber-500" />
@@ -265,7 +260,6 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
           </div>
         </div>
 
-        {/* Input Parameters Tag Bar */}
         {hasFields && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border-subtle)" }}>
             {fieldKeys.map((key) => {
@@ -296,7 +290,6 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
           </div>
         )}
 
-        {/* Action Toolbar */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "16px", paddingTop: "12px", borderTop: "1px solid var(--border-subtle)", flexWrap: "wrap", gap: "8px" }}>
           <div className="flex items-center gap-2">
             <Button variant="default" size="sm" onClick={handleCopyReport} className="gap-1.5 text-[11px]">

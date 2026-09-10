@@ -60,7 +60,6 @@ const NAV_ITEMS = [
 
 const STORAGE_KEY = "canesense_conversations"
 
-
 const SUGGESTIONS = [
   { icon: Trophy, label: "Why is CaneSugar v6 the best model?", query: "Why is CaneSugar v6 the most accurate model and how does its 8-fold stacking ensemble work?", color: "var(--accent-gold)" },
   { icon: GitCompare, label: "Compare CaneSugar vs CatBoost", query: "Compare CaneSugar v6 and CatBoost performance, R² scores, and error rates.", color: "var(--accent-green)" },
@@ -68,7 +67,6 @@ const SUGGESTIONS = [
   { icon: BarChartHorizontal, label: "Show all model benchmarks", query: "Show me the complete R², MAE, and RMSE comparison for all 6 models.", color: "#7c3aed" },
   { icon: Sprout, label: "Run yield forecast for my field", query: "Can you analyze my current field parameters and provide an agronomic forecast?", color: "var(--accent-primary)" },
 ]
-
 
 function loadConversations() {
   try {
@@ -97,12 +95,11 @@ function buildTitle(messages) {
   return "New Conversation"
 }
 
-// --- Model Selection Handler ---
   async function handleModelSelection(model) {
     setSelectedModel(model)
     setShowModelSelector(false)
     setIsSelectingModel(true)
-    
+
     try {
       const fieldData = {
         Planting_Date: gpsData?.Planting_Date,
@@ -113,24 +110,23 @@ function buildTitle(messages) {
         Irrigation_Type: gpsData?.Irrigation_Type,
         Fertilizer_Type: gpsData?.Fertilizer_Type,
       }
-      
-      // Check if we have valid field data
+
       const hasValidData = Object.values(fieldData).some(v => v && v.trim() !== "")
-      
+
       if (!hasValidData) {
         addToast('error', 'No field data', 'Please enter field details first')
         return
       }
-      
+
       let result
       if (model === "auto") {
         result = await predictAuto(fieldData)
       } else if (model === "ensemble") {
         result = await predictEnsemble([fieldData])
       } else {
-        result = await predictAuto(fieldData) // Fallback to auto if specific model not supported
+        result = await predictAuto(fieldData)
       }
-      
+
       if (result && result.predictions?.[0] !== undefined) {
         onEnsembleResult(result)
         addToast('success', 'Prediction complete', `Using ${model === "auto" ? "best model" : model}: ${result.predictions[0].toFixed(2)} Quintal/Acre`)
@@ -165,7 +161,6 @@ function buildContextMessage(gpsData, availableModels, backendStatus) {
   return ctx
 }
 
-// --- Component ---
 function Dashboard({
   uploadedImage,
   onImageUpload,
@@ -228,7 +223,6 @@ function Dashboard({
   useEffect(() => { onPredictionResultRef.current = onPredictionResult }, [onPredictionResult])
   useEffect(() => { onEnsembleResultRef.current = onEnsembleResult }, [onEnsembleResult])
 
-  // Theme toggle
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark")
@@ -237,12 +231,10 @@ function Dashboard({
     }
   }, [darkMode])
 
-  // Save conversations to localStorage on change
   useEffect(() => {
     saveConversations(conversations)
   }, [conversations])
 
-  // Auto-scroll to bottom
   useEffect(() => {
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
     scrollTimeoutRef.current = setTimeout(() => {
@@ -256,19 +248,16 @@ function Dashboard({
     return () => { if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current) }
   }, [conversations, activeChatId, streamingContent])
 
-  // Create initial conversation if none exist
   useEffect(() => {
     if (conversations.length === 0 && view === "analysis") {
       createNewConversation()
     }
   }, [view, conversations.length])
 
-  // Get active conversation
   const activeConversation = useMemo(() => {
     return conversations.find((c) => c.id === activeChatId) || null
   }, [conversations, activeChatId])
 
-  // Messages from active conversation
   const messages = useMemo(() => {
     return activeConversation?.messages || []
   }, [activeConversation])
@@ -291,7 +280,6 @@ function Dashboard({
     }
   }, [gpsData, onGPSSubmit])
 
-  // --- Conversation Management ---
   function createNewConversation() {
     if (abortRef.current) {
       abortRef.current.abort()
@@ -364,7 +352,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
     )
   }
 
-  // --- Stable send handler (ref-based, never stale) ---
   useEffect(() => { composerRef.current = composer }, [composer])
 
   const onSendRef = useRef(async () => {})
@@ -492,7 +479,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
         setStreamingContent("")
         setAiStatus("complete")
 
-        // Also detect structured field data (JSON with field params) in the user message
         const hasFieldDataInMsg = /"Planting_Date"|Planting_Date\s*[:=]/i.test(text)
         const isPredictionQuery = /predict|yield|cane|forecast|estimate|run|production|analysis|recommend/i.test(text)
         if ((isPredictionQuery || hasFieldDataInMsg) && (currentGps || hasFieldDataInMsg)) {
@@ -584,7 +570,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
 
   const toolPanel = (
     <div className="flex flex-col gap-5">
-      {/* Backend Status */}
       <div className="flex items-center gap-3" style={{ border: "1px solid var(--border-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)" }}>
         {backendStatus === "connected" ? (
           <span className="status-dot connected" />
@@ -611,7 +596,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
         </div>
       </div>
 
-      {/* AI Status */}
       <div className="flex items-center gap-3" style={{ border: "1px solid var(--border-subtle)", padding: "12px 14px", borderRadius: "var(--radius-sm)" }}>
         {aiStatus === "streaming" || aiStatus === "connecting" ? (
           <Loader2 className="size-3 animate-spin" style={{ color: "var(--accent-primary)" }} />
@@ -632,7 +616,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
         </div>
       </div>
 
-      {/* Input Data */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="divider-label-text">Input Data</span>
@@ -641,7 +624,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
         <UploadZone onImageUpload={onImageUpload} uploadedImage={uploadedImage} />
       </div>
 
-      {/* Field Details */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="divider-label-text">Crop & Soil</span>
@@ -656,7 +638,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
         />
       </div>
 
-      {/* Model Performance */}
       {isBackendReady && availableModels.length > 0 && (
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
@@ -700,7 +681,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
                       <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--accent-primary)" }}>
                         R² {m.r2 ? m.r2.toFixed(3) : "—"}
                       </span>
-                      {/* Always keep badge space for alignment */}
                       <div style={{ width: "44px", display: "flex", justifyContent: "center", flexShrink: 0 }}>
                         {isBest && (
                           <Badge variant="green" className="text-[8px]" style={{ height: "16px", padding: "0 4px" }}>Best</Badge>
@@ -714,7 +694,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
         </div>
       )}
 
-      {/* Quick Actions */}
       <div className="flex flex-col gap-2">
         <span className="divider-label-text">Quick Actions</span>
         <Button variant="default" size="sm" className="w-full justify-start gap-2" onClick={() => { setView("dashboard"); setShowChat(false) }}>
@@ -978,7 +957,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                           ) : null}
                           <div className={"message-bubble" + (isUser ? " user" : " assistant")} style={{ position: "relative" }}>
                             {isUser ? m.content : <MarkdownRenderer content={m.content} />}
-                            
+
                             {!isUser && (
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "6px", marginTop: "8px", paddingTop: "6px", borderTop: "1px solid var(--border-subtle)", fontSize: "10px", color: "var(--text-muted)" }}>
                                 <span>{formatTime(m.timestamp)}</span>
@@ -1026,7 +1005,6 @@ To get started, enter your field details in the **Tools** panel (right side), th
           </ScrollArea>
           {view === "analysis" && (
             <div className="composer-wrap" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {/* Quick Suggestion Chips Bar */}
               <div style={{ display: "flex", alignItems: "center", gap: "6px", overflowX: "auto", padding: "2px 4px", scrollbarWidth: "none" }}>
                 {SUGGESTIONS.map((s) => {
                   const Icon = s.icon
@@ -1095,11 +1073,9 @@ To get started, enter your field details in the **Tools** panel (right side), th
           </div>
         </aside>
       </div>
-      
-      {/* Toast Notifications */}
+
       <ToastNotification toasts={toasts} removeToast={removeToast} />
-      
-      {/* Model Selector Modal */}
+
       {showModelSelector && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <motion.div
@@ -1128,8 +1104,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
           </motion.div>
         </div>
       )}
-      
-      {/* History Page is now rendered inline in the main content area */}
+
     </div>
   )
 }

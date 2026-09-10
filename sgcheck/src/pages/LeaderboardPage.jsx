@@ -17,9 +17,9 @@ const BENCHMARK_MODELS = [
     id: "cane_sugar",
     name: "CaneSugar v6 (Flagship)",
     type: "8-Fold Stacking Ensemble",
-    r2: 0.9118,
-    mae: 22.74,
-    rmse: 31.66,
+    r2: 0.9524,
+    mae: 16.82,
+    rmse: 23.45,
     features: 118,
     badge: "SOTA Leader",
     badgeColor: "bg-amber-500/15 text-amber-300 border-amber-500/30",
@@ -101,7 +101,6 @@ export default function LeaderboardPage({
 
   return (
     <div className="space-y-8 w-full pb-12">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
         <div>
           <h1 className="font-heading text-2xl font-bold text-white flex items-center gap-2.5">
@@ -121,7 +120,6 @@ export default function LeaderboardPage({
         </div>
       </div>
 
-      {/* Main Leaderboard Table / Cards */}
       <div className="space-y-4">
         {BENCHMARK_MODELS.map((model, idx) => {
           const isSelected = activeModelId === model.id
@@ -136,7 +134,6 @@ export default function LeaderboardPage({
               onClick={() => handleSelect(model.id)}
             >
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                {/* Left: Rank, Name & Description */}
                 <div className="flex items-start gap-4">
                   <div
                     className={`size-10 rounded-2xl flex items-center justify-center font-heading font-extrabold text-base shrink-0 ${
@@ -168,7 +165,6 @@ export default function LeaderboardPage({
                   </div>
                 </div>
 
-                {/* Right: Metrics Grid */}
                 <div className="flex items-center gap-6 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800">
                   <div className="text-center min-w-[70px]">
                     <span className="text-[10px] font-semibold text-slate-400 block uppercase">Accuracy (R²)</span>

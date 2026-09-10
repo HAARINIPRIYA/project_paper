@@ -1,10 +1,4 @@
-/* ============================================
-   CaneSense — Enhanced Dark Theme
-   Sugarcane Yield Prediction Dashboard
-   v2.0 - Refined Professional Style
-   ============================================ */
 
-/* ----- Custom Fonts (Local) ----- */
 @font-face {
   font-family: "GROBOLD";
   src: url("/fonts/GROBOLD.ttf") format("truetype");
@@ -52,103 +46,85 @@
   font-style: normal;
   font-display: swap;
 }
-
-/* ============================================
-   CaneSense — "Golden Harvest" Design Tokens
-   Warm, Premium Agricultural Aesthetic
-   v3.0 - Glassmorphism + Gold Accent
-   ============================================ */
 
 :root {
-  /* Warm Dark Core - welcoming, not harsh */
+
   --bg-deep: #13161A;
   --bg-surface: #191D22;
   --bg-elevated: #21262C;
   --bg-card: #1A1E23;
   --bg-card-hover: #22262C;
   --bg-input: #161A1E;
-  
-  /* Glassmorphism */
+
   --glass-bg: rgba(33, 38, 44, 0.4);
   --glass-border: rgba(212, 168, 67, 0.10);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  
-  /* Subtle Borders - Warm tones */
+
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-default: rgba(255, 255, 255, 0.10);
   --border-strong: #D4A843;
   --border-focus: #D4A843;
-  
-  /* Text - Warm off-white for welcoming feel */
+
   --text-primary: #F0EDE6;
   --text-secondary: #A39B8E;
   --text-muted: #605A50;
   --text-placeholder: #4A453C;
-  
-  /* === Sugarcane Gold — Hero Accent === */
+
   --accent-gold: #D4A843;
   --accent-gold-hover: #E0B84E;
   --accent-gold-bg: rgba(212, 168, 67, 0.15);
   --accent-gold-border: rgba(212, 168, 67, 0.35);
   --accent-gold-glow: rgba(212, 168, 67, 0.30);
-  
-  /* Legacy aliases — gold replaces green as primary */
+
   --accent-primary: #D4A843;
   --accent-primary-hover: #E0B84E;
   --accent-primary-bg: rgba(212, 168, 67, 0.12);
   --accent-primary-border: rgba(212, 168, 67, 0.3);
   --accent-primary-glow: rgba(212, 168, 67, 0.25);
-  
+
   --accent-blue: #D4A843;
   --accent-blue-hover: #E0B84E;
   --accent-blue-bg: rgba(212, 168, 67, 0.12);
   --accent-blue-border: rgba(212, 168, 67, 0.3);
-  
-  /* === Earthy Green — Secondary === */
+
   --accent-green: #2D6A4F;
   --accent-green-hover: #35845F;
   --accent-green-bg: rgba(45, 106, 79, 0.18);
   --accent-green-border: rgba(45, 106, 79, 0.35);
-  
-  /* === Sage Green — Positive States === */
+
   --accent-sage: #7BA05B;
   --accent-sage-bg: rgba(123, 160, 91, 0.12);
   --accent-sage-border: rgba(123, 160, 91, 0.3);
-  
-  /* === Terracotta — Warm Accent === */
+
   --accent-terracotta: #C76B4A;
   --accent-terracotta-bg: rgba(199, 107, 74, 0.12);
   --accent-terracotta-border: rgba(199, 107, 74, 0.3);
-  
-  /* Status Colors - Refined */
+
   --accent-red: #E55858;
   --accent-red-hover: #D14545;
   --accent-red-bg: rgba(229, 88, 88, 0.12);
   --accent-red-border: rgba(229, 88, 88, 0.3);
-  
+
   --accent-orange: #E8A048;
   --accent-orange-hover: #F0B058;
   --accent-orange-bg: rgba(232, 160, 72, 0.12);
   --accent-orange-border: rgba(232, 160, 72, 0.3);
-  
+
   --accent-purple: #9B7ED8;
   --accent-purple-bg: rgba(155, 126, 216, 0.12);
-  
+
   --accent-cyan: #5BB8C4;
   --accent-cyan-bg: rgba(91, 184, 196, 0.12);
-  
-  /* Shadows - Softer, warmer */
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.6);
-  
-  /* Glow Effects */
+
   --glow-primary: 0 0 20px rgba(212, 168, 67, 0.25);
   --glow-primary-strong: 0 0 30px rgba(212, 168, 67, 0.4);
   --glow-success: 0 0 15px rgba(45, 106, 79, 0.3);
-  
-  /* Border Radius - Premium feel */
+
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -158,13 +134,11 @@
   --radius-input: 8px;
   --radius-button: 8px;
   --radius-pill: 9999px;
-  
-  /* Typography */
+
   --font-heading: "GROBOLD", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-body: "ClashDisplay", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "SF Mono", "Fira Code", "Roboto Mono", Consolas, monospace;
-  
-  /* Spacing */
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -175,28 +149,22 @@
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
-  
-  /* Layout */
+
   --sidebar-width: 280px;
   --topbar-height: 56px;
-  
-  /* Sugarcane Theme Colors - Gold replaces green as hero */
+
   --cane-green: #2D6A4F;
   --cane-green-bg: rgba(45, 106, 79, 0.15);
   --cane-green-border: rgba(45, 106, 79, 0.35);
   --cane-gold: #D4A843;
   --cane-gold-bg: rgba(212, 168, 67, 0.15);
   --cane-gold-border: rgba(212, 168, 67, 0.35);
-  
-  /* Transitions */
+
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ============================================
-   RESET & BASE - Enhanced
-   ============================================ */
 *, *::before, *::after { 
   box-sizing: border-box; 
   border-color: var(--border-default); 
@@ -221,7 +189,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Explicit Form, Button, and Table Font Mapping */
 button,
 input,
 optgroup,
@@ -259,7 +226,6 @@ a:hover {
   color: var(--accent-primary-hover);
 }
 
-/* Headings and Titles */
 h1, h2, h3, h4, h5, h6,
 .font-heading,
 .main-header-title,
@@ -272,14 +238,10 @@ h1, h2, h3, h4, h5, h6,
   color: var(--text-primary);
 }
 
-/* Monospace & Code */
 code, kbd, samp, pre, .font-mono {
   font-family: var(--font-mono);
 }
 
-/* ============================================
-   SCROLLBAR - Refined
-   ============================================ */
 ::-webkit-scrollbar { 
   width: 8px; 
   height: 8px; 
@@ -299,9 +261,6 @@ code, kbd, samp, pre, .font-mono {
   background: rgba(212, 168, 67, 0.35); 
 }
 
-/* ============================================
-   APP LAYOUT - Enhanced
-   ============================================ */
 .app-grid {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr 360px;
@@ -321,9 +280,6 @@ code, kbd, samp, pre, .font-mono {
   }
 }
 
-/* ============================================
-   SIDEBAR - Refined
-   ============================================ */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -453,7 +409,6 @@ code, kbd, samp, pre, .font-mono {
   padding: var(--space-1) 0;
 }
 
-/* Search */
 .sidebar-search-wrap {
   padding: var(--space-2) var(--space-4);
   position: relative;
@@ -490,7 +445,6 @@ code, kbd, samp, pre, .font-mono {
   box-shadow: 0 0 0 3px var(--accent-primary-bg);
 }
 
-/* Chat Items */
 .chat-item {
   width: 100%;
   padding: var(--space-3) var(--space-5);
@@ -542,7 +496,6 @@ code, kbd, samp, pre, .font-mono {
   margin-top: 3px; 
 }
 
-/* User Area */
 .sidebar-user {
   border-top: 1px solid var(--border-subtle);
   padding: var(--space-3) var(--space-4);
@@ -576,9 +529,6 @@ code, kbd, samp, pre, .font-mono {
   color: var(--text-muted); 
 }
 
-/* ============================================
-   TOP HEADER BAR - Enhanced
-   ============================================ */
 .main-header {
   display: flex;
   align-items: center;
@@ -632,9 +582,6 @@ code, kbd, samp, pre, .font-mono {
   gap: var(--space-2);
 }
 
-/* ============================================
-   MAIN CONTENT AREA - Enhanced
-   ============================================ */
 .main-area {
   display: flex;
   flex-direction: column;
@@ -652,9 +599,6 @@ code, kbd, samp, pre, .font-mono {
   padding: var(--space-6) var(--space-7);
 }
 
-/* ============================================
-   RIGHT TOOLS PANEL - Enhanced
-   ============================================ */
 .tools-panel {
   display: flex;
   flex-direction: column;
@@ -698,9 +642,6 @@ code, kbd, samp, pre, .font-mono {
   padding: var(--space-5);
 }
 
-/* ============================================
-   BUTTONS - Refined
-   ============================================ */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -809,9 +750,6 @@ code, kbd, samp, pre, .font-mono {
   justify-content: center; 
 }
 
-/* ============================================
-   BADGES - Refined
-   ============================================ */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -869,9 +807,6 @@ code, kbd, samp, pre, .font-mono {
   border-color: var(--accent-gold-border); 
 }
 
-/* ============================================
-   CARDS - Enhanced
-   ============================================ */
 .gcp-card,
 .aws-card {
   background: var(--bg-card);
@@ -932,9 +867,6 @@ code, kbd, samp, pre, .font-mono {
   padding: var(--space-4) var(--space-5); 
 }
 
-/* ============================================
-   STAT CARDS - Enhanced
-   ============================================ */
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -1016,9 +948,6 @@ code, kbd, samp, pre, .font-mono {
   color: var(--accent-gold);
 }
 
-/* ============================================
-   MODEL COMPARISON - Enhanced
-   ============================================ */
 .model-rank-item > * {
   min-width: 0;
 }
@@ -1074,9 +1003,6 @@ code, kbd, samp, pre, .font-mono {
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ============================================
-   ACTIVITY ITEMS - Enhanced
-   ============================================ */
 .activity-item {
   display: flex;
   align-items: center;
@@ -1108,9 +1034,6 @@ code, kbd, samp, pre, .font-mono {
   animation: pulse 2s infinite; 
 }
 
-/* ============================================
-   INFO CARDS - Enhanced
-   ============================================ */
 .info-card {
   display: flex;
   flex-direction: column;
@@ -1138,31 +1061,24 @@ code, kbd, samp, pre, .font-mono {
   text-overflow: ellipsis;
 }
 
-/* Ensure long model names don't break layout */
 .model-chip {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Badge safety - prevent text overflow in chips */
 .badge {
   max-width: 250px;
 }
 
-/* Flex safety: prevent flex children from overflowing their parent */
 .flex-1 {
   min-width: 0;
 }
 
-/* Ensure flex items with truncation have constrained width */
 .min-w-0 {
   min-width: 0;
 }
 
-/* ============================================
-   MINI CARDS - Enhanced
-   ============================================ */
 .mini-card {
   display: flex;
   flex-direction: column;
@@ -1197,9 +1113,6 @@ code, kbd, samp, pre, .font-mono {
   text-overflow: ellipsis;
 }
 
-/* ============================================
-   STATUS DOT - Refined
-   ============================================ */
 .status-dot {
   display: inline-block;
   width: 8px;
@@ -1222,9 +1135,6 @@ code, kbd, samp, pre, .font-mono {
   background: var(--accent-sage); 
 }
 
-/* ============================================
-   MODEL CHIP - Enhanced
-   ============================================ */
 .model-chip {
   display: inline-flex;
   align-items: center;
@@ -1256,9 +1166,6 @@ code, kbd, samp, pre, .font-mono {
   box-shadow: var(--glow-primary);
 }
 
-/* ============================================
-   FIELD SECTIONS - Enhanced
-   ============================================ */
 .field-section {
   display: flex;
   flex-direction: column;
@@ -1278,9 +1185,6 @@ code, kbd, samp, pre, .font-mono {
   font-family: var(--font-body);
 }
 
-/* ============================================
-   UPLOAD DROPZONE - Enhanced
-   ============================================ */
 .upload-dropzone {
   border: 2px dashed var(--border-default);
   padding: var(--space-5);
@@ -1321,9 +1225,6 @@ code, kbd, samp, pre, .font-mono {
   border-color: var(--accent-primary-border);
 }
 
-/* ============================================
-   RESULT HIGHLIGHT - Enhanced
-   ============================================ */
 .result-highlight {
   display: flex;
   flex-direction: column;
@@ -1348,9 +1249,6 @@ code, kbd, samp, pre, .font-mono {
   letter-spacing: 0.02em;
 }
 
-/* ============================================
-   CONFIDENCE INDICATOR - Enhanced
-   ============================================ */
 .confidence-indicator {
   display: inline-flex;
   align-items: center;
@@ -1373,9 +1271,6 @@ code, kbd, samp, pre, .font-mono {
   background: var(--accent-orange); 
 }
 
-/* ============================================
-   FORM ELEMENTS - Enhanced
-   ============================================ */
 .input {
   height: 42px;
   width: 100%;
@@ -1414,9 +1309,6 @@ code, kbd, samp, pre, .font-mono {
   box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2); 
 }
 
-/* ============================================
-   SELECT BOX & OPTION BOX - Custom Styled
-   ============================================ */
 select,
 select.input,
 .select {
@@ -1463,7 +1355,6 @@ select.input:disabled {
   background-color: var(--bg-elevated);
 }
 
-/* Options Dropdown */
 option,
 optgroup {
   font-family: var(--font-body) !important;
@@ -1516,9 +1407,6 @@ optgroup {
   cursor: not-allowed; 
 }
 
-/* ============================================
-   MESSAGES / CHAT - Enhanced
-   ============================================ */
 .message-row { 
   display: flex; 
   gap: var(--space-3); 
@@ -1565,7 +1453,6 @@ optgroup {
   margin-bottom: 0; 
 }
 
-/* Composer */
 .composer-wrap {
   border-top: 1px solid var(--border-subtle);
   background: var(--bg-card);
@@ -1613,9 +1500,6 @@ optgroup {
   gap: var(--space-2); 
 }
 
-/* ============================================
-   TABS - Enhanced
-   ============================================ */
 .tabs { 
   display: flex; 
   flex-direction: column; 
@@ -1664,9 +1548,6 @@ optgroup {
   outline: none; 
 }
 
-/* ============================================
-   SEPARATOR - Enhanced
-   ============================================ */
 .cane-separator { 
   flex-shrink: 0; 
   background: var(--border-subtle); 
@@ -1682,9 +1563,6 @@ optgroup {
   align-self: stretch; 
 }
 
-/* ============================================
-   SCROLL AREA - Enhanced
-   ============================================ */
 .scroll-area { 
   position: relative; 
   overflow: hidden; 
@@ -1698,9 +1576,6 @@ optgroup {
   overflow-x: hidden; 
 }
 
-/* ============================================
-   AVATAR - Enhanced
-   ============================================ */
 .avatar {
   position: relative;
   display: flex;
@@ -1731,9 +1606,6 @@ optgroup {
   text-transform: uppercase;
 }
 
-/* ============================================
-   SHEET (MOBILE DRAWER) - Enhanced
-   ============================================ */
 .sheet-overlay {
   position: fixed;
   inset: 0;
@@ -1782,9 +1654,6 @@ optgroup {
   letter-spacing: 0.02em;
 }
 
-/* ============================================
-   NAV BUTTON GRID (MOBILE) - Enhanced
-   ============================================ */
 .nav-btn-grid {
   display: flex;
   flex-wrap: wrap;
@@ -1796,9 +1665,6 @@ optgroup {
   min-width: 0; 
 }
 
-/* ============================================
-   STATUS INDICATOR - Enhanced
-   ============================================ */
 .status-indicator {
   display: flex;
   align-items: center;
@@ -1817,9 +1683,6 @@ optgroup {
   border-color: var(--accent-green-border);
 }
 
-/* ============================================
-   DIVIDER LABEL - Enhanced
-   ============================================ */
 .divider-label-text {
   font-size: 10px;
   font-weight: 700;
@@ -1830,9 +1693,6 @@ optgroup {
   white-space: nowrap;
 }
 
-/* ============================================
-   UTILITY CLASSES - Enhanced
-   ============================================ */
 .flex { display: flex; }
 .inline-flex { display: inline-flex; }
 .hidden { display: none; }
@@ -1861,7 +1721,6 @@ optgroup {
 .grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .col-span-2 { grid-column: span 2 / span 2; }
 
-/* Sizing */
 .h-screen { height: 100vh; }
 .h-full { height: 100%; }
 .h-auto { height: auto; }
@@ -1895,7 +1754,6 @@ optgroup {
 .size-12 { width: 3rem; height: 3rem; }
 .size-full { width: 100%; height: 100%; }
 
-/* Padding */
 .p-0 { padding: 0; }
 .p-1 { padding: 0.25rem; }
 .p-1\\.5 { padding: 0.375rem; }
@@ -1940,7 +1798,6 @@ optgroup {
 .pl-3 { padding-left: 0.75rem; }
 .pl-9 { padding-left: 2.25rem; }
 
-/* Margin */
 .mt-0\\.5 { margin-top: 0.125rem; }
 .mt-1 { margin-top: 0.25rem; }
 .mt-1\\.5 { margin-top: 0.375rem; }
@@ -1968,7 +1825,6 @@ optgroup {
 .gap-6 { gap: 1.5rem; }
 .gap-8 { gap: 2rem; }
 
-/* Typography */
 .text-xs { font-size: 0.6875rem; line-height: 1.45; }
 .text-sm { font-size: 0.8125rem; line-height: 1.45; }
 .text-base { font-size: 0.875rem; line-height: 1.5; }
@@ -1997,7 +1853,6 @@ optgroup {
 .capitalize { text-transform: capitalize; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 
-/* Colors */
 .text-foreground { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
 .text-muted { color: var(--text-muted); }
@@ -2014,7 +1869,6 @@ optgroup {
 .bg-green-light { background-color: var(--accent-green-bg); }
 .bg-red-light { background-color: var(--accent-red-bg); }
 
-/* Borders */
 .border { border-width: 1px; border-style: solid; }
 .border-0 { border-width: 0; }
 .border-t { border-top-width: 1px; border-top-style: solid; }
@@ -2034,12 +1888,10 @@ optgroup {
 .rounded-lg { border-radius: var(--radius-lg); }
 .rounded-full { border-radius: var(--radius-pill); }
 
-/* Shadows */
 .shadow-sm { box-shadow: var(--shadow-sm); }
 .shadow { box-shadow: var(--shadow-md); }
 .shadow-lg { box-shadow: var(--shadow-lg); }
 
-/* Effects */
 .opacity-0 { opacity: 0; }
 .opacity-40 { opacity: 0.4; }
 .opacity-50 { opacity: 0.5; }
@@ -2047,7 +1899,6 @@ optgroup {
 .opacity-70 { opacity: 0.7; }
 .opacity-80 { opacity: 0.8; }
 
-/* Position */
 .relative { position: relative; }
 .absolute { position: absolute; }
 .fixed { position: fixed; }
@@ -2065,12 +1916,10 @@ optgroup {
 .z-20 { z-index: 20; }
 .z-50 { z-index: 50; }
 
-/* Overflow */
 .overflow-hidden { overflow: hidden; }
 .overflow-y-auto { overflow-y: auto; }
 .overflow-x-hidden { overflow-x: hidden; }
 
-/* Interactivity */
 .cursor-pointer { cursor: pointer; }
 .cursor-default { cursor: default; }
 .cursor-not-allowed { cursor: not-allowed; }
@@ -2082,7 +1931,6 @@ optgroup {
 .object-cover { object-fit: cover; }
 .aspect-square { aspect-ratio: 1 / 1; }
 
-/* Transitions */
 .transition-all { transition: all var(--transition-normal); }
 .transition-colors { transition: background-color var(--transition-normal), color var(--transition-normal), border-color var(--transition-normal); }
 .transition-shadow { transition: box-shadow var(--transition-normal); }
@@ -2091,17 +1939,12 @@ optgroup {
 .duration-200 { transition-duration: 200ms; }
 .duration-300 { transition-duration: 300ms; }
 
-/* Focus ring */
 .focus-visible\\:outline-none:focus-visible { outline: none; }
 .focus-visible\\:ring-2:focus-visible { box-shadow: 0 0 0 3px var(--accent-primary-glow); }
 
-/* Disabled */
 .disabled\\:pointer-events-none:disabled { pointer-events: none; }
 .disabled\\:opacity-50:disabled { opacity: 0.5; }
 
-/* ============================================
-   ANIMATIONS - Enhanced
-   ============================================ */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -2164,9 +2007,6 @@ optgroup {
   animation: shimmer 2s linear infinite;
 }
 
-/* ============================================
-   COMPARISON MODAL - Enhanced
-   ============================================ */
 .compare-modal {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -2208,7 +2048,6 @@ optgroup {
   color: var(--text-muted);
 }
 
-/* Bar chart */
 .compare-bar-chart {
   display: flex;
   flex-direction: column;
@@ -2258,7 +2097,6 @@ optgroup {
   font-family: var(--font-heading);
 }
 
-/* Comparison table */
 .compare-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--border-subtle);
@@ -2308,23 +2146,15 @@ optgroup {
   white-space: nowrap;
 }
 
-/* Grid card select button */
 .grid-select-btn:hover {
   background: var(--accent-gold-bg) !important;
   color: var(--accent-gold) !important;
 }
 
-/* ============================================
-   
-   ============================================ */
-
 @media (max-width: 767px) {
   body { background: var(--bg-deep); }
 }
 
-/* ============================================
-   MOBILE NAVIGATION
-   ============================================ */
 .mobile-nav {
   display: none;
   position: fixed;
@@ -2343,7 +2173,7 @@ optgroup {
     justify-content: space-around;
     align-items: center;
   }
-  
+
   .mobile-nav-btn {
     display: flex;
     flex-direction: column;
@@ -2359,23 +2189,18 @@ optgroup {
     transition: color var(--transition-fast);
     border-radius: var(--radius-sm);
   }
-  
+
   .mobile-nav-btn:hover,
   .mobile-nav-btn.active {
     color: var(--accent-primary);
   }
-  
+
   .mobile-nav-btn svg {
     width: 20px;
     height: 20px;
   }
 }
 
-/* ============================================
-   THEME SYSTEM — Smooth Theme Switching
-   ============================================ */
-
-/* Smooth theme transitions — scoped to avoid performance issues */
 html.theme-transitioning,
 html.theme-transitioning *,
 html.theme-transitioning *::before,
@@ -2386,14 +2211,10 @@ html.theme-transitioning *::after {
               box-shadow 350ms ease !important;
 }
 
-/* ----- Theme: Emerald Dark (Default) ----- */
-/* All default variables defined in :root above */
-/* Explicit data-theme selector ensures consistent specificity with other themes */
 [data-theme="emerald"] {
   --shadow-glow-green: 0 0 20px rgba(0, 214, 143, 0.25);
 }
 
-/* ----- Theme: Ocean Blue ----- */
 [data-theme="ocean"] {
   --bg-deep: #060D1A;
   --bg-surface: #0A1525;
@@ -2401,64 +2222,63 @@ html.theme-transitioning *::after {
   --bg-card: #0D1828;
   --bg-card-hover: #122236;
   --bg-input: #080F1E;
-  
+
   --border-subtle: #152A3E;
   --border-default: #1E3A52;
   --border-strong: #0099FF;
   --border-focus: #0099FF;
-  
+
   --text-primary: #E8F0FA;
   --text-secondary: #94A9C4;
   --text-muted: #4D6680;
   --text-placeholder: #344A61;
-  
+
   --accent-primary: #0099FF;
   --accent-primary-hover: #33ADFF;
   --accent-primary-bg: rgba(0, 153, 255, 0.12);
   --accent-primary-border: rgba(0, 153, 255, 0.3);
   --accent-primary-glow: rgba(0, 153, 255, 0.25);
-  
+
   --accent-blue: #0099FF;
   --accent-blue-hover: #33ADFF;
   --accent-blue-bg: rgba(0, 153, 255, 0.12);
   --accent-blue-border: rgba(0, 153, 255, 0.3);
-  
+
   --accent-green: #00C48C;
   --accent-green-hover: #00DBA0;
   --accent-green-bg: rgba(0, 196, 140, 0.12);
   --accent-green-border: rgba(0, 196, 140, 0.3);
-  
+
   --accent-red: #FF6B6B;
   --accent-red-hover: #FF5252;
   --accent-red-bg: rgba(255, 107, 107, 0.12);
   --accent-red-border: rgba(255, 107, 107, 0.3);
-  
+
   --accent-orange: #FFB547;
   --accent-orange-hover: #FFC233;
   --accent-orange-bg: rgba(255, 181, 71, 0.12);
   --accent-orange-border: rgba(255, 181, 71, 0.3);
-  
+
   --accent-purple: #7C5CFC;
   --accent-purple-bg: rgba(124, 92, 252, 0.12);
-  
+
   --accent-cyan: #00C9DB;
   --accent-cyan-bg: rgba(0, 201, 219, 0.12);
-  
+
   --glow-primary: 0 0 20px rgba(0, 153, 255, 0.3);
   --glow-primary-strong: 0 0 30px rgba(0, 153, 255, 0.5);
   --glow-success: 0 0 15px rgba(0, 196, 140, 0.25);
-  
+
   --cane-green: #00D68F;
   --cane-green-bg: rgba(0, 214, 143, 0.12);
   --cane-green-border: rgba(0, 214, 143, 0.35);
   --cane-gold: #FFB547;
   --cane-gold-bg: rgba(255, 181, 71, 0.12);
   --cane-gold-border: rgba(255, 181, 71, 0.35);
-  
+
   --shadow-glow-green: 0 0 20px rgba(0, 153, 255, 0.25);
 }
 
-/* ----- Theme: Sunset Amber ----- */
 [data-theme="sunset"] {
   --bg-deep: #0F0A06;
   --bg-surface: #1A1208;
@@ -2466,64 +2286,63 @@ html.theme-transitioning *::after {
   --bg-card: #1C150A;
   --bg-card-hover: #261D10;
   --bg-input: #120D06;
-  
+
   --border-subtle: #2E2214;
   --border-default: #3E3020;
   --border-strong: #FF8C00;
   --border-focus: #FF8C00;
-  
+
   --text-primary: #FAF0E0;
   --text-secondary: #C4AD94;
   --text-muted: #806A52;
   --text-placeholder: #5C4A38;
-  
+
   --accent-primary: #FF8C00;
   --accent-primary-hover: #FFA233;
   --accent-primary-bg: rgba(255, 140, 0, 0.12);
   --accent-primary-border: rgba(255, 140, 0, 0.3);
   --accent-primary-glow: rgba(255, 140, 0, 0.25);
-  
+
   --accent-blue: #FF8C00;
   --accent-blue-hover: #FFA233;
   --accent-blue-bg: rgba(255, 140, 0, 0.12);
   --accent-blue-border: rgba(255, 140, 0, 0.3);
-  
+
   --accent-green: #E8A040;
   --accent-green-hover: #F0B050;
   --accent-green-bg: rgba(232, 160, 64, 0.12);
   --accent-green-border: rgba(232, 160, 64, 0.3);
-  
+
   --accent-red: #FF6B4A;
   --accent-red-hover: #FF5A3A;
   --accent-red-bg: rgba(255, 107, 74, 0.12);
   --accent-red-border: rgba(255, 107, 74, 0.3);
-  
+
   --accent-orange: #FF9500;
   --accent-orange-hover: #FFA620;
   --accent-orange-bg: rgba(255, 149, 0, 0.12);
   --accent-orange-border: rgba(255, 149, 0, 0.3);
-  
+
   --accent-purple: #A0704C;
   --accent-purple-bg: rgba(160, 112, 76, 0.12);
-  
+
   --accent-cyan: #D4A050;
   --accent-cyan-bg: rgba(212, 160, 80, 0.12);
-  
+
   --glow-primary: 0 0 20px rgba(255, 140, 0, 0.3);
   --glow-primary-strong: 0 0 30px rgba(255, 140, 0, 0.5);
   --glow-success: 0 0 15px rgba(232, 160, 64, 0.25);
-  
+
   --cane-green: #E8A040;
   --cane-green-bg: rgba(232, 160, 64, 0.12);
   --cane-green-border: rgba(232, 160, 64, 0.35);
   --cane-gold: #FFD700;
   --cane-gold-bg: rgba(255, 215, 0, 0.12);
   --cane-gold-border: rgba(255, 215, 0, 0.35);
-  
+
   --shadow-glow-green: 0 0 20px rgba(255, 140, 0, 0.25);
 }
 
-/* ----- Theme: Midnight Purple ----- */
 [data-theme="midnight"] {
   --bg-deep: #0A0614;
   --bg-surface: #120B20;
@@ -2531,59 +2350,59 @@ html.theme-transitioning *::after {
   --bg-card: #150E26;
   --bg-card-hover: #1E1535;
   --bg-input: #0C0718;
-  
+
   --border-subtle: #22183A;
   --border-default: #2E2248;
   --border-strong: #A855F7;
   --border-focus: #A855F7;
-  
+
   --text-primary: #EDE4FA;
   --text-secondary: #B4A0D4;
   --text-muted: #6E5A8E;
   --text-placeholder: #4D3A6E;
-  
+
   --accent-primary: #A855F7;
   --accent-primary-hover: #B96FF8;
   --accent-primary-bg: rgba(168, 85, 247, 0.12);
   --accent-primary-border: rgba(168, 85, 247, 0.3);
   --accent-primary-glow: rgba(168, 85, 247, 0.25);
-  
+
   --accent-blue: #A855F7;
   --accent-blue-hover: #B96FF8;
   --accent-blue-bg: rgba(168, 85, 247, 0.12);
   --accent-blue-border: rgba(168, 85, 247, 0.3);
-  
+
   --accent-green: #818CF8;
   --accent-green-hover: #99A3FA;
   --accent-green-bg: rgba(129, 140, 248, 0.12);
   --accent-green-border: rgba(129, 140, 248, 0.3);
-  
+
   --accent-red: #F472B6;
   --accent-red-hover: #F48BC6;
   --accent-red-bg: rgba(244, 114, 182, 0.12);
   --accent-red-border: rgba(244, 114, 182, 0.3);
-  
+
   --accent-orange: #C084FC;
   --accent-orange-hover: #CD9CFC;
   --accent-orange-bg: rgba(192, 132, 252, 0.12);
   --accent-orange-border: rgba(192, 132, 252, 0.3);
-  
+
   --accent-purple: #D946EF;
   --accent-purple-bg: rgba(217, 70, 239, 0.12);
-  
+
   --accent-cyan: #67E8F9;
   --accent-cyan-bg: rgba(103, 232, 249, 0.12);
-  
+
   --glow-primary: 0 0 20px rgba(168, 85, 247, 0.3);
   --glow-primary-strong: 0 0 30px rgba(168, 85, 247, 0.5);
   --glow-success: 0 0 15px rgba(129, 140, 248, 0.25);
-  
+
   --cane-green: #818CF8;
   --cane-green-bg: rgba(129, 140, 248, 0.12);
   --cane-green-border: rgba(129, 140, 248, 0.35);
   --cane-gold: #C084FC;
   --cane-gold-bg: rgba(192, 132, 252, 0.12);
   --cane-gold-border: rgba(192, 132, 252, 0.35);
-  
+
   --shadow-glow-green: 0 0 20px rgba(168, 85, 247, 0.25);
 }

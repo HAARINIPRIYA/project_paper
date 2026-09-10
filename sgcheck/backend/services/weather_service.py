@@ -36,7 +36,6 @@ FORECAST_DAILY_VARIABLES = [
     "soil_temperature_6cm",
 ]
 
-
 class WeatherService:
     def __init__(self, forecast_url: Optional[str] = None, archive_url: Optional[str] = None):
         self.forecast_url = forecast_url or FORECAST_URL
@@ -220,9 +219,7 @@ class WeatherService:
         except (TypeError, ValueError):
             return False
 
-
 _weather_service = None
-
 
 def get_weather_service() -> WeatherService:
     global _weather_service

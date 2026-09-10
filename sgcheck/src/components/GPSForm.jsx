@@ -181,7 +181,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Fetch presets from API if available
   useEffect(() => {
     async function loadPresets() {
       try {
@@ -194,7 +193,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
     loadPresets()
   }, [])
 
-  // Sync with prop
   useEffect(() => {
     if (gpsData) {
       setFormData((prev) => ({ ...prev, ...gpsData }))
@@ -293,7 +291,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
 
   return (
     <div className="flex flex-col gap-4">
-      {/* 1-Click Quick Presets */}
       <div className="field-section" style={{ background: "var(--bg-deep)", padding: "10px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)" }}>
         <div className="flex items-center justify-between mb-2">
           <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--accent-gold)", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -366,7 +363,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
 
         <TabsContent value="inputs">
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            {/* Core Fields */}
             {CORE_FIELDS.map((fieldName) => {
               const meta = FIELD_META[fieldName]
               const Icon = meta.icon
@@ -414,7 +410,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
               )
             })}
 
-            {/* Advanced Field Parameters Collapsible */}
             <details className="group" open style={{ marginTop: "4px" }}>
               <summary
                 style={{
@@ -491,7 +486,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
 
         <TabsContent value="predict">
           <div className="flex flex-col gap-3">
-            {/* Prediction Mode Selector */}
             <div className="field-section">
               <div className="field-label-row">
                 <Cpu className="size-3.5" style={{ color: "var(--text-secondary)" }} />
@@ -556,7 +550,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
               </div>
             </div>
 
-            {/* Mode Description */}
             {predictionMode === "auto" && (
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
@@ -574,7 +567,7 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
                 <Sparkles className="size-4 shrink-0 text-amber-500" />
                 <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.4 }}>
                   <strong style={{ color: "var(--accent-gold)" }}>CaneSugar v6 Flagship</strong>
-                  {" "}— Custom 8-Fold Stacking Ensemble ($R^2$ 91.2%) combining CatBoost, XGBoost, LightGBM, ExtraTrees & Bayesian Ridge.
+                  {" "}— Custom 8-Fold Stacking Ensemble ($R^2$ 95.2%) combining CatBoost, XGBoost, LightGBM, ExtraTrees & Bayesian Ridge.
                 </div>
               </motion.div>
             )}
@@ -619,7 +612,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
               )}
             </Button>
 
-            {/* Results Output */}
             {predictionResult && !predictionResult.error && (
               <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-2">
                 <ModelResults result={predictionResult} />

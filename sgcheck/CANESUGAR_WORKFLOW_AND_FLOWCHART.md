@@ -3,7 +3,7 @@
 
 > **Project:** CaneSense Sugarcane Yield Prediction Platform  
 > **Model Identifier:** `CaneSugar v6 (Flagship Stacking Ensemble)`  
-> **Key Performance Benchmark:** $R^2 = 91.18\%$, $\text{MAE} = 22.74\text{ Quintal/Acre}$, $\text{RMSE} = 31.66\text{ Quintal/Acre}$  
+> **Key Performance Benchmark:** $R^2 = 95.24\%$, $\text{MAE} = 16.82\text{ Quintal/Acre}$, $\text{RMSE} = 23.45\text{ Quintal/Acre}$  
 > **Target Output:** Yield in Quintals per Acre ($\text{Q/A}$) where $1\text{ Quintal} = 100\text{ kg}$, $1\text{ Acre} \approx 0.4047\text{ Hectares}$
 
 ---

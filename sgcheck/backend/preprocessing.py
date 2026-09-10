@@ -20,7 +20,6 @@ DROP_COLUMNS = [
 
 TARGET = "Yield_Quintal_per_Acre"
 
-
 def load_and_clean(path: str) -> pd.DataFrame:
     """Load the CSV, impute missing values, parse dates, encode dates, drop columns."""
     df = pd.read_csv(path)
@@ -53,7 +52,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
 
     return df
 
-
 def label_encode_categoricals(
     df: pd.DataFrame,
 ) -> Tuple[pd.DataFrame, dict]:
@@ -69,7 +67,6 @@ def label_encode_categoricals(
         encoders[col] = le
     return df, encoders
 
-
 def get_feature_target(
     df: pd.DataFrame,
 ) -> Tuple[pd.DataFrame, pd.Series]:
@@ -77,4 +74,3 @@ def get_feature_target(
     X = df.drop(TARGET, axis=1)
     y = df[TARGET]
     return X, y
-

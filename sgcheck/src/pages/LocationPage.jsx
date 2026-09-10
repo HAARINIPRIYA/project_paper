@@ -9,7 +9,6 @@ export default function LocationPage({
 }) {
   return (
     <div className="space-y-6 w-full pb-12">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
         <div>
           <h1 className="font-heading text-2xl font-bold text-white flex items-center gap-2.5">
@@ -29,7 +28,6 @@ export default function LocationPage({
         )}
       </div>
 
-      {/* Map & Geolocation Studio */}
       <div className="glass-card p-6 bg-slate-900/70">
         <LocationSelector
           onWeatherDataReady={onWeatherDataReady}

@@ -68,7 +68,6 @@ export default function AiAgronomistDrawer({
             className="ai-drawer-content"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Drawer Header (Theme-Aligned) */}
             <div className="ai-drawer-header">
               <div className="flex items-center gap-3">
                 <div className="ai-drawer-avatar">
@@ -109,7 +108,6 @@ export default function AiAgronomistDrawer({
               </div>
             </div>
 
-            {/* Context Notice (Theme-Aligned) */}
             {fieldData && (
               <div className="ai-drawer-context-bar">
                 <Sparkles className="size-3.5 shrink-0" />
@@ -119,7 +117,6 @@ export default function AiAgronomistDrawer({
               </div>
             )}
 
-            {/* Message Thread */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && !streamingText && (
                 <div className="py-8 text-center flex flex-col items-center justify-center">
@@ -198,7 +195,6 @@ export default function AiAgronomistDrawer({
                 )
               })}
 
-              {/* Streaming Output */}
               {streamingText && (
                 <div className="flex gap-3 justify-start">
                   <div className="ai-drawer-avatar size-7 rounded-lg text-[10px] font-bold shrink-0">
@@ -227,7 +223,6 @@ export default function AiAgronomistDrawer({
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Composer Box (Theme-Aligned) */}
             <div className="ai-drawer-composer">
               <div className="ai-drawer-input-container">
                 <textarea

@@ -21,13 +21,11 @@ TRAINING_RANGES = {
     "Soil_Moisture_%": (10.0, 40.0),
 }
 
-
 def _derive_dew_point(temp_c: float, rh_pct: float) -> float:
     a = 17.27
     b = 237.7
     alpha = (a * temp_c) / (b + temp_c) + math.log(max(rh_pct, 1.0) / 100.0)
     return (b * alpha) / (a - alpha)
-
 
 def _derive_humidity_from_dewpoint(temp_c: float, dew_c: float) -> float:
     a = 17.27
@@ -36,13 +34,11 @@ def _derive_humidity_from_dewpoint(temp_c: float, dew_c: float) -> float:
     alpha_temp = (a * temp_c) / (b + temp_c)
     return 100.0 * math.exp(alpha_dew - alpha_temp)
 
-
 def _derive_et0_hargreaves(temp_max: float, temp_min: float, temp_avg: float, solar_mj: float, lat_rad: float = 0.185) -> float:
     delta = temp_max - temp_min
     ra_constant = 492.0
     et0 = 0.0023 * ra_constant * (temp_avg + 17.8) * (delta ** 0.5) * 0.408 * solar_mj / 28.0
     return max(0.1, min(et0, 12.0))
-
 
 class WeatherDataAdapter:
     def __init__(self):
@@ -303,9 +299,7 @@ class WeatherDataAdapter:
             },
         }
 
-
 _weather_adapter = None
-
 
 def get_weather_adapter() -> WeatherDataAdapter:
     global _weather_adapter

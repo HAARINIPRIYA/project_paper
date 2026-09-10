@@ -1,9 +1,4 @@
-/* ============================================
-   CaneSense — Soft Pastel Theme
-   Sugarcane Yield Prediction Dashboard
-   ============================================ */
 
-/* ----- Custom Fonts (Local) ----- */
 @font-face {
   font-family: "GROBOLD";
   src: url("/fonts/GROBOLD.ttf") format("truetype");
@@ -52,9 +47,8 @@
   font-display: swap;
 }
 
-/* ----- Black, Soft Green & Off-White Theme (Easy on Eyes) ----- */
 :root {
-  /* Black Core Colors */
+
   --bg-deep: #08090A;
   --bg-surface: #0F1113;
   --bg-elevated: #181B1E;
@@ -62,18 +56,15 @@
   --bg-card-hover: #1A1D21;
   --bg-input: #0A0C0E;
 
-  /* Muted Borders */
   --border-subtle: #1E2226;
   --border-default: #282D33;
   --border-strong: #00D68F;
 
-  /* Readable text - high contrast */
   --text-primary: #F0F4F8;
   --text-secondary: #A8B5C4;
   --text-muted: #5E6B7A;
   --text-placeholder: #3D4752;
 
-  /* Primary Accent - Bright Emerald */
   --accent-blue: #00D68F;
   --accent-blue-hover: #00F5A0;
   --accent-blue-bg: rgba(0, 214, 143, 0.12);
@@ -83,12 +74,12 @@
   --accent-green-hover: #35845F;
   --accent-green-bg: rgba(45, 106, 79, 0.18);
   --accent-green-border: rgba(45, 106, 79, 0.35);
-  
+
   --accent-red: #FF6B6B;
   --accent-red-hover: #FF5252;
   --accent-red-bg: rgba(255, 107, 107, 0.12);
   --accent-red-border: rgba(255, 107, 107, 0.3);
-  
+
   --accent-orange: #FFB547;
   --accent-orange-hover: #FFC233;
   --accent-orange-bg: rgba(255, 181, 71, 0.12);
@@ -96,11 +87,10 @@
 
   --accent-purple: #7C5CFC;
   --accent-purple-bg: rgba(124, 92, 252, 0.12);
-  
+
   --accent-cyan: #00C9DB;
   --accent-cyan-bg: rgba(0, 201, 219, 0.12);
 
-  /* Soft Shadows with glow */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5), 0 6px 10px rgba(0, 0, 0, 0.3);
@@ -114,16 +104,13 @@
   --radius-button: 8px;
   --radius-pill: 9999px;
 
-  /* Typography */
   --font-heading: "GROBOLD", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-body: "ClashDisplay", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "SF Mono", "Fira Code", "Roboto Mono", Consolas, monospace;
 
-  /* Spacing */
   --sidebar-width: 280px;
   --topbar-height: 56px;
 
-  /* Sugarcane accents */
   --cane-green: #2D6A4F;
   --cane-green-bg: rgba(45, 106, 79, 0.15);
   --cane-green-border: rgba(45, 106, 79, 0.35);
@@ -132,9 +119,6 @@
   --cane-gold-border: rgba(212, 168, 67, 0.35);
 }
 
-/* ============================================
-   RESET & BASE
-   ============================================ */
 *, *::before, *::after { 
   box-sizing: border-box; 
   border-color: var(--border-default); 
@@ -155,7 +139,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Explicit Form, Button, and Table Font Mapping */
 button,
 input,
 optgroup,
@@ -182,7 +165,6 @@ div {
 a { color: var(--accent-blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* Headings use GROBOLD */
 h1, h2, h3, h4, h5, h6,
 .font-heading,
 .main-header-title,
@@ -194,24 +176,15 @@ h1, h2, h3, h4, h5, h6,
   letter-spacing: 0.02em;
 }
 
-/* Monospace & Code */
 code, kbd, samp, pre, .font-mono {
   font-family: var(--font-mono);
 }
 
-/* ============================================
-   SCROLLBAR
-   ============================================ */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(212, 168, 67, 0.18); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(212, 168, 67, 0.35); }
 
-/* ============================================
-   UTILITY CLASSES
-   ============================================ */
-
-/* Layout */
 .flex { display: flex; }
 .inline-flex { display: inline-flex; }
 .hidden { display: none; }
@@ -240,7 +213,6 @@ code, kbd, samp, pre, .font-mono {
 .grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .col-span-2 { grid-column: span 2 / span 2; }
 
-/* Sizing */
 .h-screen { height: 100vh; }
 .h-full { height: 100%; }
 .h-auto { height: auto; }
@@ -272,7 +244,6 @@ code, kbd, samp, pre, .font-mono {
 .size-9 { width: 2.25rem; height: 2.25rem; }
 .size-10 { width: 2.5rem; height: 2.5rem; }
 
-/* Padding */
 .p-0 { padding: 0; }
 .p-1 { padding: 0.25rem; }
 .p-1\\.5 { padding: 0.375rem; }
@@ -317,7 +288,6 @@ code, kbd, samp, pre, .font-mono {
 .pl-3 { padding-left: 0.75rem; }
 .pl-9 { padding-left: 2.25rem; }
 
-/* Margin */
 .mt-0\\.5 { margin-top: 0.125rem; }
 .mt-1 { margin-top: 0.25rem; }
 .mt-1\\.5 { margin-top: 0.375rem; }
@@ -345,7 +315,6 @@ code, kbd, samp, pre, .font-mono {
 .gap-6 { gap: 1.5rem; }
 .gap-8 { gap: 2rem; }
 
-/* Typography */
 .text-xs { font-size: 0.6875rem; line-height: 1.45; }
 .text-sm { font-size: 0.8125rem; line-height: 1.45; }
 .text-base { font-size: 0.875rem; line-height: 1.5; }
@@ -374,7 +343,6 @@ code, kbd, samp, pre, .font-mono {
 .capitalize { text-transform: capitalize; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 
-/* Colors */
 .text-foreground { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
 .text-muted { color: var(--text-muted); }
@@ -391,7 +359,6 @@ code, kbd, samp, pre, .font-mono {
 .bg-green-light { background-color: var(--accent-green-bg); }
 .bg-red-light { background-color: var(--accent-red-bg); }
 
-/* Borders */
 .border { border-width: 1px; border-style: solid; }
 .border-0 { border-width: 0; }
 .border-t { border-top-width: 1px; border-top-style: solid; }
@@ -411,12 +378,10 @@ code, kbd, samp, pre, .font-mono {
 .rounded-lg { border-radius: var(--radius-lg); }
 .rounded-full { border-radius: var(--radius-pill); }
 
-/* Shadows */
 .shadow-sm { box-shadow: var(--shadow-sm); }
 .shadow { box-shadow: var(--shadow-md); }
 .shadow-lg { box-shadow: var(--shadow-lg); }
 
-/* Effects */
 .opacity-0 { opacity: 0; }
 .opacity-40 { opacity: 0.4; }
 .opacity-50 { opacity: 0.5; }
@@ -424,7 +389,6 @@ code, kbd, samp, pre, .font-mono {
 .opacity-70 { opacity: 0.7; }
 .opacity-80 { opacity: 0.8; }
 
-/* Position */
 .relative { position: relative; }
 .absolute { position: absolute; }
 .fixed { position: fixed; }
@@ -442,12 +406,10 @@ code, kbd, samp, pre, .font-mono {
 .z-20 { z-index: 20; }
 .z-50 { z-index: 50; }
 
-/* Overflow */
 .overflow-hidden { overflow: hidden; }
 .overflow-y-auto { overflow-y: auto; }
 .overflow-x-hidden { overflow-x: hidden; }
 
-/* Interactivity */
 .cursor-pointer { cursor: pointer; }
 .cursor-default { cursor: default; }
 .cursor-not-allowed { cursor: not-allowed; }
@@ -459,7 +421,6 @@ code, kbd, samp, pre, .font-mono {
 .object-cover { object-fit: cover; }
 .aspect-square { aspect-ratio: 1 / 1; }
 
-/* Transitions */
 .transition-all { transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); }
 .transition-colors { transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1), color 200ms cubic-bezier(0.4, 0, 0.2, 1), border-color 200ms cubic-bezier(0.4, 0, 0.2, 1); }
 .transition-shadow { transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1); }
@@ -468,15 +429,12 @@ code, kbd, samp, pre, .font-mono {
 .duration-200 { transition-duration: 200ms; }
 .duration-300 { transition-duration: 300ms; }
 
-/* Focus ring */
 .focus-visible\\:outline-none:focus-visible { outline: none; }
 .focus-visible\\:ring-2:focus-visible {  box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.4); }
 
-/* Disabled */
 .disabled\\:pointer-events-none:disabled { pointer-events: none; }
 .disabled\\:opacity-50:disabled { opacity: 0.5; }
 
-/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -501,7 +459,6 @@ code, kbd, samp, pre, .font-mono {
 }
 .animate-glow { animation: glow 2s ease-in-out infinite; }
 
-/* Prediction Hero shimmer / gradient sweep */
 @keyframes heroShimmer {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -522,10 +479,6 @@ code, kbd, samp, pre, .font-mono {
   background-size: 200% 200% !important;
 }
 
-/* ============================================
-   APP LAYOUT
-   ============================================ */
-
 .app-grid {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr 360px;
@@ -540,9 +493,6 @@ code, kbd, samp, pre, .font-mono {
   .app-grid { display: none; }
 }
 
-/* ============================================
-   SIDEBAR
-   ============================================ */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -729,9 +679,6 @@ code, kbd, samp, pre, .font-mono {
 .sidebar-user-name { font-size: 13px; font-weight: 600; font-family: var(--font-body); color: var(--text-primary); }
 .sidebar-user-subtitle { font-size: 11px; font-family: var(--font-body); color: var(--text-muted); }
 
-/* ============================================
-   TOP HEADER BAR
-   ============================================ */
 .main-header {
   display: flex;
   align-items: center;
@@ -770,9 +717,6 @@ code, kbd, samp, pre, .font-mono {
   gap: 8px;
 }
 
-/* ============================================
-   MAIN CONTENT AREA
-   ============================================ */
 .main-area {
   display: flex;
   flex-direction: column;
@@ -787,9 +731,6 @@ code, kbd, samp, pre, .font-mono {
   padding: 24px 28px;
 }
 
-/* ============================================
-   RIGHT TOOLS PANEL
-   ============================================ */
 .tools-panel {
   display: flex;
   flex-direction: column;
@@ -827,11 +768,6 @@ code, kbd, samp, pre, .font-mono {
   padding: 20px;
 }
 
-/* ============================================
-   COMPONENT STYLES
-   ============================================ */
-
-/* ----- Buttons ----- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -904,7 +840,6 @@ code, kbd, samp, pre, .font-mono {
 .btn-icon { width: 40px; height: 40px; padding: 0; justify-content: center; }
 .btn-icon-sm { width: 34px; height: 34px; padding: 0; justify-content: center; }
 
-/* ----- Badges (Chip Style) ----- */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -928,7 +863,6 @@ code, kbd, samp, pre, .font-mono {
 .badge-red { background: var(--accent-red-bg); color: var(--accent-red); border-color: var(--accent-red-border); }
 .badge-orange { background: var(--cane-gold-bg); color: #8B6B42; border-color: var(--cane-gold-border); }
 
-/* ----- Cards ----- */
 .gcp-card,
 .aws-card {
   background: var(--bg-card);
@@ -975,7 +909,6 @@ code, kbd, samp, pre, .font-mono {
 .gcp-card-content { padding: 22px; }
 .gcp-card-content.compact { padding: 18px 22px; }
 
-/* ----- Stat Cards ----- */
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -1049,7 +982,6 @@ code, kbd, samp, pre, .font-mono {
   color: var(--accent-blue);
 }
 
-/* Fix overlapping: flex children must have min-width: 0 */
 .model-rank-item > * {
   min-width: 0;
 }
@@ -1062,29 +994,24 @@ code, kbd, samp, pre, .font-mono {
   text-overflow: ellipsis;
 }
 
-/* Ensure long model names don't break layout */
 .model-chip {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Badge safety - prevent text overflow in chips */
 .badge {
   max-width: 250px;
 }
 
-/* Flex safety: prevent flex children from overflowing their parent */
 .flex-1 {
   min-width: 0;
 }
 
-/* Ensure flex items with truncation have constrained width */
 .min-w-0 {
   min-width: 0;
 }
 
-/* ----- Model Comparison Bars ----- */
 .model-rank-item {
   display: flex;
   align-items: center;
@@ -1128,7 +1055,6 @@ code, kbd, samp, pre, .font-mono {
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ----- Activity Items ----- */
 .activity-item {
   display: flex;
   align-items: center;
@@ -1149,7 +1075,6 @@ code, kbd, samp, pre, .font-mono {
 .activity-dot.success { background: var(--accent-green); }
 .activity-dot.running { background: var(--accent-orange); animation: pulse 2s infinite; }
 
-/* ----- Info Cards ----- */
 .info-card {
   display: flex;
   flex-direction: column;
@@ -1173,7 +1098,6 @@ code, kbd, samp, pre, .font-mono {
   font-family: var(--font-body);
 }
 
-/* ----- Mini Cards ----- */
 .mini-card {
   display: flex;
   flex-direction: column;
@@ -1203,7 +1127,6 @@ code, kbd, samp, pre, .font-mono {
   font-family: var(--font-body);
 }
 
-/* ----- Status Dot ----- */
 .status-dot {
   display: inline-block;
   width: 8px;
@@ -1216,7 +1139,6 @@ code, kbd, samp, pre, .font-mono {
 .status-dot.disconnected { background: var(--accent-red); }
 .status-dot.ready { background: var(--accent-green); }
 
-/* ----- Model Chip (selector) ----- */
 .model-chip {
   display: inline-flex;
   align-items: center;
@@ -1246,7 +1168,6 @@ code, kbd, samp, pre, .font-mono {
   box-shadow: 0 2px 12px rgba(0, 204, 102, 0.4);
 }
 
-/* ----- Field Sections (Form) ----- */
 .field-section {
   display: flex;
   flex-direction: column;
@@ -1264,7 +1185,6 @@ code, kbd, samp, pre, .font-mono {
   font-family: var(--font-body);
 }
 
-/* ----- Upload Dropzone ----- */
 .upload-dropzone {
   border: 2px dashed var(--border-default);
   padding: 20px;
@@ -1301,9 +1221,6 @@ code, kbd, samp, pre, .font-mono {
   border-color: var(--accent-blue-border);
 }
 
-/* ============================================
-   RESULT HIGHLIGHT
-   ============================================ */
 .result-highlight {
   display: flex;
   flex-direction: column;
@@ -1327,7 +1244,6 @@ code, kbd, samp, pre, .font-mono {
   margin-top: 2px;
 }
 
-/* Prediction Hero Card - glowing result container */
 .prediction-hero {
   position: relative;
   overflow: hidden;
@@ -1346,7 +1262,6 @@ code, kbd, samp, pre, .font-mono {
   z-index: 1;
 }
 
-/* ----- Confidence Indicator ----- */
 .confidence-indicator {
   display: inline-flex;
   align-items: center;
@@ -1360,10 +1275,6 @@ code, kbd, samp, pre, .font-mono {
 }
 .confidence-dot.high { background: var(--accent-green); }
 .confidence-dot.medium { background: var(--accent-orange); }
-
-/* ============================================
-   FORM ELEMENTS
-   ============================================ */
 
 .input {
   height: 42px;
@@ -1388,9 +1299,6 @@ code, kbd, samp, pre, .font-mono {
 .input[aria-invalid="true"] { border-color: var(--accent-red); }
 .input[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px rgba(212, 114, 122, 0.2); }
 
-/* ============================================
-   SELECT BOX & OPTION BOX - Custom Styled
-   ============================================ */
 select,
 select.input,
 .select {
@@ -1437,7 +1345,6 @@ select.input:disabled {
   background-color: var(--bg-elevated);
 }
 
-/* Options Dropdown */
 option,
 optgroup {
   font-family: var(--font-body) !important;
@@ -1481,9 +1388,6 @@ optgroup {
 .textarea::placeholder { color: var(--text-placeholder); }
 .textarea:disabled { background: var(--bg-elevated); opacity: 0.6; cursor: not-allowed; }
 
-/* ============================================
-   MESSAGES / CHAT
-   ============================================ */
 .message-row { display: flex; gap: 12px; align-items: flex-end; }
 .message-row.user { justify-content: flex-end; }
 .message-row.assistant { justify-content: flex-start; }
@@ -1537,9 +1441,6 @@ optgroup {
 .composer-hint { font-size: 11px; color: var(--text-placeholder); font-family: var(--font-body); }
 .composer-status { display: flex; align-items: center; gap: 6px; }
 
-/* ============================================
-   TABS
-   ============================================ */
 .tabs { display: flex; flex-direction: column; gap: 12px; }
 .tabs-list {
   display: flex;
@@ -1572,22 +1473,13 @@ optgroup {
 }
 .tab-content { flex: 1; font-size: 14px; font-family: var(--font-body); outline: none; }
 
-/* ============================================
-   SEPARATOR
-   ============================================ */
 .cane-separator { flex-shrink: 0; background: var(--border-subtle); }
 .cane-separator[data-orientation="horizontal"] { height: 1px; width: 100%; }
 .cane-separator[data-orientation="vertical"] { width: 1px; align-self: stretch; }
 
-/* ============================================
-   SCROLL AREA
-   ============================================ */
 .scroll-area { position: relative; overflow: hidden; }
 .scroll-area-viewport { width: 100%; height: 100%; border-radius: inherit; overflow-y: auto; overflow-x: hidden; }
 
-/* ============================================
-   AVATAR
-   ============================================ */
 .avatar {
   position: relative;
   display: flex;
@@ -1613,9 +1505,6 @@ optgroup {
   text-transform: uppercase;
 }
 
-/* ============================================
-   SHEET (MOBILE DRAWER)
-   ============================================ */
 .sheet-overlay {
   position: fixed;
   inset: 0;
@@ -1653,9 +1542,6 @@ optgroup {
   letter-spacing: 0.02em;
 }
 
-/* ============================================
-   NAV BUTTON GRID (MOBILE)
-   ============================================ */
 .nav-btn-grid {
   display: flex;
   flex-wrap: wrap;
@@ -1663,9 +1549,6 @@ optgroup {
 }
 .nav-btn-grid > * { flex: 1; min-width: 0; }
 
-/* ============================================
-   STATUS INDICATOR
-   ============================================ */
 .status-indicator {
   display: flex;
   align-items: center;
@@ -1683,9 +1566,6 @@ optgroup {
   border-color: var(--accent-green-border);
 }
 
-/* ============================================
-   DIVIDER LABEL
-   ============================================ */
 .divider-label-text {
   font-size: 10px;
   font-weight: 700;
@@ -1696,9 +1576,6 @@ optgroup {
   white-space: nowrap;
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
 @media (min-width: 640px) {
   .sm\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sm\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -1721,9 +1598,6 @@ optgroup {
   .xl\\:col-span-3 { grid-column: span 3 / span 3; }
 }
 
-/* ============================================
-   HOVER UTILITIES
-   ============================================ */
 .hover\\:bg-muted:hover { background: rgba(0, 204, 102, 0.08); }
 .hover\\:border-blue:hover { border-color: var(--accent-blue); }
 .hover\\:text-blue:hover { color: var(--accent-blue); }

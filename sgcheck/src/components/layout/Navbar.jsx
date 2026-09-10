@@ -31,7 +31,6 @@ export default function Navbar({
   return (
     <header className="top-navbar">
       <div className="site-container flex items-center justify-between gap-3 h-full">
-        {/* Left: Brand Logo */}
         <div
           className="flex items-center gap-2.5 shrink-0 cursor-pointer select-none"
           onClick={() => onTabChange("overview")}
@@ -47,7 +46,6 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Center: Segmented Nav Tabs */}
         <nav className="nav-tabs-container">
           {TABS.map((tab) => {
             const Icon = tab.icon
@@ -76,9 +74,7 @@ export default function Navbar({
           })}
         </nav>
 
-        {/* Right: Actions, Status & Theme */}
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Backend Live Health Pill */}
           <div
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border shrink-0 ${
               backendStatus === "connected"
@@ -107,7 +103,6 @@ export default function Navbar({
             </span>
           </div>
 
-          {/* AI Agronomist Button */}
           <button
             onClick={onOpenAiChat}
             className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-all shadow-sm shadow-amber-500/10 cursor-pointer shrink-0"
@@ -118,7 +113,6 @@ export default function Navbar({
             <span className="hidden sm:inline">Ask AI</span>
           </button>
 
-          {/* Theme Switcher */}
           <ThemeSwitcher />
         </div>
       </div>

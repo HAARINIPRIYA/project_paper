@@ -105,7 +105,6 @@ export default function FactorImpactCard({ impacts = [], title = "Agronomic Yiel
                 </div>
               </div>
 
-              {/* Progress bar visual */}
               <div style={{ height: "4px", width: "100%", background: "var(--bg-surface)", borderRadius: "2px", overflow: "hidden" }}>
                 <div
                   style={{

@@ -98,7 +98,6 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate, compa
         harvestDate
       )
 
-      // Concurrently infer soil chemistry & nutrient dosing
       let agroInference = null
       try {
         agroInference = await inferAgroDataFromCoordinates({
