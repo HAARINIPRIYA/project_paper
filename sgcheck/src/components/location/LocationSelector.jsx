@@ -8,8 +8,9 @@ import LocationConfirmation from "./LocationConfirmation"
 import LocationBot from "./LocationBot"
 import WeatherDataPanel from "@/components/weather/WeatherDataPanel"
 import { fetchWeatherAggregation } from "@/services/weatherApi"
+import { inferAgroDataFromCoordinates } from "@/services/agroInferenceService"
 
-function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
+function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate, compact = false }) {
   const [district, setDistrict] = useState("")
   const [placeName, setPlaceName] = useState("")
   const [latitude, setLatitude] = useState(null)
@@ -20,6 +21,7 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
   const [weatherData, setWeatherData] = useState(null)
   const [availableFeatures, setAvailableFeatures] = useState([])
   const [missingFeatures, setMissingFeatures] = useState([])
+  const [featureStatus, setFeatureStatus] = useState({})
   const [confirmStatus, setConfirmStatus] = useState("idle")
   const [weatherError, setWeatherError] = useState(null)
   const [activeTab, setActiveTab] = useState("manual")
@@ -33,6 +35,7 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
     setWeatherData(null)
     setAvailableFeatures([])
     setMissingFeatures([])
+    setFeatureStatus({})
     setConfirmStatus("idle")
     setWeatherError(null)
   }, [])
@@ -46,6 +49,7 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
     setWeatherData(null)
     setAvailableFeatures([])
     setMissingFeatures([])
+    setFeatureStatus({})
     setConfirmStatus("idle")
     setWeatherError(null)
   }, [])
@@ -69,6 +73,7 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
     setWeatherData(null)
     setAvailableFeatures([])
     setMissingFeatures([])
+    setFeatureStatus({})
     setConfirmStatus("idle")
     setWeatherError(null)
   }, [])
@@ -93,18 +98,36 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
         harvestDate
       )
 
-      if (result.success) {
+      // Concurrently infer soil chemistry & nutrient dosing
+      let agroInference = null
+      try {
+        agroInference = await inferAgroDataFromCoordinates({
+          latitude,
+          longitude,
+          plantingDate,
+          harvestDate,
+        })
+      } catch (err) {
+        console.warn("Agro inference in LocationSelector:", err)
+      }
+
+      if (result.success || agroInference?.success) {
         setWeatherData(result)
         setAvailableFeatures(result.available_features || [])
         setMissingFeatures(result.missing_features || [])
+        setFeatureStatus(result.feature_status || {})
         setConfirmStatus("confirmed")
 
         if (onWeatherDataReady) {
           onWeatherDataReady({
-            features: result.canesugar_features || {},
+            features: {
+              ...(result.canesugar_features || {}),
+              ...(agroInference?.inferredFields || {}),
+            },
             available: result.available_features || [],
             missing: result.missing_features || [],
-            location: result.location || {},
+            location: result.location || agroInference?.location || {},
+            agroInference,
           })
         }
       } else {
@@ -112,7 +135,6 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
         setConfirmStatus("error")
       }
     } catch (err) {
-      console.error("Weather fetch failed:", err)
       setWeatherError(
         err.message?.includes("timed out")
           ? "Environmental service timed out. Please try again."
@@ -126,27 +148,12 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
 
   return (
     <div
-      className="field-section location-section"
       style={{
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border-subtle)",
-        borderRadius: "var(--radius-sm)",
-        padding: "14px",
         display: "flex",
         flexDirection: "column",
-        gap: "12px",
+        gap: compact ? "10px" : "16px",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <MapPin className="size-3.5" style={{ color: "var(--accent-gold)" }} />
-        <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--accent-gold)" }}>
-          Field Location
-        </span>
-        <span style={{ fontSize: "9px", color: "var(--text-muted)", marginLeft: "auto" }}>
-          Step 1 of 3
-        </span>
-      </div>
-
       <div
         style={{
           display: "flex",
@@ -155,21 +162,22 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
           borderRadius: "var(--radius-sm)",
           background: "var(--bg-deep)",
           border: "1px solid var(--border-subtle)",
+          width: compact ? "100%" : "fit-content",
         }}
       >
         <button
           type="button"
           onClick={() => setActiveTab("manual")}
           style={{
-            flex: 1,
+            flex: compact ? 1 : "none",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "5px",
-            padding: "6px 10px",
+            padding: compact ? "5px 8px" : "7px 14px",
             borderRadius: "3px",
             border: "none",
-            fontSize: "11px",
+            fontSize: compact ? "10px" : "12px",
             fontWeight: 600,
             cursor: "pointer",
             transition: "all 150ms",
@@ -178,22 +186,22 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
             fontFamily: "var(--font-body)",
           }}
         >
-          <MapPin className="size-3" />
+          <MapPin className={compact ? "size-2.5" : "size-3"} />
           District & Map
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("bot")}
           style={{
-            flex: 1,
+            flex: compact ? 1 : "none",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "5px",
-            padding: "6px 10px",
+            padding: compact ? "5px 8px" : "7px 14px",
             borderRadius: "3px",
             border: "none",
-            fontSize: "11px",
+            fontSize: compact ? "10px" : "12px",
             fontWeight: 600,
             cursor: "pointer",
             transition: "all 150ms",
@@ -202,39 +210,45 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
             fontFamily: "var(--font-body)",
           }}
         >
-          <Bot className="size-3" />
+          <Bot className={compact ? "size-2.5" : "size-3"} />
           Paste Link / Coordinates
         </button>
       </div>
 
       {activeTab === "manual" && (
-        <>
-          <DistrictSelector value={district} onChange={handleDistrictChange} />
+        <div className={compact ? "flex flex-col gap-3" : "grid grid-cols-1 lg:grid-cols-12 gap-5 items-start w-full min-w-0"}>
+          <div className={compact ? "flex flex-col gap-2.5" : "lg:col-span-5 flex flex-col gap-3 min-w-0 w-full"}>
+            <DistrictSelector value={district} onChange={handleDistrictChange} compact={compact} />
 
-          <PlaceSearch
-            district={district}
-            onSelect={handlePlaceSelect}
-            disabled={!district}
-          />
+            <PlaceSearch
+              district={district}
+              onSelect={handlePlaceSelect}
+              disabled={!district}
+              compact={compact}
+            />
 
-          <FieldLocationMap
-            latitude={latitude}
-            longitude={longitude}
-            onMarkerMove={handleMarkerMove}
-            mapCenter={mapCenter}
-            mapZoom={mapZoom}
-          />
+            <CoordinateDisplay latitude={latitude} longitude={longitude} compact={compact} />
+          </div>
 
-          <CoordinateDisplay latitude={latitude} longitude={longitude} />
-        </>
+          <div className={compact ? "w-full" : "lg:col-span-7 min-w-0 w-full"}>
+            <FieldLocationMap
+              latitude={latitude}
+              longitude={longitude}
+              onMarkerMove={handleMarkerMove}
+              mapCenter={mapCenter}
+              mapZoom={mapZoom}
+              height={compact ? "180px" : "400px"}
+            />
+          </div>
+        </div>
       )}
 
       {activeTab === "bot" && (
-        <LocationBot onLocationDetected={handleBotLocation} />
+        <LocationBot onLocationDetected={handleBotLocation} compact={compact} />
       )}
 
       {(latitude != null && longitude != null) && (
-        <>
+        <div style={{ display: "flex", flexDirection: "column", gap: compact ? "8px" : "12px" }}>
           <LocationConfirmation
             latitude={latitude}
             longitude={longitude}
@@ -242,6 +256,7 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
             place={placeName}
             status={confirmStatus}
             onConfirm={handleConfirm}
+            compact={compact}
           />
 
           {(confirmStatus === "loading" || confirmStatus === "confirmed" || weatherError) && (
@@ -251,9 +266,11 @@ function LocationSelector({ onWeatherDataReady, plantingDate, harvestDate }) {
               error={weatherError}
               availableFeatures={availableFeatures}
               missingFeatures={missingFeatures}
+              featureStatus={featureStatus}
+              compact={compact}
             />
           )}
-        </>
+        </div>
       )}
     </div>
   )

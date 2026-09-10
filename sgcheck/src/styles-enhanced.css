@@ -2315,39 +2315,8 @@ optgroup {
 }
 
 /* ============================================
-   RESPONSIVE - Enhanced
+   
    ============================================ */
-@media (min-width: 640px) {
-  .sm\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .sm\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-
-@media (min-width: 768px) {
-  .md\\:flex { display: flex; }
-  .md\\:hidden { display: none; }
-  .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-
-@media (min-width: 1024px) {
-  .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .lg\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .lg\\:col-span-2 { grid-column: span 2 / span 2; }
-}
-
-@media (min-width: 1280px) {
-  .xl\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .xl\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .xl\\:col-span-2 { grid-column: span 2 / span 2; }
-  .xl\\:col-span-3 { grid-column: span 3 / span 3; }
-}
-
-/* ============================================
-   HOVER UTILITIES - Enhanced
-   ============================================ */
-.hover\\:bg-muted:hover { background: var(--accent-primary-bg); }
-.hover\\:border-blue:hover { border-color: var(--accent-primary); }
-.hover\\:text-blue:hover { color: var(--accent-primary); }
 
 @media (max-width: 767px) {
   body { background: var(--bg-deep); }

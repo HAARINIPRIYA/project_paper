@@ -1,6 +1,6 @@
 import { CheckCircle2, Loader2, MapPin, AlertTriangle } from "lucide-react"
 
-function LocationConfirmation({ latitude, longitude, district, place, status, onConfirm }) {
+function LocationConfirmation({ latitude, longitude, district, place, status, onConfirm, compact = false }) {
   const hasCoords = latitude != null && longitude != null
   const isConfirmed = status === "confirmed"
   const isLoading = status === "loading"
@@ -11,11 +11,11 @@ function LocationConfirmation({ latitude, longitude, district, place, status, on
       {hasCoords && (
         <div
           style={{
-            padding: "8px 10px",
-            borderRadius: "var(--radius-sm)",
-            background: "var(--bg-deep)",
-            border: "1px solid var(--border-subtle)",
-            fontSize: "11px",
+          padding: compact ? "6px 8px" : "8px 10px",
+          borderRadius: "var(--radius-sm)",
+          background: "var(--bg-deep)",
+          border: "1px solid var(--border-subtle)",
+          fontSize: compact ? "10px" : "11px",
             color: "var(--text-secondary)",
             display: "flex",
             flexDirection: "column",
@@ -53,9 +53,9 @@ function LocationConfirmation({ latitude, longitude, district, place, status, on
         disabled={!hasCoords || isLoading || isConfirmed}
         style={{
           width: "100%",
-          height: "42px",
+          height: compact ? "34px" : "42px",
           padding: "0 14px",
-          fontSize: "13px",
+          fontSize: compact ? "12px" : "13px",
           fontWeight: 600,
           fontFamily: "var(--font-body)",
           borderRadius: "var(--radius-sm)",

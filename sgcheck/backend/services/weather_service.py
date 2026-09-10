@@ -10,6 +10,15 @@ FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 ELEVATION_URL = "https://api.open-meteo.com/v1/elevation"
 
+ARCHIVE_DAILY_VARIABLES = [
+    "precipitation_sum",
+    "temperature_2m_max",
+    "temperature_2m_min",
+    "temperature_2m_mean",
+    "shortwave_radiation_sum",
+    "wind_speed_10m_max",
+]
+
 FORECAST_DAILY_VARIABLES = [
     "precipitation_sum",
     "temperature_2m_max",
@@ -25,14 +34,6 @@ FORECAST_DAILY_VARIABLES = [
     "soil_moisture_7_to_28cm",
     "soil_moisture_28_to_100cm",
     "soil_temperature_6cm",
-]
-
-ARCHIVE_DAILY_VARIABLES = [
-    "precipitation_sum",
-    "temperature_2m_max",
-    "temperature_2m_min",
-    "temperature_2m_mean",
-    "shortwave_radiation_sum",
 ]
 
 

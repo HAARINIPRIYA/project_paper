@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Calendar,
@@ -22,7 +22,6 @@ import {
   CloudRain,
   AlertTriangle,
   Award,
-  MapPin,
   CloudSun,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -31,8 +30,6 @@ import { Input } from "@/components/ui/input"
 import { predictAuto, predictEnsemble, predictWithModel, getPresets } from "@/lib/api"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ModelResults from "./ModelResults"
-import LocationSelector from "./location/LocationSelector"
-
 const MODEL_OPTIONS = [
   { value: "auto", label: "Auto (Best: CaneSugar v6)" },
   { value: "cane_sugar", label: "CaneSugar v6 (Ensemble)" },
@@ -159,7 +156,7 @@ const FIELD_META = {
 const CORE_FIELDS = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type"]
 const ADVANCED_FIELDS = ["Soil_Type", "Irrigation_Type", "Fertilizer_Type", "Nitrogen_kg_per_acre", "Potassium_kg_per_acre", "Phosphorus_kg_per_acre", "Soil_Moisture_%", "Soil_pH"]
 
-function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null, onEnsembleResult = null }) {
+function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null, onEnsembleResult = null, weatherFeatures = null, weatherLocation = null }) {
   const [formData, setFormData] = useState({
     Planting_Date: "2024-01-15",
     Harvesting_Date: "2024-11-30",
@@ -183,8 +180,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
   const [selectedModel, setSelectedModel] = useState("cane_sugar")
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [weatherFeatures, setWeatherFeatures] = useState(null)
-  const [weatherLocation, setWeatherLocation] = useState(null)
 
   // Fetch presets from API if available
   useEffect(() => {
@@ -236,11 +231,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
     onSubmit(formData)
     setIsSubmitting(false)
   }
-
-  const handleWeatherDataReady = useCallback((data) => {
-    setWeatherFeatures(data.features || {})
-    setWeatherLocation(data.location || {})
-  }, [])
 
   const buildFieldPayload = () => {
     const payload = {}
@@ -342,12 +332,6 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
           })}
         </div>
       </div>
-
-      <LocationSelector
-        onWeatherDataReady={handleWeatherDataReady}
-        plantingDate={formData.Planting_Date}
-        harvestDate={formData.Harvesting_Date}
-      />
 
       {weatherFeatures && (
         <div

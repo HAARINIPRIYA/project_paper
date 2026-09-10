@@ -830,16 +830,7 @@ def aggregate_weather_for_prediction(input_data: WeatherAggregateRequest):
             "canesugar_features": clean_features,
             "available_features": provenance.get("available_features", []),
             "missing_features": provenance.get("missing_features", []),
-            "weather_summary": {
-                "rainfall_mm": canesugar_features.get("Rainfall_Total_mm", 0),
-                "temperature_avg_c": canesugar_features.get("Temp_Avg_C", 0),
-                "temperature_max_c": canesugar_features.get("Temp_Max_C", 0),
-                "temperature_min_c": canesugar_features.get("Temp_Min_C", 0),
-                "humidity_pct": canesugar_features.get("Humidity_%", 0),
-                "soil_moisture_pct": canesugar_features.get("Soil_Moisture_%", 0),
-                "evapotranspiration_mm_day": canesugar_features.get("Evapotranspiration_mm_day", 0),
-                "soil_temperature_c": canesugar_features.get("soil_temperature_c", None),
-            },
+            "feature_status": provenance.get("feature_status", {}),
             "provenance": provenance,
             "source": "Open-Meteo",
             "status": "success",
@@ -868,6 +859,24 @@ def parse_location(input_data: ParseLocationRequest):
     text = input_data.text.strip()
     if not text:
         raise HTTPException(status_code=400, detail="Text input is required.")
+
+    # Degree-Minute-Second (DMS) format: e.g. 11°04'58.3"N 77°59'30.9"E
+    dms_match = re.search(
+        r'(-?\d{1,3})[°\s]\s*(\d{1,2})[\'′\s]\s*([\d.]+)["″]?\s*([NSEW])\s*[,;\s]+\s*(-?\d{1,3})[°\s]\s*(\d{1,2})[\'′\s]\s*([\d.]+)["″]?\s*([NSEW])',
+        text,
+        re.IGNORECASE,
+    )
+    if dms_match:
+        def to_dec(d, m, s, direction):
+            val = float(d) + float(m) / 60.0 + float(s) / 3600.0
+            if direction.upper() in ['S', 'W']:
+                val = -val
+            return val
+
+        lat = to_dec(dms_match.group(1), dms_match.group(2), dms_match.group(3), dms_match.group(4))
+        lon = to_dec(dms_match.group(5), dms_match.group(6), dms_match.group(7), dms_match.group(8))
+        if -90 <= lat <= 90 and -180 <= lon <= 180:
+            return {"latitude": round(lat, 6), "longitude": round(lon, 6), "format": "DMS"}
 
     google_maps_q = re.search(r'(?:https?://)?(?:www\.)?google\.com/maps.*?[?&](?:q|query|center)=(-?\d+\.?\d*),\s*(-?\d+\.?\d*)', text, re.IGNORECASE)
     if google_maps_q:

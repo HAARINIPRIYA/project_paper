@@ -74,7 +74,7 @@ function DraggableMarker({ position, onMove }) {
   )
 }
 
-function FieldLocationMap({ latitude, longitude, onMarkerMove, mapCenter, mapZoom }) {
+function FieldLocationMap({ latitude, longitude, onMarkerMove, mapCenter, mapZoom, height = "300px" }) {
   const center = useMemo(() => {
     if (latitude && longitude) return [latitude, longitude]
     if (mapCenter) return mapCenter
@@ -96,7 +96,7 @@ function FieldLocationMap({ latitude, longitude, onMarkerMove, mapCenter, mapZoo
     <div
       style={{
         width: "100%",
-        height: "300px",
+        height: height,
         borderRadius: "var(--radius-sm)",
         overflow: "hidden",
         border: "1px solid var(--border-default)",

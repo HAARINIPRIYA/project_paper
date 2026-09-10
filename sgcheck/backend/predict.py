@@ -159,17 +159,10 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
         df.drop(TARGET, axis=1, inplace=True)
 
     # Fill basic numerics with default realistic values if absent
-    defaults = {
+    agronomic_defaults = {
         "Nitrogen_kg_per_acre": 150.0,
         "Phosphorus_kg_per_acre": 60.0,
         "Potassium_kg_per_acre": 100.0,
-        "Soil_Moisture_%": 25.0,
-        "Temp_Avg_C": 26.0,
-        "Temp_Max_C": 32.0,
-        "Temp_Min_C": 20.0,
-        "Rainfall_Total_mm": 1200.0,
-        "Rainfall_Seasonal_mm": 800.0,
-        "Evapotranspiration_mm_day": 4.5,
         "Soil_pH": 7.2,
         "Organic_Carbon_%": 0.8,
         "Water_Quantity_liters_per_acre": 1200.0,
@@ -184,7 +177,7 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
         "Silt_%": 35.0,
         "Clay_%": 30.0,
     }
-    for k, v in defaults.items():
+    for k, v in agronomic_defaults.items():
         if k in df.columns:
             df[k] = df[k].fillna(v)
 
@@ -288,6 +281,42 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
         df[col] = df[col].fillna(0.0)
 
     return df
+
+
+REQUIRED_ENVIRONMENTAL_FEATURES = [
+    "Rainfall_Total_mm",
+    "Rainfall_Seasonal_mm",
+    "Temp_Avg_C",
+    "Temp_Max_C",
+    "Temp_Min_C",
+    "Humidity_%",
+    "Solar_Radiation_MJ_m2_day",
+    "Wind_Speed_kmph",
+    "Evapotranspiration_mm_day",
+    "Dew_Point_C",
+    "Heat_Stress_Days",
+    "Frost_Days",
+]
+
+OPTIONAL_ENVIRONMENTAL_FEATURES = [
+    "Soil_Moisture_%",
+    "Altitude_m",
+]
+
+
+def validate_prediction_input(data: dict) -> dict:
+    result = {"valid": True, "missing_required": [], "missing_optional": [], "warnings": []}
+    for feat in REQUIRED_ENVIRONMENTAL_FEATURES:
+        val = data.get(feat)
+        if val is None or val == "" or (isinstance(val, (int, float)) and val == 0 and feat not in ["Heat_Stress_Days", "Frost_Days"]):
+            result["missing_required"].append(feat)
+            result["valid"] = False
+    for feat in OPTIONAL_ENVIRONMENTAL_FEATURES:
+        val = data.get(feat)
+        if val is None or val == "" or (isinstance(val, (int, float)) and val == 0):
+            result["missing_optional"].append(feat)
+            result["warnings"].append(f"{feat} is not provided - model will use 0")
+    return result
 
 
 def calculate_factor_impacts(data: dict, predicted_yield: float) -> List[Dict]:

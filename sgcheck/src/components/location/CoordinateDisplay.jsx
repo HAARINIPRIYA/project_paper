@@ -1,6 +1,6 @@
 import { Crosshair } from "lucide-react"
 
-function CoordinateDisplay({ latitude, longitude }) {
+function CoordinateDisplay({ latitude, longitude, compact = false }) {
   const hasCoords = latitude != null && longitude != null
 
   return (
@@ -8,8 +8,8 @@ function CoordinateDisplay({ latitude, longitude }) {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "12px",
-        padding: "10px 12px",
+        gap: compact ? "8px" : "12px",
+        padding: compact ? "8px 10px" : "10px 12px",
         borderRadius: "var(--radius-sm)",
         background: hasCoords ? "rgba(212, 168, 67, 0.06)" : "var(--bg-deep)",
         border: `1px solid ${hasCoords ? "rgba(212, 168, 67, 0.2)" : "var(--border-subtle)"}`,
@@ -26,7 +26,7 @@ function CoordinateDisplay({ latitude, longitude }) {
           </div>
           <div
             style={{
-              fontSize: "14px",
+              fontSize: compact ? "12px" : "14px",
               fontWeight: 700,
               fontFamily: "var(--font-mono)",
               color: hasCoords ? "var(--text-primary)" : "var(--text-muted)",
@@ -43,7 +43,7 @@ function CoordinateDisplay({ latitude, longitude }) {
           </div>
           <div
             style={{
-              fontSize: "14px",
+              fontSize: compact ? "12px" : "14px",
               fontWeight: 700,
               fontFamily: "var(--font-mono)",
               color: hasCoords ? "var(--text-primary)" : "var(--text-muted)",

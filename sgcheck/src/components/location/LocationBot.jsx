@@ -8,7 +8,7 @@ const SAMPLE_PROMPTS = [
   "Paste any map URL (Google, OSM, Bing)",
 ]
 
-function LocationBot({ onLocationDetected }) {
+function LocationBot({ onLocationDetected, compact = false }) {
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState([
     {
@@ -116,7 +116,7 @@ function LocationBot({ onLocationDetected }) {
           display: "flex",
           alignItems: "center",
           gap: "6px",
-          padding: "10px 14px",
+          padding: compact ? "8px 10px" : "10px 14px",
           borderBottom: "1px solid var(--border-subtle)",
           background: "var(--bg-card)",
         }}
@@ -135,7 +135,7 @@ function LocationBot({ onLocationDetected }) {
           <Bot className="size-3" style={{ color: "#fff" }} />
         </div>
         <div>
-          <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>
+          <div style={{ fontSize: compact ? "11px" : "12px", fontWeight: 700, color: "var(--text-primary)" }}>
             Location Bot
           </div>
           <div style={{ fontSize: "9px", color: "var(--text-muted)" }}>
@@ -148,12 +148,12 @@ function LocationBot({ onLocationDetected }) {
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "10px 12px",
+          padding: compact ? "8px 10px" : "10px 12px",
           display: "flex",
           flexDirection: "column",
           gap: "8px",
-          maxHeight: "260px",
-          minHeight: "140px",
+          maxHeight: compact ? "180px" : "260px",
+          minHeight: compact ? "100px" : "140px",
         }}
       >
         {messages.map((msg, i) => (

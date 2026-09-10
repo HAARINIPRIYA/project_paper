@@ -28,6 +28,7 @@ import {
   Copy,
   Check,
   RotateCcw,
+  MapPin,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -40,17 +41,20 @@ import ThemeSwitcher from "@/components/ui/ThemeSwitcher"
 import GPSForm from "./components/GPSForm"
 import UploadZone from "./components/UploadZone"
 import DashboardPage from "./pages/DashboardPage"
+import LocationSelector from "./components/location/LocationSelector"
 import PredictionHero from "./components/PredictionHero"
 import HistoryPage from "./pages/HistoryPage"
 import ModelSelector from "./components/ModelSelector"
 import ToastNotification from "./components/ToastNotification"
 import { useToast } from "./hooks/useToast"
 import { predictAuto, predictEnsemble } from "./lib/api"
+import { fetchWeatherAggregation } from "./services/weatherApi"
 import { sendChatMessage, parseStreamingResponse, SYSTEM_PROMPT, extractFieldData } from "./lib/aiChat"
 import MarkdownRenderer from "./components/MarkdownRenderer"
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "location", label: "Field Location", icon: MapPin },
   { id: "analysis", label: "Analysis", icon: MessageSquareText },
 ]
 
@@ -191,6 +195,8 @@ function Dashboard({
   const [selectedModel, setSelectedModel] = useState(null)
   const [isSelectingModel, setIsSelectingModel] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
+  const [weatherFeatures, setWeatherFeatures] = useState(null)
+  const [weatherLocation, setWeatherLocation] = useState(null)
 
   const handleCopyMessage = (id, content) => {
     navigator.clipboard.writeText(content)
@@ -207,15 +213,18 @@ function Dashboard({
   const conversationsRef = useRef(conversations)
   const availableModelsRef = useRef(availableModels)
   const backendStatusRef = useRef(backendStatus)
+  const weatherFeaturesRef = useRef(weatherFeatures)
+  const weatherLocationRef = useRef(weatherLocation)
   const onPredictionResultRef = useRef(onPredictionResult)
   const onEnsembleResultRef = useRef(onEnsembleResult)
 
-  // Keep refs in sync
   useEffect(() => { gpsDataRef.current = gpsData }, [gpsData])
   useEffect(() => { activeChatIdRef.current = activeChatId }, [activeChatId])
   useEffect(() => { conversationsRef.current = conversations }, [conversations])
   useEffect(() => { availableModelsRef.current = availableModels }, [availableModels])
   useEffect(() => { backendStatusRef.current = backendStatus }, [backendStatus])
+  useEffect(() => { weatherFeaturesRef.current = weatherFeatures }, [weatherFeatures])
+  useEffect(() => { weatherLocationRef.current = weatherLocation }, [weatherLocation])
   useEffect(() => { onPredictionResultRef.current = onPredictionResult }, [onPredictionResult])
   useEffect(() => { onEnsembleResultRef.current = onEnsembleResult }, [onEnsembleResult])
 
@@ -267,6 +276,20 @@ function Dashboard({
   const hasFieldData = gpsData !== null
   const hasImage = uploadedImage !== null
   const isBackendReady = backendStatus === "connected"
+
+  const handleWeatherDataReady = useCallback((data) => {
+    setWeatherFeatures(data.features || null)
+    setWeatherLocation(data.location || null)
+    if (data.features && Object.keys(data.features).length > 0) {
+      const fieldPayload = { ...gpsData }
+      for (const [k, v] of Object.entries(data.features)) {
+        if (v != null && v !== 0 && v !== "") fieldPayload[k] = v
+      }
+      if (data.location?.latitude) fieldPayload.latitude = data.location.latitude
+      if (data.location?.longitude) fieldPayload.longitude = data.location.longitude
+      onGPSSubmit(fieldPayload)
+    }
+  }, [gpsData, onGPSSubmit])
 
   // --- Conversation Management ---
   function createNewConversation() {
@@ -474,29 +497,56 @@ To get started, enter your field details in the **Tools** panel (right side), th
         const isPredictionQuery = /predict|yield|cane|forecast|estimate|run|production|analysis|recommend/i.test(text)
         if ((isPredictionQuery || hasFieldDataInMsg) && (currentGps || hasFieldDataInMsg)) {
           const fieldData = {}
-          const backendFields = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type", "Soil_Type", "Irrigation_Type", "Fertilizer_Type"]
-          // First try saved gpsData
+          const backendFields = ["Planting_Date", "Harvesting_Date", "Variety", "Crop_Type", "Soil_Type", "Irrigation_Type", "Fertilizer_Type", "Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre", "Soil_pH"]
           if (currentGps) {
             for (const key of backendFields) {
-              if (currentGps[key] && currentGps[key].trim() !== "") {
+              if (currentGps[key] && String(currentGps[key]).trim() !== "") {
                 fieldData[key] = currentGps[key]
               }
             }
+            if (currentGps["Soil_Moisture_%"] && String(currentGps["Soil_Moisture_%"]).trim() !== "") {
+              fieldData["Soil_Moisture_%"] = currentGps["Soil_Moisture_%"]
+            }
           }
-          // If no saved data, parse field data from the user's chat message using shared helper
           if (Object.keys(fieldData).length === 0 && hasFieldDataInMsg) {
             const extracted = extractFieldData(text)
             if (extracted) Object.assign(fieldData, extracted)
           }
           if (Object.keys(fieldData).length > 0) {
+            let enrichedData = { ...fieldData }
+            const currentWeather = weatherFeaturesRef.current
+            const currentLoc = weatherLocationRef.current
+            const plantingDate = fieldData.Planting_Date || currentGps?.Planting_Date
+            const harvestDate = fieldData.Harvesting_Date || currentGps?.Harvesting_Date
+            if (currentWeather && Object.keys(currentWeather).length > 0) {
+              for (const [k, v] of Object.entries(currentWeather)) {
+                if (v != null && v !== 0 && v !== "") enrichedData[k] = v
+              }
+              if (currentLoc?.latitude) enrichedData.latitude = currentLoc.latitude
+              if (currentLoc?.longitude) enrichedData.longitude = currentLoc.longitude
+            } else if (currentGps?.latitude && currentGps?.longitude && plantingDate && harvestDate) {
+              try {
+                const weatherResult = await fetchWeatherAggregation(
+                  currentGps.latitude, currentGps.longitude,
+                  plantingDate, harvestDate
+                )
+                if (weatherResult?.success && weatherResult.canesugar_features) {
+                  for (const [k, v] of Object.entries(weatherResult.canesugar_features)) {
+                    if (v != null && v !== 0 && v !== "") enrichedData[k] = v
+                  }
+                  enrichedData.latitude = currentGps.latitude
+                  enrichedData.longitude = currentGps.longitude
+                }
+              } catch {}
+            }
             try {
-              const ensemble = await predictEnsemble([fieldData])
+              const ensemble = await predictEnsemble([enrichedData])
               if (ensemble && ensemble.predictions?.[0] !== undefined) {
                 onEnsembleResultRef.current(ensemble)
               }
             } catch {
               try {
-                const auto = await predictAuto(fieldData)
+                const auto = await predictAuto(enrichedData)
                 if (auto && auto.predictions?.[0] !== undefined) {
                   onPredictionResultRef.current(auto)
                 }
@@ -594,10 +644,16 @@ To get started, enter your field details in the **Tools** panel (right side), th
       {/* Field Details */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <span className="divider-label-text">Field Details</span>
+          <span className="divider-label-text">Crop & Soil</span>
           <Badge variant="outline" className="text-[9px]">Optional</Badge>
         </div>
-        <GPSForm onSubmit={onGPSSubmit} gpsData={gpsData} availableModels={availableModels} />
+        <GPSForm
+          onSubmit={onGPSSubmit}
+          gpsData={gpsData}
+          availableModels={availableModels}
+          weatherFeatures={weatherFeatures}
+          weatherLocation={weatherLocation}
+        />
       </div>
 
       {/* Model Performance */}
@@ -805,7 +861,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                 <span onClick={() => setView("dashboard")}>CaneSense</span>
                 <ChevronRight className="chevron" size={12} />
                 <span style={{ color: "var(--text-primary)", cursor: "default" }}>
-                  {view === "dashboard" ? "Dashboard" : view === "history" ? "Prediction History" : showChat ? "AI Assistant" : "Dashboard"}
+                  {view === "dashboard" ? "Dashboard" : view === "location" ? "Field Location" : view === "history" ? "Prediction History" : showChat ? "AI Assistant" : "Dashboard"}
                 </span>
               </div>
             </div>
@@ -836,6 +892,31 @@ To get started, enter your field details in the **Tools** panel (right side), th
                 <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                   <div className="main-content">
                     <DashboardPage uploadedImage={uploadedImage} gpsData={gpsData} availableModels={availableModels} modelMetrics={modelMetrics} trainingSummary={trainingSummary} backendStatus={backendStatus} predictionResult={predictionResult} ensembleResult={ensembleResult} />
+                  </div>
+                </motion.div>
+              ) : view === "location" ? (
+                <motion.div key="location" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                  <div className="main-content" style={{ maxWidth: "960px", margin: "0 auto", padding: "24px 28px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+                      <div style={{ width: "36px", height: "36px", borderRadius: "var(--radius-md)", background: "rgba(212, 168, 67, 0.12)", display: "grid", placeItems: "center" }}>
+                        <MapPin className="size-5" style={{ color: "var(--accent-gold)" }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "18px", fontWeight: 700, fontFamily: "var(--font-heading)", color: "var(--text-primary)" }}>Field Location</div>
+                        <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>Select your field on the map to auto-fetch environmental data</div>
+                      </div>
+                      {weatherFeatures && (
+                        <Badge variant="green" className="text-[10px]" style={{ marginLeft: "auto" }}>
+                          <CheckCircle2 className="size-2.5" style={{ marginRight: "3px" }} />
+                          Weather data linked
+                        </Badge>
+                      )}
+                    </div>
+                    <LocationSelector
+                      onWeatherDataReady={handleWeatherDataReady}
+                      plantingDate={gpsData?.Planting_Date || "2024-01-15"}
+                      harvestDate={gpsData?.Harvesting_Date || "2024-11-30"}
+                    />
                   </div>
                 </motion.div>
               ) : view === "history" ? (

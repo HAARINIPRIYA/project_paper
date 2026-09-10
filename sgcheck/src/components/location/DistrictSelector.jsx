@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { ChevronRight, MapPin } from "lucide-react"
 import { DISTRICTS } from "@/services/locationApi"
 
-function DistrictSelector({ value, onChange }) {
+function DistrictSelector({ value, onChange, compact = false }) {
   const [isOpen, setIsOpen] = useState(false)
   const [search, setSearch] = useState("")
   const ref = useRef(null)
@@ -48,9 +48,9 @@ function DistrictSelector({ value, onChange }) {
         onClick={() => setIsOpen(!isOpen)}
         style={{
           width: "100%",
-          height: "42px",
+          height: compact ? "34px" : "42px",
           padding: "0 10px",
-          fontSize: "13px",
+          fontSize: compact ? "12px" : "13px",
           fontFamily: "var(--font-body)",
           color: selected ? "var(--text-primary)" : "var(--text-muted)",
           background: "var(--bg-input)",

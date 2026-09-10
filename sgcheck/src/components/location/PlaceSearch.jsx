@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { Search, MapPin, Loader2 } from "lucide-react"
 import { searchPlaces } from "@/services/locationApi"
 
-function PlaceSearch({ district, onSelect, disabled }) {
+function PlaceSearch({ district, onSelect, disabled, compact = false }) {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState([])
   const [isOpen, setIsOpen] = useState(false)
@@ -94,9 +94,9 @@ function PlaceSearch({ district, onSelect, disabled }) {
           disabled={disabled}
           style={{
             width: "100%",
-            height: "42px",
+            height: compact ? "34px" : "42px",
             padding: "0 32px 0 10px",
-            fontSize: "13px",
+            fontSize: compact ? "12px" : "13px",
             fontFamily: "var(--font-body)",
             color: "var(--text-primary)",
             background: "var(--bg-input)",
