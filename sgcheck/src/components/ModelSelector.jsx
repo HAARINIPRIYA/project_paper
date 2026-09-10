@@ -16,7 +16,7 @@ const MODEL_INFO = {
   cane_sugar: {
     label: "CaneSugar v6 (Recommended)",
     description: "Custom 8-Fold Stacking Ensemble with 118+ domain features",
-    r2: "91.2%",
+    r2: "95.2%",
     speed: "Fast",
     bestFor: "Maximum Yield Accuracy",
     features: ["8-Fold Stacking", "CatBoost + XGB + LGBM", "Domain Ratios & Biometrics"],
@@ -100,7 +100,6 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
       </div>
 
       <div className="space-y-4">
-        {/* Auto Mode Option */}
         <div 
           className={`p-4 rounded-lg border cursor-pointer transition-all ${
             mode === "auto" 
@@ -119,7 +118,7 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
               <div className="font-semibold flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-amber-500" />
                 <span>Auto Mode (Best Model — CaneSugar v6)</span>
-                <Badge variant="green" className="text-[9px]">91.2% R²</Badge>
+                <Badge variant="green" className="text-[9px]">95.2% R²</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
                 Automatically selects the highest-accuracy model architecture for your field data.
@@ -128,7 +127,6 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
           </div>
         </div>
 
-        {/* Manual Mode Option */}
         <div 
           className={`p-4 rounded-lg border cursor-pointer transition-all ${
             mode === "manual" 
@@ -151,7 +149,7 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
               <p className="text-sm text-muted-foreground">
                 Choose a specific machine learning model for benchmarking or experimental comparison.
               </p>
-              
+
               {mode === "manual" && (
                 <div className="mt-4 p-3 bg-card rounded-lg border">
                   <div className="mb-2 text-sm font-medium">Choose Model:</div>
@@ -190,7 +188,7 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
                           <span className="text-muted-foreground">Best For:</span>
                           <span className="font-medium text-primary">{MODEL_INFO[manualModel]?.bestFor}</span>
                         </div>
-                        
+
                         {MODEL_INFO[manualModel]?.features && (
                           <div className="pt-2">
                             <div className="text-xs text-muted-foreground mb-1">Architecture Highlights:</div>

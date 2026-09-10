@@ -1,4 +1,16 @@
-@import "./styles.css";
-@import "./styles-enhanced.css";
+@import "tailwindcss";
+
 @import "./dark-mode.css";
 @import "./animations.css";
+@import "./styles-redesign.css";
+
+html, body, #root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}

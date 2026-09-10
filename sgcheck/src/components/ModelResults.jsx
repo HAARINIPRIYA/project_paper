@@ -86,7 +86,6 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
         transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
         className="flex flex-col gap-4"
       >
-        {/* Main Result Card */}
         <div
           className="aws-card prediction-hero-card"
           style={{
@@ -152,12 +151,10 @@ function ModelResults({ result, isEnsemble = false, bestModel = null }) {
           </div>
         </div>
 
-        {/* Factor Impact Breakdown */}
         {factor_impacts && factor_impacts.length > 0 && (
           <FactorImpactCard impacts={factor_impacts} />
         )}
 
-        {/* Model Breakdown for Ensemble */}
         {isEnsemble && sortedIndividual.length > 0 && (
           <div className="aws-card">
             <div className="aws-card-header">

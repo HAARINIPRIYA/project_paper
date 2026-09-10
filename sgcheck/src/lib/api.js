@@ -1,7 +1,5 @@
 
-
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000"
-
 
 async function request(path, options = {}) {
   const url = `${API_BASE}${path}`
@@ -16,21 +14,17 @@ async function request(path, options = {}) {
   return res.json()
 }
 
-
 export async function getHealth() {
   return request("/health")
 }
-
 
 export async function getModels() {
   return request("/models")
 }
 
-
 export async function getModelFeatures(modelName) {
   return request(`/features/${modelName}`)
 }
-
 
 export async function predictWithModel(modelName, fieldData) {
   return request(`/predict/${modelName}`, {
@@ -39,14 +33,12 @@ export async function predictWithModel(modelName, fieldData) {
   })
 }
 
-
 export async function predictAuto(fieldData) {
   return request("/predict", {
     method: "POST",
     body: JSON.stringify(fieldData),
   })
 }
-
 
 export async function predictEnsemble(records, weights = null) {
   const body = { records }
@@ -56,7 +48,6 @@ export async function predictEnsemble(records, weights = null) {
     body: JSON.stringify(body),
   })
 }
-
 
 export async function getPresets() {
   return request("/presets")
@@ -69,4 +60,3 @@ export async function getHistory() {
 export async function clearHistoryApi() {
   return request("/history", { method: "DELETE" })
 }
-

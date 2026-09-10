@@ -1,14 +1,9 @@
 
-
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
-
-
-
-
 const components = {
-  
+
   h2: ({ children, ...props }) => (
     <h2
       style={{
@@ -45,7 +40,6 @@ const components = {
     )
   },
 
-  
   p: ({ children, ...props }) => (
     <p
       style={{
@@ -60,12 +54,11 @@ const components = {
     </p>
   ),
 
-  
   strong: ({ children, ...props }) => {
     const text = typeof children === 'string' ? children : ''
     const isYieldValue = text.includes('Quintal')
     if (isYieldValue) {
-      
+
       return (
         <strong
           style={{
@@ -98,7 +91,6 @@ const components = {
     )
   },
 
-  
   ul: ({ children, ...props }) => (
     <ul
       style={{
@@ -133,7 +125,6 @@ const components = {
     </li>
   ),
 
-  
   blockquote: ({ children, ...props }) => (
     <blockquote
       style={{
@@ -152,7 +143,6 @@ const components = {
     </blockquote>
   ),
 
-  
   code: ({ inline, children, ...props }) => {
     if (inline) {
       return (
@@ -188,7 +178,6 @@ const components = {
     )
   },
 
-  
   table: ({ children, ...props }) => (
     <div style={{ overflow: "auto", margin: "8px 0" }}>
       <table
@@ -251,7 +240,6 @@ const components = {
     </td>
   ),
 
-  
   hr: ({ ...props }) => (
     <hr
       style={{
@@ -263,7 +251,6 @@ const components = {
     />
   ),
 
-  
   a: ({ children, href, ...props }) => (
     <a
       href={href}
@@ -280,13 +267,8 @@ const components = {
     </a>
   ),
 
-  
   br: ({ ...props }) => <br style={{ lineHeight: 1.8 }} {...props} />,
 }
-
-
-
-
 
 export default function MarkdownRenderer({ content }) {
   if (!content) return null

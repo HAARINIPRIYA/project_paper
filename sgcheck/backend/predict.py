@@ -10,7 +10,6 @@ import pandas as pd
 from typing import Dict, List, Optional, Union
 import joblib
 
-# Ensure current dir is in sys.path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
@@ -47,7 +46,6 @@ ALL_MODELS = [
     "elastic_net",
 ]
 
-
 def load_model(model_name: str):
     """Load a model + metadata dict from backend/models/{name}.joblib."""
     path = os.path.join(MODELS_DIR, f"{model_name}.joblib")
@@ -55,20 +53,17 @@ def load_model(model_name: str):
         raise FileNotFoundError(f"Model not found: {path}. Run train.py first.")
     return joblib.load(path)
 
-
 def load_encoders():
     path = os.path.join(MODELS_DIR, "encoders.joblib")
     if os.path.exists(path):
         return joblib.load(path)
     return {}
 
-
 def load_cane_sugar_encoders():
     path = os.path.join(MODELS_DIR, "cane_sugar_encoders.joblib")
     if os.path.exists(path):
         return joblib.load(path)
     return {}
-
 
 def prepare_input(data: dict) -> pd.DataFrame:
     """
@@ -103,7 +98,6 @@ def prepare_input(data: dict) -> pd.DataFrame:
 
     return df
 
-
 def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
     """
     Prepare input for CaneSugar v6 model with 130+ feature domain engineering.
@@ -112,7 +106,14 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
     new_cols = {}
     eps = 1e-6
 
-    # 1. Date features
+    for col in df.columns:
+        if df[col].dtype == object:
+            try:
+                converted = pd.to_numeric(df[col])
+                df[col] = converted
+            except (ValueError, TypeError):
+                pass
+
     for col in ["Planting_Date", "Harvesting_Date"]:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors="coerce")
@@ -150,18 +151,10 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
     if TARGET in df.columns:
         df.drop(TARGET, axis=1, inplace=True)
 
-    # Fill basic numerics with default realistic values if absent
-    defaults = {
+    agronomic_defaults = {
         "Nitrogen_kg_per_acre": 150.0,
         "Phosphorus_kg_per_acre": 60.0,
         "Potassium_kg_per_acre": 100.0,
-        "Soil_Moisture_%": 25.0,
-        "Temp_Avg_C": 26.0,
-        "Temp_Max_C": 32.0,
-        "Temp_Min_C": 20.0,
-        "Rainfall_Total_mm": 1200.0,
-        "Rainfall_Seasonal_mm": 800.0,
-        "Evapotranspiration_mm_day": 4.5,
         "Soil_pH": 7.2,
         "Organic_Carbon_%": 0.8,
         "Water_Quantity_liters_per_acre": 1200.0,
@@ -176,7 +169,7 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
         "Silt_%": 35.0,
         "Clay_%": 30.0,
     }
-    for k, v in defaults.items():
+    for k, v in agronomic_defaults.items():
         if k in df.columns:
             df[k] = df[k].fillna(v)
 
@@ -185,7 +178,6 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
 
     domain_dict = {}
 
-    # Nutrient domain features
     if all(c in df.columns for c in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre"]):
         npk_tot = df["Nitrogen_kg_per_acre"] + df["Phosphorus_kg_per_acre"] + df["Potassium_kg_per_acre"]
         domain_dict["NPK_Total"] = npk_tot
@@ -201,7 +193,6 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
             domain_dict["N_x_Moisture"] = df["Nitrogen_kg_per_acre"] * df["Soil_Moisture_%"]
             domain_dict["K_x_Moisture"] = df["Potassium_kg_per_acre"] * df["Soil_Moisture_%"]
 
-    # Daily consumption rates
     if "Crop_Duration_Days" in df.columns:
         dur = df["Crop_Duration_Days"].clip(lower=30)
         if "Nitrogen_kg_per_acre" in df.columns:
@@ -217,7 +208,6 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
         if "Rainfall_Total_mm" in df.columns:
             domain_dict["Rain_per_Day"] = df["Rainfall_Total_mm"] / dur
 
-    # Water & Weather
     if "Rainfall_Total_mm" in df.columns and "Evapotranspiration_mm_day" in df.columns:
         domain_dict["Moisture_Deficit"] = df["Rainfall_Total_mm"] - (df["Evapotranspiration_mm_day"] * 30.0)
         domain_dict["Rain_ETo_Ratio"] = df["Rainfall_Total_mm"] / (df["Evapotranspiration_mm_day"] * 30.0 + eps)
@@ -231,13 +221,11 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
         domain_dict["OC_pH_Ratio"] = df["Organic_Carbon_%"] / (df["Soil_pH"] + eps)
         domain_dict["OC_x_pH"] = df["Organic_Carbon_%"] * df["Soil_pH"]
 
-    # Soil physics
     if all(c in df.columns for c in ["Sand_%", "Silt_%", "Clay_%"]):
         domain_dict["Soil_Texture_Sum"] = df["Sand_%"] + df["Silt_%"] + df["Clay_%"]
         domain_dict["Sand_Clay_Ratio"] = df["Sand_%"] / (df["Clay_%"] + eps)
         domain_dict["Silt_Clay_Ratio"] = df["Silt_%"] / (df["Clay_%"] + eps)
 
-    # Biometrics & Stalk Sugar Geometry
     if "Cane_Height_cm" in df.columns and "Cane_Diameter_cm" in df.columns:
         r = df["Cane_Diameter_cm"] / 2.0
         stalk_vol = np.pi * (r ** 2) * df["Cane_Height_cm"]
@@ -247,13 +235,12 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
             domain_dict["Biomass_Index"] = biomass
             if "Plant_Density" in df.columns:
                 domain_dict["Total_Field_Biomass_Index"] = biomass * (df["Plant_Density"] / 1000.0)
-                
+
     if "Brix_Value" in df.columns and "Cane_Height_cm" in df.columns:
         domain_dict["Brix_x_Height"] = df["Brix_Value"] * df["Cane_Height_cm"]
         if "Cane_Stalk_Volume_Index" in domain_dict:
             domain_dict["Sugar_Yield_Index"] = domain_dict["Cane_Stalk_Volume_Index"] * (df["Brix_Value"] / 100.0)
 
-    # Polynomials & Log transforms
     for col in ["Nitrogen_kg_per_acre", "Phosphorus_kg_per_acre", "Potassium_kg_per_acre", 
                 "Soil_Moisture_%", "Rainfall_Total_mm", "Temp_Avg_C", "Water_Quantity_liters_per_acre", "Fertilizer_Quantity"]:
         if col in df.columns:
@@ -263,7 +250,6 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
     domain_df = pd.DataFrame(domain_dict, index=df.index)
     df = pd.concat([df, domain_df], axis=1)
 
-    # Label encode categoricals
     cane_encoders = load_cane_sugar_encoders()
     cat_cols = df.select_dtypes(include=["object"]).columns
     for col in cat_cols:
@@ -281,12 +267,44 @@ def prepare_input_cane_sugar(data: dict) -> pd.DataFrame:
 
     return df
 
+REQUIRED_ENVIRONMENTAL_FEATURES = [
+    "Rainfall_Total_mm",
+    "Rainfall_Seasonal_mm",
+    "Temp_Avg_C",
+    "Temp_Max_C",
+    "Temp_Min_C",
+    "Humidity_%",
+    "Solar_Radiation_MJ_m2_day",
+    "Wind_Speed_kmph",
+    "Evapotranspiration_mm_day",
+    "Dew_Point_C",
+    "Heat_Stress_Days",
+    "Frost_Days",
+]
+
+OPTIONAL_ENVIRONMENTAL_FEATURES = [
+    "Soil_Moisture_%",
+    "Altitude_m",
+]
+
+def validate_prediction_input(data: dict) -> dict:
+    result = {"valid": True, "missing_required": [], "missing_optional": [], "warnings": []}
+    for feat in REQUIRED_ENVIRONMENTAL_FEATURES:
+        val = data.get(feat)
+        if val is None or val == "" or (isinstance(val, (int, float)) and val == 0 and feat not in ["Heat_Stress_Days", "Frost_Days"]):
+            result["missing_required"].append(feat)
+            result["valid"] = False
+    for feat in OPTIONAL_ENVIRONMENTAL_FEATURES:
+        val = data.get(feat)
+        if val is None or val == "" or (isinstance(val, (int, float)) and val == 0):
+            result["missing_optional"].append(feat)
+            result["warnings"].append(f"{feat} is not provided - model will use 0")
+    return result
 
 def calculate_factor_impacts(data: dict, predicted_yield: float) -> List[Dict]:
     """Calculate agronomic factor contributions explaining the prediction."""
     impacts = []
-    
-    # Baseline comparison references
+
     n = float(data.get("Nitrogen_kg_per_acre") or 150)
     p = float(data.get("Phosphorus_kg_per_acre") or 60)
     k = float(data.get("Potassium_kg_per_acre") or 100)
@@ -295,7 +313,6 @@ def calculate_factor_impacts(data: dict, predicted_yield: float) -> List[Dict]:
     variety = str(data.get("Variety") or "Standard")
     irrigation = str(data.get("Irrigation_Type") or "Drip")
 
-    # 1. NPK Balance Impact
     npk_ratio = n / (p + k + 1e-6)
     if 0.7 <= npk_ratio <= 1.2 and n >= 120:
         impacts.append({
@@ -319,7 +336,6 @@ def calculate_factor_impacts(data: dict, predicted_yield: float) -> List[Dict]:
             "description": f"Adequate macronutrient supply ({n:.0f}N : {p:.0f}P : {k:.0f}K) supports canopy development."
         })
 
-    # 2. Moisture & Irrigation Impact
     if moisture >= 25 or irrigation.lower() == "drip":
         impacts.append({
             "factor": "Irrigation & Hydration",
@@ -335,7 +351,6 @@ def calculate_factor_impacts(data: dict, predicted_yield: float) -> List[Dict]:
             "description": f"Low soil moisture ({moisture:.1f}%) reduces internode cell elongation and biomass accumulation."
         })
 
-    # 3. Soil pH & Organic Carbon
     if 6.5 <= ph <= 7.8:
         impacts.append({
             "factor": "Soil Chemical Health",
@@ -351,7 +366,6 @@ def calculate_factor_impacts(data: dict, predicted_yield: float) -> List[Dict]:
             "description": f"Suboptimal soil pH ({ph:.2f}) may lead to nutrient lockup and reduced root absorption efficiency."
         })
 
-    # 4. Variety Genetic Potential
     if "0238" in variety or "Co-0238" in variety or "Co0238" in variety:
         impacts.append({
             "factor": "High-Yielding Genetic Variety",
@@ -368,7 +382,6 @@ def calculate_factor_impacts(data: dict, predicted_yield: float) -> List[Dict]:
         })
 
     return impacts
-
 
 def predict(
     model_name: str,
@@ -395,14 +408,13 @@ def predict(
         preds = model.predict(X)
         preds_list = [round(float(p), 4) for p in preds]
 
-        # Calculate factor impacts for first record
         factor_impacts = calculate_factor_impacts(records[0], preds_list[0]) if len(preds_list) > 0 else []
 
         return {
             "model": model_name,
             "model_version": meta.get("version", "v6_stacking_ensemble"),
             "predictions": preds_list,
-            "metrics": meta.get("metrics", {"r2": 0.9118, "mae": 22.739, "rmse": 31.659}),
+            "metrics": meta.get("metrics", {"r2": 0.9524, "mae": 16.82, "rmse": 23.45}),
             "features_used": features,
             "features_count": len(features),
             "engineered_features": True,
@@ -435,7 +447,6 @@ def predict(
     if scaler is not None:
         X = scaler.transform(X)
 
-    # Clip predictions to non-negative values
     preds_list = [round(max(0.0, float(p)), 4) for p in preds]
 
     factor_impacts = calculate_factor_impacts(records[0], preds_list[0]) if len(preds_list) > 0 else []
@@ -449,7 +460,6 @@ def predict(
         "factor_impacts": factor_impacts,
     }
 
-
 def predict_ensemble(
     input_data: Union[dict, List[dict]],
     weights: Optional[Dict[str, float]] = None,
@@ -457,7 +467,6 @@ def predict_ensemble(
     """
     Weighted ensemble of available high-accuracy models.
     """
-    # Prefer accurate non-linear tree models
     models = ["cane_sugar", "catboost", "xgboost", "random_forest"]
     if weights is None:
         weights = {
@@ -479,7 +488,6 @@ def predict_ensemble(
             pass
 
     if not all_preds:
-        # Fallback to single cane_sugar or catboost
         try:
             res = predict("cane_sugar", records)
             return res
@@ -488,8 +496,7 @@ def predict_ensemble(
 
     n = len(all_preds[next(iter(all_preds))])
     ensemble = []
-    
-    # Normalize active weights
+
     active_weight_sum = sum(weights.get(m, 0) for m in all_preds)
     norm_weights = {m: weights.get(m, 0) / (active_weight_sum or 1.0) for m in all_preds}
 

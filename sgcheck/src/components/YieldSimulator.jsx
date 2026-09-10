@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button"
 import { predictWithModel } from "@/lib/api"
 
 export default function YieldSimulator({ initialData = null, baselineYield = 280.0, onApplySimulation = null }) {
-  // Simulator parameters state
   const [params, setParams] = useState({
     Nitrogen_kg_per_acre: 160,
     Potassium_kg_per_acre: 100,
@@ -32,7 +31,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
   const [isSimulating, setIsSimulating] = useState(false)
   const debounceRef = useRef(null)
 
-  // Sync with initialData if provided
   useEffect(() => {
     if (initialData) {
       setParams({
@@ -46,10 +44,9 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
     }
   }, [initialData])
 
-  // Run real-time simulation via backend or fast model approximation
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    
+
     debounceRef.current = setTimeout(async () => {
       setIsSimulating(true)
       try {
@@ -75,7 +72,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
           setSimulatedYield(res.predictions[0])
         }
       } catch (err) {
-        // Fallback simulation model approximation
         const nFactor = (params.Nitrogen_kg_per_acre - 150) * 0.35
         const kFactor = (params.Potassium_kg_per_acre - 90) * 0.2
         const mFactor = (params.Soil_Moisture - 25) * 1.5
@@ -135,7 +131,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
       </div>
 
       <div className="aws-card-body" style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-        {/* Comparison Banner */}
         <div
           style={{
             display: "grid",
@@ -148,7 +143,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
             border: "1px solid var(--border-subtle)",
           }}
         >
-          {/* Baseline */}
           <div>
             <div style={{ fontSize: "10px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 600 }}>
               Current Baseline
@@ -163,7 +157,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
             <ArrowRight className="size-4" style={{ color: "var(--text-muted)" }} />
           </div>
 
-          {/* Simulated */}
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: "10px", color: "var(--accent-gold)", textTransform: "uppercase", fontWeight: 600 }}>
               Simulated Forecast
@@ -184,9 +177,7 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
           </div>
         </div>
 
-        {/* Sliders Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Nitrogen Slider */}
           <div className="slider-box" style={{ background: "var(--bg-deep)", padding: "10px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
               <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -212,7 +203,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
             </div>
           </div>
 
-          {/* Potassium Slider */}
           <div className="slider-box" style={{ background: "var(--bg-deep)", padding: "10px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
               <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -238,7 +228,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
             </div>
           </div>
 
-          {/* Soil Moisture Slider */}
           <div className="slider-box" style={{ background: "var(--bg-deep)", padding: "10px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
               <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -264,7 +253,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
             </div>
           </div>
 
-          {/* Soil pH Slider */}
           <div className="slider-box" style={{ background: "var(--bg-deep)", padding: "10px 12px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
               <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -291,7 +279,6 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
           </div>
         </div>
 
-        {/* Insight note */}
         <div style={{ fontSize: "11px", color: "var(--text-secondary)", background: "rgba(212,168,67,0.06)", border: "1px solid rgba(212,168,67,0.15)", borderRadius: "var(--radius-sm)", padding: "8px 12px", display: "flex", alignItems: "center", gap: "8px" }}>
           {deltaPercent > 5 ? (
             <TrendingUp className="size-3.5 text-emerald-500 shrink-0" />
