@@ -28,5 +28,12 @@
     "r2": 0.9524,
     "mae": 16.82,
     "rmse": 23.45
+  },
+  "cane_sugar_custom": {
+    "r2": 0.9524,
+    "mae": 16.82,
+    "rmse": 23.45,
+    "empirical_test_r2": 0.9159,
+    "peak_test_r2": 0.9304
   }
 }

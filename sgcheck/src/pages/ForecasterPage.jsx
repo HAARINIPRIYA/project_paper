@@ -24,7 +24,7 @@ export default function ForecasterPage({
             <span>Sugarcane Yield Forecaster</span>
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Configure field parameters below to generate an instant Stacking Ensemble prediction.
+            Configure field parameters below to generate an instant Custom Mathematical Model prediction.
           </p>
         </div>
 

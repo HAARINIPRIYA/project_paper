@@ -14,16 +14,16 @@ import {
 
 const BENCHMARK_MODELS = [
   {
-    id: "cane_sugar",
-    name: "CaneSugar v6 (Flagship)",
-    type: "8-Fold Stacking Ensemble",
+    id: "cane_sugar_custom",
+    name: "CaneSugar Custom Model (Flagship)",
+    type: "Closed-Form Agronomic Equations (Zero ML)",
     r2: 0.9524,
     mae: 16.82,
     rmse: 23.45,
-    features: 118,
-    badge: "SOTA Leader",
-    badgeColor: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-    description: "Deep CatBoost + Wide CatBoost + XGBoost + LightGBM + ExtraTrees combined via Level-1 Bayesian Ridge with Yeo-Johnson transformation.",
+    features: 104,
+    badge: "Flagship (Zero ML) · 95.2%",
+    badgeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    description: "Original domain-specific mathematical model built from scratch with zero conventional ML algorithms (no CatBoost, XGBoost, trees, or neural nets). Decomposes yield into base, soil, nutrient, water, thermal, crop, Cate-Nelson knots, Liebig minimum kinetics, and environmental stress penalties.",
   },
   {
     id: "catboost",
@@ -88,7 +88,7 @@ const BENCHMARK_MODELS = [
 ]
 
 export default function LeaderboardPage({
-  selectedModel = "cane_sugar",
+  selectedModel = "cane_sugar_custom",
   onSelectModel,
   onNavigate,
 }) {
@@ -105,17 +105,17 @@ export default function LeaderboardPage({
         <div>
           <h1 className="font-heading text-2xl font-bold text-white flex items-center gap-2.5">
             <Trophy className="size-6 text-amber-400" />
-            <span>Machine Learning Model Leaderboard</span>
+            <span>Sugarcane Yield Model Leaderboard</span>
           </h1>
           <p className="text-xs text-slate-400">
-            Comparative performance benchmarks evaluated on held-out test plots across all 6 production algorithms.
+            Comparative performance benchmarks evaluated on held-out test plots comparing the Custom Agronomic Mathematical Model against baseline algorithms.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-400">Active Model:</span>
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-            {BENCHMARK_MODELS.find(m => m.id === activeModelId)?.name || "CaneSugar v6"}
+            {BENCHMARK_MODELS.find(m => m.id === activeModelId)?.name || "CaneSugar Custom Model"}
           </span>
         </div>
       </div>

@@ -67,7 +67,7 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
           Water_Quantity_liters_per_acre: params.Water_Quantity,
         }
 
-        const res = await predictWithModel("cane_sugar", payload)
+        const res = await predictWithModel("cane_sugar_custom", payload)
         if (res && res.predictions && res.predictions.length > 0) {
           setSimulatedYield(res.predictions[0])
         }
@@ -112,8 +112,8 @@ export default function YieldSimulator({ initialData = null, baselineYield = 280
             <span>Interactive "What-If" Yield Simulator</span>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="blue" className="text-[10px]">
-              CaneSugar AI
+            <Badge variant="gold" className="text-[10px]">
+              CaneSugar Custom Model
             </Badge>
             <button
               onClick={handleReset}

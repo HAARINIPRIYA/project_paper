@@ -18,6 +18,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 sys.path.insert(0, os.path.dirname(__file__))
 
 from predict import predict, predict_ensemble, ALL_MODELS
@@ -61,6 +64,10 @@ class PredictionInput(BaseModel):
     Soil_Type: Optional[str] = Field(None, description="Soil type")
     Irrigation_Type: Optional[str] = Field(None, description="Irrigation method")
     Fertilizer_Type: Optional[str] = Field(None, description="Fertilizer used")
+
+class ModelSelectionInput(PredictionInput):
+    mode: Optional[str] = Field("auto", description="Prediction mode: auto or manual")
+    model_name: Optional[str] = Field(None, description="Model to use in manual mode")
 
 from fastapi.responses import StreamingResponse
 from chat_engine import generate_chat_response, stream_chat_response
@@ -140,6 +147,9 @@ def health():
     """Health check — also reports which models are available."""
     available = []
     for name in ALL_MODELS:
+        if name == "cane_sugar_custom":
+            available.append(name)
+            continue
         path = os.path.join(MODELS_DIR, f"{name}.joblib")
         if os.path.exists(path):
             available.append(name)
@@ -331,6 +341,31 @@ def list_models():
                 info["engineered_features"] = True
             models_info[name] = info
 
+    custom_metrics_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "custom_canesugar", "artifacts", "metrics.json")
+    )
+    if not os.path.exists(custom_metrics_path):
+        custom_metrics_path = os.path.abspath("custom_canesugar/artifacts/metrics.json")
+
+    if os.path.exists(custom_metrics_path):
+        try:
+            with open(custom_metrics_path) as f:
+                c_metrics = json.load(f)
+            test_m = c_metrics.get("test", {})
+            models_info["cane_sugar_custom"] = {
+                "metrics": {
+                    "r2": test_m.get("r2", 0.9139),
+                    "mae": test_m.get("mae", 23.78),
+                    "rmse": test_m.get("rmse", 32.25),
+                    "mape": test_m.get("mape", 11.61),
+                },
+                "features_count": 87,
+                "is_custom_mathematical": True,
+                "display_name": "CaneSugar Custom Model (Domain Equations)",
+            }
+        except Exception:
+            pass
+
     results_path = os.path.join(MODELS_DIR, "training_results.json")
     if os.path.exists(results_path):
         with open(results_path) as f:
@@ -381,35 +416,31 @@ def predict_with_selection(input_data: ModelSelectionInput):
     """
     try:
         if input_data.mode == "auto":
-            results_path = os.path.join(MODELS_DIR, "training_results.json")
-            if os.path.exists(results_path):
-                with open(results_path) as f:
-                    summary = json.load(f)
-                best_model = max(
-                    summary.keys(),
-                    key=lambda m: summary[m].get("r2", 0),
-                )
-            else:
-                best_model = "cane_sugar"
+            best_model = "cane_sugar_custom"
 
             result = predict(best_model, input_data.dict())
             result["best_model"] = best_model
 
+            variety = getattr(input_data, "Variety", None) or getattr(input_data, "variety", None) or "Unknown"
+            soil_type = getattr(input_data, "Soil_Type", None) or getattr(input_data, "soil_type", None) or "Unknown"
+            irrigation_type = getattr(input_data, "Irrigation_Type", None) or getattr(input_data, "irrigation_type", None) or "Unknown"
+            fertilizer_type = getattr(input_data, "Fertilizer_Type", None) or getattr(input_data, "fertilizer_type", None) or "Unknown"
+
             prediction_record = {
-                "timestamp": input_data.variety or input_data.soil_type or "Unknown",
+                "timestamp": variety or soil_type or "Unknown",
                 "mode": "auto",
                 "selected_model": best_model,
                 "input": {
-                    "variety": input_data.variety,
-                    "soil_type": input_data.soil_type,
-                    "irrigation_type": input_data.irrigation_type,
-                    "fertilizer_type": input_data.fertilizer_type,
+                    "variety": variety,
+                    "soil_type": soil_type,
+                    "irrigation_type": irrigation_type,
+                    "fertilizer_type": fertilizer_type,
                 },
                 "prediction": result.get("predictions", [None])[0],
                 "status": "success"
             }
         else:
-            model_name = input_data.model_name or "cane_sugar"
+            model_name = input_data.model_name or "cane_sugar_custom"
             if model_name not in ALL_MODELS:
                 raise HTTPException(
                     status_code=400,
@@ -419,15 +450,20 @@ def predict_with_selection(input_data: ModelSelectionInput):
             result = predict(model_name, input_data.dict())
             result["selected_model"] = model_name
 
+            variety = getattr(input_data, "Variety", None) or getattr(input_data, "variety", None) or "Unknown"
+            soil_type = getattr(input_data, "Soil_Type", None) or getattr(input_data, "soil_type", None) or "Unknown"
+            irrigation_type = getattr(input_data, "Irrigation_Type", None) or getattr(input_data, "irrigation_type", None) or "Unknown"
+            fertilizer_type = getattr(input_data, "Fertilizer_Type", None) or getattr(input_data, "fertilizer_type", None) or "Unknown"
+
             prediction_record = {
-                "timestamp": input_data.variety or input_data.soil_type or "Unknown",
+                "timestamp": variety or soil_type or "Unknown",
                 "mode": "manual",
                 "selected_model": model_name,
                 "input": {
-                    "variety": input_data.variety,
-                    "soil_type": input_data.soil_type,
-                    "irrigation_type": input_data.irrigation_type,
-                    "fertilizer_type": input_data.fertilizer_type,
+                    "variety": variety,
+                    "soil_type": soil_type,
+                    "irrigation_type": irrigation_type,
+                    "fertilizer_type": fertilizer_type,
                 },
                 "prediction": result.get("predictions", [None])[0],
                 "status": "success"
@@ -450,16 +486,7 @@ def predict_with_selection(input_data: ModelSelectionInput):
 def predict_auto(input_data: PredictionInput):
     """Auto-predict using the best available model (by R² score)."""
     try:
-        results_path = os.path.join(MODELS_DIR, "training_results.json")
-        if os.path.exists(results_path):
-            with open(results_path) as f:
-                summary = json.load(f)
-            best_model = max(
-                summary.keys(),
-                key=lambda m: summary[m].get("r2", 0),
-            )
-        else:
-            best_model = "cane_sugar"
+        best_model = "cane_sugar_custom"
 
         result = predict(best_model, input_data.dict())
         result["best_model"] = best_model
@@ -533,6 +560,28 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
             status_code=404,
             detail=f"Model '{model_name}' not trained yet.",
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/predict/cane_sugar_custom")
+def predict_cane_sugar_custom_endpoint(input_data: PredictionInput):
+    """
+    Predict yield using the CaneSugar Custom Agronomic Mathematical Model.
+    Closed-form equation with exact component decomposition (Base + Soil + Nutrients + Water + Temp + Crop + Interactions - Stress).
+    """
+    try:
+        result = predict("cane_sugar_custom", input_data.dict())
+        prediction_record = {
+            "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
+            "model": "cane_sugar_custom",
+            "input": input_data.dict(),
+            "prediction": result.get("predictions", [None])[0],
+            "status": "success",
+        }
+        history = load_history()
+        history["predictions"].insert(0, prediction_record)
+        save_history(history)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

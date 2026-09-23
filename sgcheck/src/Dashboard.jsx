@@ -61,10 +61,10 @@ const NAV_ITEMS = [
 const STORAGE_KEY = "canesense_conversations"
 
 const SUGGESTIONS = [
-  { icon: Trophy, label: "Why is CaneSugar v6 the best model?", query: "Why is CaneSugar v6 the most accurate model and how does its 8-fold stacking ensemble work?", color: "var(--accent-gold)" },
-  { icon: GitCompare, label: "Compare CaneSugar vs CatBoost", query: "Compare CaneSugar v6 and CatBoost performance, R² scores, and error rates.", color: "var(--accent-green)" },
+  { icon: Trophy, label: "How does the CaneSugar Custom Model work?", query: "Explain how the CaneSugar Custom Model works and how it predicts yield using closed-form domain equations without conventional ML.", color: "var(--accent-gold)" },
+  { icon: GitCompare, label: "Compare Custom Model vs Baselines", query: "Compare CaneSugar Custom Model against baseline models like CatBoost and XGBoost.", color: "var(--accent-green)" },
   { icon: Target, label: "How to maximize my sugarcane yield?", query: "Based on my field data, what agronomic adjustments (NPK, moisture, spacing) will maximize yield?", color: "var(--accent-orange)" },
-  { icon: BarChartHorizontal, label: "Show all model benchmarks", query: "Show me the complete R², MAE, and RMSE comparison for all 6 models.", color: "#7c3aed" },
+  { icon: BarChartHorizontal, label: "Show all model benchmarks", query: "Show me the complete R², MAE, and RMSE comparison for all models.", color: "#7c3aed" },
   { icon: Sprout, label: "Run yield forecast for my field", query: "Can you analyze my current field parameters and provide an agronomic forecast?", color: "var(--accent-primary)" },
 ]
 
@@ -651,6 +651,7 @@ To get started, enter your field details in the **Tools** panel (right side), th
                 const m = modelMetrics[name] || {}
                 const isBest = idx === 0
                 const colors = {
+                  cane_sugar_custom: "var(--accent-gold)",
                   cane_sugar: "#FF6B35",
                   catboost: "var(--accent-primary)",
                   xgboost: "var(--accent-blue)",

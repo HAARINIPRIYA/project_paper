@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import FactorImpactCard from "./FactorImpactCard"
 
 const MODEL_LABELS = {
+  cane_sugar_custom: "CaneSugar Custom Model (Domain Equations)",
   cane_sugar: "CaneSugar v6 Flagship",
   catboost: "CatBoost Regressor",
   xgboost: "XGBoost Regressor",
@@ -21,6 +22,7 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS_MAP = {
+  cane_sugar_custom: "var(--accent-gold)",
   cane_sugar: "var(--accent-gold)",
   catboost: "var(--accent-green)",
   xgboost: "var(--accent-blue)",

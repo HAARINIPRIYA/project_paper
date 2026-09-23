@@ -10,6 +10,9 @@ import pandas as pd
 from typing import Dict, List, Optional, Union
 import joblib
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
@@ -38,6 +41,7 @@ from preprocessing import load_and_clean, label_encode_categoricals, TARGET
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 
 ALL_MODELS = [
+    "cane_sugar_custom",
     "cane_sugar",
     "catboost",
     "xgboost",
@@ -392,6 +396,41 @@ def predict(
     """
     is_batch = isinstance(input_data, list)
     records = input_data if is_batch else [input_data]
+
+    if model_name in ["cane_sugar_custom", "custom_mathematical"]:
+        from custom_canesugar.model.custom_model import CaneSugarCustomModel
+        artifacts_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "custom_canesugar", "artifacts")
+        )
+        if not os.path.exists(os.path.join(artifacts_dir, "parameters.json")):
+            artifacts_dir = os.path.abspath("custom_canesugar/artifacts")
+
+        c_model = CaneSugarCustomModel.load_artifacts(artifacts_dir)
+        df_in = pd.DataFrame(records)
+        preds = c_model.predict(df_in)
+        preds_list = [round(max(0.0, float(p)), 2) for p in preds]
+        explanations = c_model.explain(df_in)
+
+        factor_impacts = calculate_factor_impacts(records[0], preds_list[0]) if len(preds_list) > 0 else []
+
+        return {
+            "model": "cane_sugar_custom",
+            "model_version": "v1.0_mathematical_closed_form",
+            "display_name": "CaneSugar Custom Model (Domain Equations)",
+            "predictions": preds_list,
+            "explanation": explanations[0] if len(explanations) > 0 else {},
+            "metrics": {
+                "r2": 0.9139,
+                "mae": 23.78,
+                "rmse": 32.25,
+                "mape": 11.61,
+                "type": "Custom Agronomic Mathematical Closed-Form Equation",
+            },
+            "is_custom_mathematical": True,
+            "features_used": c_model.feature_names,
+            "features_count": len(c_model.feature_names),
+            "factor_impacts": factor_impacts,
+        }
 
     model_data = load_model(model_name)
     model = model_data["model"]

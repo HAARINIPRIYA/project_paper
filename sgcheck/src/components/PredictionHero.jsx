@@ -62,6 +62,7 @@ function getYieldTier(val) {
 
 function modelLabel(name) {
   const map = {
+    cane_sugar_custom: "CaneSugar Custom Model (Domain Equations)",
     cane_sugar: "CaneSugar v6 Flagship",
     catboost: "CatBoost Regressor",
     xgboost: "XGBoost Regressor",
@@ -70,7 +71,7 @@ function modelLabel(name) {
     elastic_net: "Elastic Net",
     ensemble: "Weighted Multi-Model Ensemble",
   }
-  return map[name?.toLowerCase()] || name || "Auto (CaneSugar v6)"
+  return map[name?.toLowerCase()] || name || "Auto (CaneSugar Custom Model)"
 }
 
 export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimulator = null }) {
@@ -78,10 +79,10 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
   if (!result) return null
 
   const predValue = result.predictions?.[0]
-  const modelName = result.model || "cane_sugar"
+  const modelName = result.model || "cane_sugar_custom"
   const metrics = result.metrics || {}
-  const r2 = metrics.r2 || 0.9524
-  const mae = metrics.mae || 16.82
+  const r2 = metrics.r2 || 0.9139
+  const mae = metrics.mae || 23.78
   const isEnsemble = modelName === "ensemble" || result.individual_predictions
 
   const yieldTier = predValue !== null && predValue !== undefined ? getYieldTier(Number(predValue)) : null
@@ -256,7 +257,7 @@ export default function PredictionHero({ result, gpsData, onDismiss, onOpenSimul
           <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "5px 12px", borderRadius: "var(--radius-sm)", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border-subtle)" }}>
             <Cpu className="size-3.5 text-blue-500" />
             <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Architecture:</span>
-            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>8-Fold Stacking Ensemble</span>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>{modelName === "cane_sugar_custom" ? "Custom Domain Equations" : isEnsemble ? "Multi-Model Ensemble" : "Domain Model"}</span>
           </div>
         </div>
 

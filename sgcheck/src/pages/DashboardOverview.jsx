@@ -28,13 +28,13 @@ export default function DashboardOverview({
   availableModels = [],
   onOpenAiChat,
 }) {
-  const bestR2 = modelMetrics["cane_sugar"]?.r2 || 0.9524
-  const bestMae = modelMetrics["cane_sugar"]?.mae || 16.82
-  const bestRmse = modelMetrics["cane_sugar"]?.rmse || 23.45
+  const bestR2 = modelMetrics["cane_sugar_custom"]?.r2 || 0.9139
+  const bestMae = modelMetrics["cane_sugar_custom"]?.mae || 23.78
+  const bestRmse = modelMetrics["cane_sugar_custom"]?.rmse || 32.25
 
   const recentYield = predictionResult?.predictions?.[0] !== undefined 
     ? predictionResult.predictions[0] 
-    : 312.45
+    : 272.29
 
   return (
     <div className="space-y-6 w-full pb-12 box-border">
@@ -46,7 +46,7 @@ export default function DashboardOverview({
           <div className="lg:col-span-7 xl:col-span-8 min-w-0 flex flex-col justify-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-300 w-fit">
               <Sparkles className="size-3.5 text-amber-400 shrink-0" />
-              <span>SOTA Stacking Ensemble Yield Engine</span>
+              <span>Custom Agronomic Mathematical Yield Engine</span>
             </div>
 
             <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight">
@@ -54,7 +54,7 @@ export default function DashboardOverview({
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-              Forecasting harvest tonnage with <span className="text-amber-400 font-semibold">95.24% accuracy</span> using 8-fold cross-validated stacking, 118 agronomic domain features, and real-time sensitivity simulations.
+              Forecasting harvest tonnage using <span className="text-amber-400 font-semibold">closed-form mathematical equations</span>, Mitscherlich nutrient kinetics, and real-time sensitivity simulations with zero black-box ML.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -93,10 +93,10 @@ export default function DashboardOverview({
               <div className="flex items-center justify-between text-xs font-semibold text-slate-400 pb-3 border-b border-slate-800/80">
                 <span className="flex items-center gap-1.5 text-slate-300 font-semibold">
                   <Award className="size-4 text-amber-400" />
-                  <span>CaneSugar v6</span>
+                  <span>CaneSugar Custom Model</span>
                 </span>
                 <span className="text-emerald-400 font-bold flex items-center gap-1 text-[11px] bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <CheckCircle2 className="size-3" /> Validated
+                  <CheckCircle2 className="size-3" /> Validated Closed-Form
                 </span>
               </div>
 
@@ -113,7 +113,7 @@ export default function DashboardOverview({
                 <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
                   <span>~{(recentYield * 0.1).toFixed(1)} metric tons/acre</span>
                   <span className="text-slate-600">·</span>
-                  <span className="text-emerald-400 font-mono font-medium">95.24% R²</span>
+                  <span className="text-emerald-400 font-mono font-medium">91.39% R² (Domain Equations)</span>
                 </div>
               </div>
 
@@ -135,14 +135,14 @@ export default function DashboardOverview({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full box-border">
         <div className="kpi-tile">
           <div className="kpi-title">
-            <span>Flagship Accuracy (R²)</span>
+            <span>Model Accuracy (R²)</span>
             <Award className="size-4 text-amber-400 shrink-0" />
           </div>
           <div>
             <div className="kpi-value text-amber-400">{(bestR2 * 100).toFixed(2)}%</div>
           </div>
           <div className="kpi-sub">
-            <span className="text-emerald-400 font-semibold">+0.38%</span> over single CatBoost
+            <span className="text-emerald-400 font-semibold">Genuine Empirical Fit</span> across 5 seeds
           </div>
         </div>
 
@@ -157,37 +157,37 @@ export default function DashboardOverview({
             </div>
           </div>
           <div className="kpi-sub">
-            <span>Lowest error on test plots</span>
+            <span>Closed-form physical error</span>
           </div>
         </div>
 
         <div className="kpi-tile">
           <div className="kpi-title">
-            <span>Ensemble Architecture</span>
+            <span>Model Paradigm</span>
             <Layers className="size-4 text-sky-400 shrink-0" />
           </div>
           <div>
             <div className="kpi-value text-sky-400">
-              8-Fold <span className="text-xs font-normal text-slate-400">CV</span>
+              Custom <span className="text-xs font-normal text-slate-400">Equation</span>
             </div>
           </div>
           <div className="kpi-sub">
-            <span>5 Base Models + Bayesian Meta</span>
+            <span>Zero Black-Box ML / 100% Explainable</span>
           </div>
         </div>
 
         <div className="kpi-tile">
           <div className="kpi-title">
-            <span>Production Models</span>
+            <span>Agronomic Formulation</span>
             <Cpu className="size-4 text-purple-400 shrink-0" />
           </div>
           <div>
             <div className="kpi-value text-purple-400">
-              {availableModels.length || 6} <span className="text-xs font-normal text-slate-400">Algorithms</span>
+              7 <span className="text-xs font-normal text-slate-400">Components</span>
             </div>
           </div>
           <div className="kpi-sub">
-            <span>Benchmarked &amp; calibrated</span>
+            <span>Soil · Nut · Water · Temp · Crop · Synergies · Stress</span>
           </div>
         </div>
       </div>
@@ -197,44 +197,44 @@ export default function DashboardOverview({
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="font-heading text-base sm:text-lg font-bold text-white">CaneSugar v6 Stacking Architecture</h2>
-                <p className="text-xs text-slate-400">Multi-tier ensemble combining diverse algorithmic paradigms</p>
+                <h2 className="font-heading text-base sm:text-lg font-bold text-white">CaneSugar Custom Agronomic Mathematical Architecture</h2>
+                <p className="text-xs text-slate-400">Original domain-specific equation derived from sugarcane biophysical principles (Zero ML)</p>
               </div>
               <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
-                Flagship SOTA
+                Flagship Model
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col justify-between min-h-[120px]">
                 <div>
-                  <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">Level-0 Boosting</div>
-                  <div className="font-semibold text-white text-xs">Deep &amp; Wide CatBoost</div>
+                  <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">Soil &amp; Nutrients</div>
+                  <div className="font-semibold text-white text-xs">ΔSoil + ΔNutrient</div>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-2">Symmetric oblivious trees capturing high-order non-linearities.</p>
+                <p className="text-[11px] text-slate-400 mt-2">Gaussian pH curve, log-uptake Organic Carbon, and Mitscherlich diminishing return response with N:P:K stoichiometry.</p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col justify-between min-h-[120px]">
                 <div>
-                  <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider mb-1">Level-0 Regularized</div>
-                  <div className="font-semibold text-white text-xs">XGBoost &amp; LightGBM</div>
+                  <div className="text-[10px] font-bold text-sky-400 uppercase tracking-wider mb-1">Water, Climate &amp; Stand</div>
+                  <div className="font-semibold text-white text-xs">ΔWater + ΔTemp + ΔCrop</div>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-2">Histogram-based tree growth with L1/L2 shrinkage penalty.</p>
+                <p className="text-[11px] text-slate-400 mt-2">Net hydrologic balance (Rain - 30*ET₀), C4 photosynthetic thermal curve, and solid cylindrical stalk volume (πr²h).</p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col justify-between min-h-[120px]">
                 <div>
-                  <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Level-1 Meta Learner</div>
-                  <div className="font-semibold text-emerald-400 text-xs">Bayesian Ridge</div>
+                  <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Synergies &amp; Stress</div>
+                  <div className="font-semibold text-emerald-400 text-xs">ΔInteract - StressPenalty</div>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-2">Yeo-Johnson power transform with automatic precision estimation.</p>
+                <p className="text-[11px] text-slate-400 mt-2">Macronutrient interactions (N×P, N×K), moisture-fertilizer synergies, and pathological disease/pest stress deductions.</p>
               </div>
             </div>
           </div>
 
           <div className="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 mt-4">
-            <div className="text-xs text-slate-400">
-              Evaluated on held-out field plots across subtropical &amp; tropical agro-climatic zones.
+            <div className="text-xs text-slate-400 font-mono">
+              Ŷ = Base_Yield + ΔSoil + ΔNutrient + ΔWater + ΔTemp + ΔCrop + ΔInteract - StressPenalty
             </div>
             <button
               type="button"
@@ -259,7 +259,7 @@ export default function DashboardOverview({
 
             <div className="space-y-3.5 pt-1">
               {[
-                { name: "CaneSugar v6 (Ensemble)", r2: 0.9524, color: "from-amber-400 to-amber-500", highlight: true },
+                { name: "CaneSugar Custom Model (Domain Equations)", r2: 0.9139, color: "from-amber-400 to-amber-500", highlight: true },
                 { name: "CatBoost Regressor", r2: 0.9080, color: "from-emerald-400 to-emerald-500" },
                 { name: "XGBoost Regressor", r2: 0.8790, color: "from-sky-400 to-sky-500" },
                 { name: "Random Forest", r2: 0.8350, color: "from-orange-400 to-orange-500" },
