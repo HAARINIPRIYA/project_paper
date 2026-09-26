@@ -1,0 +1,63 @@
+{
+  "seeds_evaluated": [
+    42,
+    123,
+    2024,
+    3407,
+    7777
+  ],
+  "results_by_seed": [
+    {
+      "seed": 42,
+      "train_r2": 0.9837,
+      "val_r2": 0.8656,
+      "test_r2": 0.8603,
+      "test_mae": 31.02,
+      "test_rmse": 40.16,
+      "test_mape": 12.96
+    },
+    {
+      "seed": 123,
+      "train_r2": 0.987,
+      "val_r2": 0.8574,
+      "test_r2": 0.883,
+      "test_mae": 29.03,
+      "test_rmse": 37.2,
+      "test_mape": 11.69
+    },
+    {
+      "seed": 2024,
+      "train_r2": 0.98,
+      "val_r2": 0.8668,
+      "test_r2": 0.8548,
+      "test_mae": 29.85,
+      "test_rmse": 38.53,
+      "test_mape": 12.85
+    },
+    {
+      "seed": 3407,
+      "train_r2": 0.9871,
+      "val_r2": 0.8536,
+      "test_r2": 0.8451,
+      "test_mae": 29.8,
+      "test_rmse": 39.05,
+      "test_mape": 12.36
+    },
+    {
+      "seed": 7777,
+      "train_r2": 0.9667,
+      "val_r2": 0.8748,
+      "test_r2": 0.8564,
+      "test_mae": 29.72,
+      "test_rmse": 39.64,
+      "test_mape": 13.36
+    }
+  ],
+  "mean_test_r2": 0.8599,
+  "std_test_r2": 0.0126,
+  "max_test_r2": 0.883,
+  "mean_test_mae": 29.88,
+  "std_test_mae": 0.64,
+  "mean_test_rmse": 38.92,
+  "mean_test_mape": 12.64
+}

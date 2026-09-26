@@ -1,0 +1,24 @@
+{
+  "train": {
+    "r2": 0.9837,
+    "mae": 10.44,
+    "rmse": 13.29,
+    "mape": 4.15
+  },
+  "val": {
+    "r2": 0.8656,
+    "mae": 28.74,
+    "rmse": 36.81,
+    "mape": 12.77
+  },
+  "test": {
+    "r2": 0.8603,
+    "mae": 31.02,
+    "rmse": 40.16,
+    "mape": 12.96,
+    "max_error": 138.95,
+    "mean_bias": -9.56
+  },
+  "architecture": "CaneSugar Neural v1 (Entity Embeddings + Residual Skip Projection)",
+  "framework": "PyTorch"
+}

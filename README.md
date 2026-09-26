@@ -88,9 +88,24 @@ deepLearning/
 ├── MODEL_DOCUMENTATION.md             # Master technical & scientific model documentation
 ├── README.md                          # Project overview and quickstart
 ├── custom_canesugar/                  # CaneSugar Custom Mathematical Engine (Zero ML)
+│   ├── config/                        # Feature and leakage configurations
+│   ├── equations/                     # 7 biophysical transformation engines
+│   ├── model/                         # Custom closed-form optimizer & parameters
+│   ├── preprocessing/                 # Agronomic normalizer and validator
+│   ├── tests/                         # Unit tests and Anti-ML audit
+│   └── training/                      # Training runner and multi-seed evaluator
 ├── custom_canesugar_neural/           # CaneSugar Neural v1 (PyTorch Deep Learning)
+│   ├── config/                        # Neural hyperparameters & embedding dimensions
+│   ├── data/                          # Dataset analyzer, feature engineering, preprocessor
+│   ├── model/                         # PyTorch architecture, MC dropout, explainability
+│   ├── tests/                         # Unit tests & Anti-ML audit
+│   └── training/                      # Trainer, multi-seed benchmarks, visualization
 └── sgcheck/                           # Web application & API
     ├── backend/                       # FastAPI application & ML services
+    │   ├── app.py                     # FastAPI routes & server
+    │   ├── predict.py                 # Multi-model inference handler
+    │   ├── models/                    # Model weights and deployment artifacts
+    │   └── DataSet/                   # FINAL_SUGARCANE_DATASET.csv
     ├── sample_test_data.txt           # Ready-to-use sample test JSON payloads & outputs
     └── src/                           # React frontend (Vite + Tailwind CSS)
 ```
@@ -101,20 +116,71 @@ deepLearning/
 
 ### 1. Start the Backend API
 ```bash
-cd backend
+cd sgcheck/backend
 python -m uvicorn app:app --host 127.0.0.1 --port 8000 --reload
 ```
 API is available at `http://127.0.0.1:8000` (Swagger docs at `/docs`).
 
 ### 2. Start the Frontend Dashboard
 ```bash
+cd sgcheck
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 Dashboard is available at `http://127.0.0.1:5173`.
+
+### 3. Run Automated Tests
+```bash
+# Test CaneSugar Neural v1 (PyTorch architecture, embeddings, MC dropout, anti-ML audit)
+python -m unittest discover custom_canesugar_neural/tests
+
+# Test CaneSugar Custom Model (biophysical equations, decomposition, anti-ML audit)
+python -m unittest discover custom_canesugar/tests
+```
+
+---
+
+## 🔌 API Endpoints
+
+### 1. CaneSugar Custom Model
+`POST http://127.0.0.1:8000/predict/cane_sugar_custom`
+```json
+{
+  "Variety": "Co 0238",
+  "Soil_Type": "Loamy",
+  "Irrigation_Type": "Drip",
+  "Nitrogen": 150.0,
+  "Phosphorus": 60.0,
+  "Potassium": 100.0,
+  "Soil_pH": 7.1,
+  "Soil_Moisture": 26.0,
+  "Cane_Height_cm": 280.0,
+  "Cane_Diameter_cm": 2.8,
+  "Sucrose_Brix": 19.5
+}
+```
+
+### 2. CaneSugar Neural v1
+`POST http://127.0.0.1:8000/predict/cane_sugar_neural`
+```json
+{
+  "Variety": "Co98014",
+  "Soil_Type": "Loamy",
+  "Irrigation_Type": "Drip",
+  "Fertilizer_Type": "Urea",
+  "Nitrogen": 180.0,
+  "Phosphorus": 80.0,
+  "Potassium": 120.0,
+  "Soil_pH": 7.1,
+  "Soil_Moisture": 28.0,
+  "Cane_Height_cm": 310.0,
+  "Cane_Diameter_cm": 3.1,
+  "Sucrose_Brix": 21.0
+}
+```
 
 ---
 
 ## 📖 Documentation Links
 
-- **[Master Model Documentation](../MODEL_DOCUMENTATION.md)**: Mathematical formulations, deep architecture design, ablation experiments, and multi-seed benchmarks.
-- **[Sample Test Data](sample_test_data.txt)**: Copy-paste JSON payloads and verified model outputs for curl, Postman, and testing.
+- **[Master Model Documentation](MODEL_DOCUMENTATION.md)**: Mathematical formulations, deep architecture design, ablation experiments, and multi-seed benchmarks.
+- **[Sample Test Data](sgcheck/sample_test_data.txt)**: Copy-paste JSON payloads and verified model outputs for curl, Postman, and testing.

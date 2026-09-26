@@ -5,6 +5,7 @@ Used by the FastAPI server (app.py).
 
 import os
 import sys
+import json
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Union
@@ -41,6 +42,7 @@ from preprocessing import load_and_clean, label_encode_categoricals, TARGET
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 
 ALL_MODELS = [
+    "cane_sugar_neural",
     "cane_sugar_custom",
     "cane_sugar",
     "catboost",
@@ -397,6 +399,115 @@ def predict(
     is_batch = isinstance(input_data, list)
     records = input_data if is_batch else [input_data]
 
+    if model_name in ["cane_sugar_neural", "neural_v1"]:
+        import torch
+        from custom_canesugar_neural.data.preprocessor import TabularNeuralPreprocessor
+        from custom_canesugar_neural.model.architecture import CaneSugarNeuralNet
+        from custom_canesugar_neural.model.uncertainty import MonteCarloDropoutEstimator
+        from custom_canesugar_neural.model.explainability import NeuralExplainer
+
+        artifacts_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "models")
+        )
+        model_path = os.path.join(artifacts_dir, "cane_sugar_neural_v1.pt")
+        scaler_path = os.path.join(artifacts_dir, "cane_sugar_neural_scaler.joblib")
+        emb_path = os.path.join(artifacts_dir, "cane_sugar_neural_embeddings.json")
+        feat_path = os.path.join(artifacts_dir, "cane_sugar_neural_features.json")
+        metrics_path = os.path.join(artifacts_dir, "cane_sugar_neural_metrics.json")
+        config_path = os.path.join(artifacts_dir, "cane_sugar_neural_config.json")
+
+        preprocessor = TabularNeuralPreprocessor.load_artifacts(
+            scaler_path=scaler_path,
+            embeddings_json_path=emb_path,
+            features_json_path=feat_path
+        )
+
+        df_in = pd.DataFrame(records)
+        alias_map = {
+            "Nitrogen": "Nitrogen_kg_per_acre",
+            "N": "Nitrogen_kg_per_acre",
+            "Phosphorus": "Phosphorus_kg_per_acre",
+            "P": "Phosphorus_kg_per_acre",
+            "Potassium": "Potassium_kg_per_acre",
+            "K": "Potassium_kg_per_acre",
+            "Soil_Moisture": "Soil_Moisture_%",
+            "Rainfall": "Rainfall_Total_mm",
+            "Rainfall_mm": "Rainfall_Total_mm",
+            "Temperature": "Temp_Avg_C",
+            "Temperature_C": "Temp_Avg_C",
+            "Sucrose_Brix": "Brix_Value",
+            "Brix": "Brix_Value",
+            "Stalk_Height_cm": "Cane_Height_cm",
+            "Height_cm": "Cane_Height_cm",
+            "Stalk_Diameter_cm": "Cane_Diameter_cm",
+            "Diameter_cm": "Cane_Diameter_cm",
+            "Organic_Carbon": "Organic_Carbon_%",
+            "Irrigation_Type": "Irrigation_Method_Type",
+        }
+        for old_k, new_k in alias_map.items():
+            if old_k in df_in.columns and new_k not in df_in.columns:
+                df_in[new_k] = df_in[old_k]
+
+        x_num, x_cat, _ = preprocessor.transform(df_in)
+        t_x_num = torch.tensor(x_num, dtype=torch.float32)
+        t_x_cat = {k: torch.tensor(v, dtype=torch.long) for k, v in x_cat.items()}
+
+        act = "gelu"
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                act = cfg.get("activation", "gelu")
+
+        model = CaneSugarNeuralNet(
+            num_numerical_features=len(preprocessor.numerical_cols),
+            embedding_cardinalities=preprocessor.embedding_cardinalities,
+            activation=act
+        )
+        model.load_state_dict(torch.load(model_path, map_location="cpu"))
+        model.eval()
+
+        with torch.no_grad():
+            preds_raw = model(t_x_num, t_x_cat)
+            if preds_raw.dim() == 0:
+                preds_raw = preds_raw.unsqueeze(0)
+            preds_list = [round(max(0.0, float(p)), 2) for p in preds_raw]
+
+        mc = MonteCarloDropoutEstimator(model, n_samples=30)
+        mc_res = mc.estimate_uncertainty(t_x_num, t_x_cat)
+        uncertainty_list = [round(float(u), 2) for u in mc_res["uncertainty"]]
+        ci_lower_list = [round(float(c), 2) for c in mc_res["ci_lower"]]
+        ci_upper_list = [round(float(c), 2) for c in mc_res["ci_upper"]]
+
+        explainer = NeuralExplainer(
+            model=model,
+            numerical_feature_names=preprocessor.numerical_cols,
+            categorical_feature_names=preprocessor.categorical_cols,
+            n_steps=20
+        )
+        factor_impacts = explainer.explain_instance(t_x_num[0], {k: v[0] for k, v in t_x_cat.items()}, top_k=6)
+
+        meta_metrics = {}
+        if os.path.exists(metrics_path):
+            with open(metrics_path, "r", encoding="utf-8") as f:
+                saved_m = json.load(f)
+                meta_metrics = saved_m.get("test", {})
+                meta_metrics["type"] = saved_m.get("architecture", "Custom PyTorch Tabular Deep Network")
+
+        return {
+            "model": "cane_sugar_neural",
+            "model_version": "v1.0_deep_learning",
+            "display_name": "CaneSugar Neural v1 (Deep Learning)",
+            "predictions": preds_list,
+            "uncertainty": uncertainty_list,
+            "ci_lower": ci_lower_list,
+            "ci_upper": ci_upper_list,
+            "metrics": meta_metrics,
+            "factor_impacts": factor_impacts,
+            "is_deep_neural": True,
+            "features_used": preprocessor.numerical_cols + preprocessor.categorical_cols,
+            "features_count": len(preprocessor.numerical_cols) + len(preprocessor.categorical_cols),
+        }
+
     if model_name in ["cane_sugar_custom", "custom_mathematical"]:
         from custom_canesugar.model.custom_model import CaneSugarCustomModel
         artifacts_dir = os.path.abspath(
@@ -407,6 +518,30 @@ def predict(
 
         c_model = CaneSugarCustomModel.load_artifacts(artifacts_dir)
         df_in = pd.DataFrame(records)
+        alias_map = {
+            "Nitrogen": "Nitrogen_kg_per_acre",
+            "N": "Nitrogen_kg_per_acre",
+            "Phosphorus": "Phosphorus_kg_per_acre",
+            "P": "Phosphorus_kg_per_acre",
+            "Potassium": "Potassium_kg_per_acre",
+            "K": "Potassium_kg_per_acre",
+            "Soil_Moisture": "Soil_Moisture_%",
+            "Rainfall": "Rainfall_Total_mm",
+            "Rainfall_mm": "Rainfall_Total_mm",
+            "Temperature": "Temp_Avg_C",
+            "Temperature_C": "Temp_Avg_C",
+            "Sucrose_Brix": "Brix_Value",
+            "Brix": "Brix_Value",
+            "Stalk_Height_cm": "Cane_Height_cm",
+            "Height_cm": "Cane_Height_cm",
+            "Stalk_Diameter_cm": "Cane_Diameter_cm",
+            "Diameter_cm": "Cane_Diameter_cm",
+            "Organic_Carbon": "Organic_Carbon_%",
+            "Irrigation_Type": "Irrigation_Method_Type",
+        }
+        for old_k, new_k in alias_map.items():
+            if old_k in df_in.columns and new_k not in df_in.columns:
+                df_in[new_k] = df_in[old_k]
         preds = c_model.predict(df_in)
         preds_list = [round(max(0.0, float(p)), 2) for p in preds]
         explanations = c_model.explain(df_in)

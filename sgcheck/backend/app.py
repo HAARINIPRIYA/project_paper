@@ -147,7 +147,7 @@ def health():
     """Health check — also reports which models are available."""
     available = []
     for name in ALL_MODELS:
-        if name == "cane_sugar_custom":
+        if name in ["cane_sugar_custom", "cane_sugar_neural"]:
             available.append(name)
             continue
         path = os.path.join(MODELS_DIR, f"{name}.joblib")
@@ -576,6 +576,28 @@ def predict_cane_sugar_custom_endpoint(input_data: PredictionInput):
             "model": "cane_sugar_custom",
             "input": input_data.dict(),
             "prediction": result.get("predictions", [None])[0],
+            "status": "success",
+        }
+        history = load_history()
+        history["predictions"].insert(0, prediction_record)
+        save_history(history)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/predict/cane_sugar_neural")
+def predict_cane_sugar_neural_endpoint(input_data: PredictionInput):
+    """
+    Predict yield using CaneSugar Neural v1 (Deep Tabular Architecture with Embeddings and Residuals).
+    """
+    try:
+        result = predict("cane_sugar_neural", input_data.dict())
+        prediction_record = {
+            "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
+            "model": "cane_sugar_neural",
+            "input": input_data.dict(),
+            "prediction": result.get("predictions", [None])[0],
+            "uncertainty": result.get("uncertainty", [None])[0],
             "status": "success",
         }
         history = load_history()

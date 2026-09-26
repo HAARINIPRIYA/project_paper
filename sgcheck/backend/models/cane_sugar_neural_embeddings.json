@@ -1,0 +1,202 @@
+{
+  "vocab_maps": {
+    "Variety": {
+      "<unk>": 0,
+      "Co0238": 1,
+      "Co98014": 2,
+      "CoJ64": 3
+    },
+    "Soil_Type": {
+      "<unk>": 0,
+      "Alluvial": 1,
+      "Clay": 2,
+      "Loamy": 3,
+      "Sandy": 4
+    },
+    "Irrigation_Method_Type": {
+      "<unk>": 0,
+      "Drip": 1,
+      "Flood": 2,
+      "Sprinkler": 3
+    },
+    "Fertilizer_Type": {
+      "<unk>": 0,
+      "DAP": 1,
+      "Organic": 2,
+      "Urea": 3
+    },
+    "Disease_Severity": {
+      "<unk>": 0,
+      "High": 1,
+      "Low": 2,
+      "Medium": 3
+    },
+    "Pest_Level": {
+      "<unk>": 0,
+      "High": 1,
+      "Low": 2,
+      "Medium": 3
+    },
+    "Irrigation_Frequency_Level": {
+      "<unk>": 0,
+      "High": 1,
+      "Low": 2,
+      "Medium": 3
+    },
+    "Water_Quality_Category": {
+      "<unk>": 0,
+      "Good": 1,
+      "Moderate": 2,
+      "Saline": 3
+    },
+    "Soil_Condition_At_Planting": {
+      "<unk>": 0,
+      "Dry": 1,
+      "Moist": 2,
+      "Wet": 3
+    },
+    "Planting_Method": {
+      "<unk>": 0,
+      "Circular": 1,
+      "Paired Row": 2,
+      "Straight Row": 3,
+      "Trench": 4
+    },
+    "Drainage_Condition": {
+      "<unk>": 0,
+      "Good": 1,
+      "Moderate": 2,
+      "Poor": 3
+    },
+    "Disease_Type": {
+      "<unk>": 0,
+      "Leaf Scald": 1,
+      "Red Rot": 2,
+      "Smut": 3
+    },
+    "Season": {
+      "<unk>": 0,
+      "Kharif": 1,
+      "Rabi": 2
+    },
+    "Growth_Stage": {
+      "<unk>": 0,
+      "Early": 1,
+      "Late": 2,
+      "Mid": 3
+    },
+    "Application_Timing": {
+      "<unk>": 0,
+      "Early": 1,
+      "Late": 2,
+      "Mid": 3
+    },
+    "Intercropping": {
+      "<unk>": 0,
+      "No": 1,
+      "Yes": 2
+    },
+    "Weed_Control": {
+      "<unk>": 0,
+      "Chemical": 1,
+      "Manual": 2
+    },
+    "Mulching": {
+      "<unk>": 0,
+      "No": 1,
+      "Yes": 2
+    },
+    "Fertilizer_Split": {
+      "<unk>": 0,
+      "Single": 1,
+      "Split": 2
+    },
+    "Machinery_Use": {
+      "<unk>": 0,
+      "No": 1,
+      "Yes": 2
+    }
+  },
+  "cardinalities": {
+    "Variety": [
+      4,
+      16
+    ],
+    "Soil_Type": [
+      5,
+      8
+    ],
+    "Irrigation_Method_Type": [
+      4,
+      8
+    ],
+    "Fertilizer_Type": [
+      4,
+      8
+    ],
+    "Disease_Severity": [
+      4,
+      4
+    ],
+    "Pest_Level": [
+      4,
+      4
+    ],
+    "Irrigation_Frequency_Level": [
+      4,
+      4
+    ],
+    "Water_Quality_Category": [
+      4,
+      4
+    ],
+    "Soil_Condition_At_Planting": [
+      4,
+      4
+    ],
+    "Planting_Method": [
+      5,
+      4
+    ],
+    "Drainage_Condition": [
+      4,
+      4
+    ],
+    "Disease_Type": [
+      4,
+      4
+    ],
+    "Season": [
+      3,
+      4
+    ],
+    "Growth_Stage": [
+      4,
+      4
+    ],
+    "Application_Timing": [
+      4,
+      4
+    ],
+    "Intercropping": [
+      3,
+      2
+    ],
+    "Weed_Control": [
+      3,
+      2
+    ],
+    "Mulching": [
+      3,
+      2
+    ],
+    "Fertilizer_Split": [
+      3,
+      2
+    ],
+    "Machinery_Use": [
+      3,
+      2
+    ]
+  }
+}

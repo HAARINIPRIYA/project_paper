@@ -13,6 +13,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
 const MODEL_INFO = {
+  cane_sugar_neural: {
+    label: "CaneSugar Neural v1 (Deep Learning)",
+    description: "Custom PyTorch Tabular Architecture with Entity Embeddings & Residual Highway",
+    r2: "92.4%",
+    speed: "Real-time (~5ms)",
+    bestFor: "Deep Learning, Categorical Embeddings & Uncertainty Quantification",
+    features: ["Categorical Entity Embeddings", "LayerNorm + BatchNorm + GELU", "Residual Skip Projection", "Monte-Carlo Uncertainty (±σ)"],
+    highlight: true,
+  },
   cane_sugar_custom: {
     label: "CaneSugar Custom Model (Flagship)",
     description: "Domain-specific closed-form mathematical equation from scratch (Zero ML)",
