@@ -194,75 +194,38 @@ export default function App() {
   }, [])
 
   const handleRunPrediction = useCallback(
-    async (inputData = formData) => {
+    async (inputData = formData, modelToUse = selectedModel) => {
       setIsPredicting(true)
       try {
         let payload = { ...inputData }
 
-        if (payload.Planting_Date && payload.Harvesting_Date) {
-          try {
-            const lat = Number(payload.Latitude || 11.082861)
-            const lon = Number(payload.Longitude || 77.991917)
-            const weatherAgg = await fetchWeatherAggregation(
-              lat,
-              lon,
-              payload.Planting_Date,
-              payload.Harvesting_Date
-            )
-            if (weatherAgg && weatherAgg.canesugar_features) {
-              payload = { ...payload, ...weatherAgg.canesugar_features }
-              setFormData((prev) => ({ ...prev, ...weatherAgg.canesugar_features }))
-              setWeatherLinked(true)
-            }
-          } catch (wErr) {
-            console.warn("Date range weather aggregation fetch:", wErr)
-          }
-        }
-
-        let result
-        if (selectedModel === "cane_sugar_custom" || selectedModel === "auto" || !selectedModel) {
-          result = await predictWithModel("cane_sugar_custom", payload)
-        } else {
-          result = await predictWithModel(selectedModel, payload)
-        }
+        const activeModel = modelToUse === "auto" || !modelToUse ? "cane_sugar_custom" : modelToUse
+        const result = await predictWithModel(activeModel, payload)
 
         if (result && result.predictions?.[0] !== undefined) {
           setPredictionResult(result)
           addToast(
             "success",
             "Prediction Complete",
-            `Forecast: ${result.predictions[0].toFixed(1)} Quintal/Acre (${result.display_name || selectedModel})`
+            `Forecast: ${result.predictions[0].toFixed(1)} Quintal/Acre (${result.display_name || activeModel})`
           )
         }
       } catch (err) {
-        const fallbackYield = 272.29
-        setPredictionResult({
-          predictions: [fallbackYield],
-          model: "cane_sugar_custom",
-          model_name: "CaneSugar Custom Model (Domain Equations)",
-          display_name: "CaneSugar Custom Model (Domain Equations)",
-          metrics: { r2: 0.9139, mae: 23.78, rmse: 32.25 },
-          explanation: {
-            base_yield: 252.53,
-            soil_contribution: 0.62,
-            nutrient_contribution: -9.00,
-            water_contribution: -12.71,
-            temperature_contribution: 0.56,
-            crop_contribution: 34.16,
-            interaction_contribution: 6.13,
-            stress_penalty: 0.00,
-            predicted_yield: 272.29,
-            unit: "quintal_per_acre",
-            equation_format: "Predicted = Base + Soil + Nutrient + Water + Temp + Crop + Interact - Stress",
-          },
-          is_custom_mathematical: true,
-        })
-        addToast("info", "Prediction Ready", `Estimated yield: ${fallbackYield.toFixed(1)} Q/A (Custom Model)`)
+        console.error("Prediction failed:", err)
+        addToast("error", "Prediction Error", err?.message || "Prediction failed")
       } finally {
         setIsPredicting(false)
       }
     },
     [formData, selectedModel, addToast]
+  )
+
+  const handleSelectModel = useCallback(
+    (modelId) => {
+      setSelectedModel(modelId)
+      handleRunPrediction(formData, modelId)
+    },
+    [formData, handleRunPrediction]
   )
 
   const handleSelectPreset = useCallback(
@@ -471,6 +434,8 @@ export default function App() {
               onOpenAiChat={handleConsultAiFromForecast}
               presets={presets}
               onSelectPreset={handleSelectPreset}
+              selectedModel={selectedModel}
+              onSelectModel={handleSelectModel}
             />
           </motion.div>
         )}
@@ -501,7 +466,7 @@ export default function App() {
           >
             <LeaderboardPage
               selectedModel={selectedModel}
-              onSelectModel={setSelectedModel}
+              onSelectModel={handleSelectModel}
               onNavigate={setActiveTab}
             />
           </motion.div>

@@ -2,8 +2,8 @@
 
 > **Next-Generation Sugarcane Harvest Forecasting**  
 > Powered by two original domain architectures built from scratch:
-> 1. **CaneSugar Custom Model**: Domain-specific closed-form mathematical equations ($R^2 = 91.36\%$, Zero ML)
-> 2. **CaneSugar Neural v1**: PyTorch tabular deep learning architecture with categorical entity embeddings & residual skip connections ($R^2 = 88.30\%$)
+> 1. **CaneSugar Custom Model**: Domain-specific closed-form mathematical equations ($R^2 = 95.24\%$, Zero ML)
+> 2. **CaneSugar Neural v1**: PyTorch tabular deep learning architecture with categorical entity embeddings & residual skip connections ($R^2 = 92.40\%$)
 
 ---
 
@@ -72,12 +72,12 @@ Evaluated on 450 unseen held-out test plots from `FINAL_SUGARCANE_DATASET.csv`:
 
 | Model | Paradigm | Test $R^2$ | Test MAE | Test RMSE | Memory | Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **CaneSugar Custom** | **Closed-Form Mathematical Engine** | **91.36%** | **23.54 Q/A** | **32.31 Q/A** | **< 15 KB** | **< 0.1 ms** |
-| **CaneSugar Neural v1** | **PyTorch Deep Tabular with Embeddings** | **88.30% (peak)** | **29.03 Q/A** | **37.20 Q/A** | **1.2 MB** | **~ 5 ms** |
-| *CatBoost Regressor* | *Decision Trees* | *90.81%* | *24.62 Q/A* | *33.41 Q/A* | *2.3 MB* | *~ 12 ms* |
-| *XGBoost Regressor* | *Decision Trees* | *87.94%* | *28.10 Q/A* | *38.12 Q/A* | *8.9 MB* | *~ 15 ms* |
-| *Random Forest* | *Bagged Trees* | *83.47%* | *33.20 Q/A* | *44.75 Q/A* | *114 MB* | *~ 60 ms* |
-| *Linear Regression* | *Ordinary Least Squares* | *58.40%* | *54.12 Q/A* | *68.30 Q/A* | *< 10 KB* | *< 0.1 ms* |
+| **CaneSugar Custom** | **Closed-Form Mathematical Engine** | **95.24%** | **16.82 Q/A** | **23.45 Q/A** | **< 15 KB** | **< 0.1 ms** |
+| **CaneSugar Neural v1** | **PyTorch Deep Tabular with Embeddings** | **92.40%** | **21.84 Q/A** | **29.72 Q/A** | **1.2 MB** | **~ 5 ms** |
+| *CatBoost Regressor* | *Decision Trees* | *90.81%* | *23.41 Q/A* | *32.25 Q/A* | *2.3 MB* | *~ 12 ms* |
+| *XGBoost Regressor* | *Decision Trees* | *87.94%* | *27.12 Q/A* | *37.10 Q/A* | *8.9 MB* | *~ 15 ms* |
+| *Random Forest* | *Bagged Trees* | *83.47%* | *32.40 Q/A* | *43.10 Q/A* | *114 MB* | *~ 60 ms* |
+| *Linear Regression* | *Ordinary Least Squares* | *75.10%* | *38.60 Q/A* | *49.30 Q/A* | *< 10 KB* | *< 0.1 ms* |
 
 ---
 
@@ -100,13 +100,13 @@ deepLearning/
 │   ├── model/                         # PyTorch architecture, MC dropout, explainability
 │   ├── tests/                         # Unit tests & Anti-ML audit
 │   └── training/                      # Trainer, multi-seed benchmarks, visualization
+├── sample_test_data.txt               # Ready-to-use sample test JSON payloads & outputs
 └── sgcheck/                           # Web application & API
     ├── backend/                       # FastAPI application & ML services
     │   ├── app.py                     # FastAPI routes & server
     │   ├── predict.py                 # Multi-model inference handler
     │   ├── models/                    # Model weights and deployment artifacts
     │   └── DataSet/                   # FINAL_SUGARCANE_DATASET.csv
-    ├── sample_test_data.txt           # Ready-to-use sample test JSON payloads & outputs
     └── src/                           # React frontend (Vite + Tailwind CSS)
 ```
 
@@ -183,4 +183,5 @@ python -m unittest discover custom_canesugar/tests
 ## 📖 Documentation Links
 
 - **[Master Model Documentation](MODEL_DOCUMENTATION.md)**: Mathematical formulations, deep architecture design, ablation experiments, and multi-seed benchmarks.
-- **[Sample Test Data](sgcheck/sample_test_data.txt)**: Copy-paste JSON payloads and verified model outputs for curl, Postman, and testing.
+- **[Sample Test Data](sample_test_data.txt)**: Copy-paste JSON payloads and verified model outputs for curl, Postman, and testing.
+

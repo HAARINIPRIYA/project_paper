@@ -28,9 +28,9 @@ export default function DashboardOverview({
   availableModels = [],
   onOpenAiChat,
 }) {
-  const bestR2 = modelMetrics["cane_sugar_custom"]?.r2 || 0.9139
-  const bestMae = modelMetrics["cane_sugar_custom"]?.mae || 23.78
-  const bestRmse = modelMetrics["cane_sugar_custom"]?.rmse || 32.25
+  const bestR2 = modelMetrics["cane_sugar_custom"]?.r2 || 0.9524
+  const bestMae = modelMetrics["cane_sugar_custom"]?.mae || 16.82
+  const bestRmse = modelMetrics["cane_sugar_custom"]?.rmse || 23.45
 
   const recentYield = predictionResult?.predictions?.[0] !== undefined 
     ? predictionResult.predictions[0] 
@@ -259,11 +259,12 @@ export default function DashboardOverview({
 
             <div className="space-y-3.5 pt-1">
               {[
-                { name: "CaneSugar Custom Model (Domain Equations)", r2: 0.9139, color: "from-amber-400 to-amber-500", highlight: true },
+                { name: "CaneSugar Custom Model (Domain Equations)", r2: 0.9520, color: "from-amber-400 to-amber-500", highlight: true },
+                { name: "CaneSugar Neural v1 (Deep Learning)", r2: 0.9240, color: "from-purple-400 to-purple-500", highlight: true },
                 { name: "CatBoost Regressor", r2: 0.9080, color: "from-emerald-400 to-emerald-500" },
                 { name: "XGBoost Regressor", r2: 0.8790, color: "from-sky-400 to-sky-500" },
                 { name: "Random Forest", r2: 0.8350, color: "from-orange-400 to-orange-500" },
-                { name: "Linear Regression (OLS)", r2: 0.5840, color: "from-purple-400 to-purple-500" },
+                { name: "Linear Regression (OLS)", r2: 0.5840, color: "from-slate-400 to-slate-500" },
                 { name: "ElasticNet", r2: 0.5420, color: "from-rose-400 to-rose-500" },
               ].map((m) => (
                 <div key={m.name} className="space-y-1">

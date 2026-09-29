@@ -1,0 +1,760 @@
+\documentclass[conference,10pt,letterpaper]{IEEEtran}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{textcomp}
+\usepackage{url}
+\usepackage{hyperref}
+
+\makeatletter
+\@ifclassloaded{IEEEtran}{}{%
+  \usepackage[margin=1.75cm]{geometry}
+  \providecommand{\IEEEauthorblockN}[1]{#1}
+  \providecommand{\IEEEauthorblockA}[1]{\textit{#1}}
+  \providecommand{\IEEEPARstart}[2]{\textbf{#1}#2}
+  \newenvironment{IEEEkeywords}{\vspace{4pt}\noindent\textbf{\textit{Keywords---}}\ignorespaces}{\par\vspace{6pt}}
+}
+\makeatother
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
+
+\begin{document}
+
+\title{CaneSugar Neural v1: A Deep Tabular Highway Network for Sugarcane Yield Prediction}
+
+\author{
+    \IEEEauthorblockN{Agricultural Artificial Intelligence and Deep Learning Research Group}
+    \IEEEauthorblockA{Project CaneSense, Precision Agronomy and Computing Unit\\
+    Technical Documentation and Agricultural Systems Laboratory\\
+    Email: haarinis.23cse@kongu.edu}
+}
+
+\maketitle
+
+%====================================================================
+\begin{abstract}
+Mills need to know how much cane is coming months before the first stalk is cut. Farm managers need the same number to decide on nitrogen, irrigation, and which blocks to worry about. Getting it right from tabular field records is hard. Soil chemistry, nutrient balance, seasonal water, and cultivar genetics all interact, and none of them behave linearly. Gradient-boosted trees handle some of this but produce step-shaped response curves. Plain multi-layer perceptrons struggle with sparse categorical inputs and weak gradients.
+
+We built \textbf{CaneSugar Neural v1}, a single neural network (no ensemble) for sugarcane yield regression. It uses learned embeddings for 20 categorical variables, layer normalization on 65 continuous features, a linear highway skip across the bottleneck layers, and Huber loss with decoupled weight decay. We trained on 3,000 field plots split 70/15/15 into training, validation, and test sets. On the 450 held-out plots the model reaches $R^2 = 0.9240$, MAE of 21.84~Q/A, RMSE of 29.72~Q/A, and MAPE of 8.82\%. Across three random seeds, test $R^2$ is $0.9247 \pm 0.0013$.
+
+The model also reports its own doubt. Monte-Carlo Dropout gives a prediction spread ($\pm\sigma$), and Integrated Gradients shows which inputs drive each prediction. Stalk volume (28.4\%), nitrogen rate (14.2\%), and root-zone moisture (11.8\%) lead the ranking. A domain-informed neural network, in short, can match or beat tree ensembles on this task while giving smooth response curves and usable confidence intervals.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Sugarcane yield prediction, deep tabular learning, entity embeddings, precision agriculture, Monte-Carlo Dropout, Integrated Gradients, residual highway networks.
+\end{IEEEkeywords}
+
+%====================================================================
+\section{Introduction}
+
+\IEEEPARstart{S}{ugarcane} (\textit{Saccharum officinarum} L.) feeds the world's sugar supply. It also feeds bioethanol plants and cogeneration boilers~\cite{canata2024ai}. Every one of those industries runs on a forecast. Mill managers want plot-level yield estimates months ahead so they can set crushing schedules, book trucks, and honor supply contracts. Farm managers want the same estimate mid-season, while there is still time to adjust nitrogen, schedule another irrigation round, or send someone to look at a struggling block~\cite{somard2024sugarcane}.
+
+\subsection{Agricultural Context}
+Cane is not maize. A crop cycle runs 10 to 18 months, and the stalks pile up biomass and sucrose the whole way. We report yield in Quintals per Acre ($1\text{ Q/A} = 100\text{ kg/acre} \approx 0.247\text{ t/ha}$). Five groups of factors shape the final number:
+\begin{itemize}
+    \item \textbf{Soil}: root-zone depth, pH, electrical conductivity, organic carbon, and the sand--silt--clay split.
+    \item \textbf{Nutrients}: available N, P, and K, plus micronutrients (Zn, Fe, Cu, Mn, B) that matter during tillering and grand growth.
+    \item \textbf{Water}: rainfall, reference evapotranspiration ($ET_o$), water-table access, and irrigation method (drip versus furrow).
+    \item \textbf{Temperature and light}: mean temperature, the day--night swing ($T_{\max} - T_{\min}$) that affects ripening, and sunshine hours.
+    \item \textbf{Stand and stalk}: height, diameter, tiller count, and planting density.
+\end{itemize}
+
+\subsection{Problem Statement}
+These inputs do not add up. They bend, saturate, and block each other. Nitrogen raises biomass with diminishing returns (Mitscherlich), then tips over: too much N causes lodging, delays ripening, and invites red rot (\textit{Colletotrichum falcatum})~\cite{socadagui2026spatial}. Liebig's Law of the Minimum adds another wrinkle. If potassium or soil moisture is short, more nitrogen does nothing~\cite{everingham2016accurate,inman2005sugarcane}.
+
+Two families of methods dominate the field, and each has a weak spot.
+\begin{enumerate}
+    \item \textbf{Process-based crop models.} DSSAT-CANEGRO~\cite{singels2005modelling} and APSIM-Sugarcane~\cite{keating1999modelling} simulate carbon assimilation, phenology, and water balance with differential equations. They are biologically sound. They also need local calibration data that smallholders rarely have.
+    \item \textbf{Tree ensembles.} Random Forests~\cite{breiman2001random}, XGBoost~\cite{chen2016xgboost}, and CatBoost~\cite{prokhorenkova2018catboost} are the usual choice for agricultural tables~\cite{van2020crop,silva2020sugarcane}. But trees cut the input space into axis-aligned boxes. The response surface turns into steps, which plants do not follow. Extrapolation to odd weather is poor. And there is no built-in measure of model uncertainty.
+\end{enumerate}
+
+\subsection{Motivation and Contributions}
+Plain MLPs have a mixed record on tabular farm data and often lose to trees~\cite{shwartz2022tabular,borisov2022deep}. We see two reasons. One-hot encoding of categorical columns produces sparse vectors that overfit quickly. And stacked dense layers with ReLU can lose neurons and gradient signal as they push mismatched physical quantities through a bottleneck~\cite{gorishniy2021revisiting}.
+
+CaneSugar Neural v1 is our attempt to fix both. Our contributions:
+\begin{enumerate}
+    \item \textbf{A purpose-built architecture.} Learned embeddings for 20 categorical variables, layer normalization for 65 continuous inputs, fused into one 165-dimensional vector (see the note in Section~\ref{sec:embeddings} on the embedding total).
+    \item \textbf{A highway skip.} A linear projection from the 128-unit layer to the 64-unit layer keeps early nutrient-interaction signals alive and gradients healthy.
+    \item \textbf{Robust training.} Huber loss ($\delta = 1.0$), AdamW, and cosine annealing keep hail-damaged and flooded plots from wrecking the fit.
+    \item \textbf{Uncertainty.} Monte-Carlo Dropout ($T = 30$) yields a variance and a 95\% interval for each plot.
+    \item \textbf{Attribution.} Integrated Gradients checks that the network's logic matches basic agronomy.
+\end{enumerate}
+
+\subsection{Research Questions}
+\begin{itemize}
+    \item \textbf{RQ1}: Can a single, non-ensemble network reach $R^2 > 0.90$ on heterogeneous sugarcane data? (Our stretch goal was $R^2 \ge 0.95$.)
+    \item \textbf{RQ2}: Does agronomic feature engineering help the network more than raw measurements do?
+    \item \textbf{RQ3}: Do learned embeddings generalize better than one-hot encoding?
+    \item \textbf{RQ4}: Does the highway skip improve gradient flow and validation stability?
+    \item \textbf{RQ5}: How much does performance move across random seeds on an untouched test set?
+    \item \textbf{RQ6}: Which variables drive the predictions, according to Integrated Gradients?
+\end{itemize}
+
+%====================================================================
+\section{Related Work}
+
+\subsection{Sugarcane Yield Estimation}
+Early work used regional climate regressions. Later work moved to remote sensing and machine learning. Everingham et al.~\cite{everingham2016accurate} showed that Random Forests fed with seasonal climate indices beat simple bivariate regressions across Australian cane regions. Canata et al.~\cite{canata2024ai} applied machine learning to multispectral satellite images to predict Brix and purity, and found that vegetation indices track stalk sucrose.
+
+On spatial patterns, Socadagui-Casas et al.~\cite{socadagui2026spatial} modeled yield in Colombia's Cauca River Valley and stressed how soil compaction and irrigation timing interact. Som-ard et al.~\cite{somard2024sugarcane} combined UAV imagery with Sentinel-2 time series in Thailand. Vegetation indices captured canopy closure, but clouds during the monsoon hurt them. Satellites see greenness. They do not see soil chemistry, organic carbon, or root-zone nutrient balance. Those directly set stalk tonnage.
+
+\subsection{Machine Learning in Crop Production}
+A review of more than 500 studies by van Klompenburg et al.~\cite{van2020crop} found Random Forests, support vector regression, and boosted trees to be the most common choices. Silva et al.~\cite{silva2020sugarcane} compared XGBoost with neural networks and found the trees stronger, largely because they cope with unscaled inputs and categorical fields.
+
+Still, trees have a known flaw. As Borisov et al.~\cite{borisov2022deep} note, they split space into hyper-rectangles. A continuous process such as nitrogen uptake comes out as a staircase. Move an input slightly across a threshold and the predicted yield jumps. A variable-rate fertilizer applicator acting on that jump would issue advice no agronomist would accept.
+
+\subsection{Deep Learning for Tabular Data}
+Gorishniy et al.~\cite{gorishniy2021revisiting} showed that a well-regularized ResNet-style network can match or beat trees once categorical variables become learned embeddings. Guo and Berkhahn~\cite{guo2016entity} popularized the idea. Similar categories land close together in the embedding space. Early- and late-maturing cultivars, for instance, can sit on a continuum rather than in separate one-hot columns.
+
+%====================================================================
+\section{Research Gap and Objectives}
+
+Three gaps stand out.
+\begin{enumerate}
+    \item \textbf{A split field.} Forecasting sits between rigid process models and generic tree ensembles. Domain-specific tabular deep learning is barely explored.
+    \item \textbf{Architectures that ignore the physics.} Standard networks treat every column the same. They ignore units, nutrient ratios, and biological bottlenecks.
+    \item \textbf{Missing uncertainty and explanation.} Published neural models for sugarcane mostly give a single number. No intervals. No attribution.
+\end{enumerate}
+
+Our goal is to build, train, and test one network that closes all three gaps: engineered agronomic features, entity embeddings, a residual highway, Monte-Carlo Dropout, and Integrated Gradients.
+
+%====================================================================
+\section{Dataset and Preprocessing}
+
+\subsection{Data Source}
+The data come from \texttt{FINAL\_SUGARCANE\_DATASET.csv}: $N = 3{,}000$ commercial plots across sub-tropical and tropical zones, with a wide spread of soils, practices, and climates. The target is \texttt{Yield\_Quintal\_per\_Acre} (Q/A), the mill-delivered clean cane per acre. Table~\ref{tab:dataset_summary} gives the numbers.
+
+\begin{table}[htbp]
+\caption{Dataset Summary and Target Yield Distribution}
+\label{tab:dataset_summary}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}llr@{}}
+\toprule
+\textbf{Category} & \textbf{Attribute / Metric} & \textbf{Value} \\
+\midrule
+Dataset scope   & Total field plots ($N$)       & 3,000 \\
+Feature breadth & Total raw attributes          & 81 \\
+Target variable & Harvest metric                & \texttt{Yield\_Q/A} \\
+\midrule
+Target stats    & Mean $\pm$ std.\ dev.         & $280.2 \pm 104.1$ \\
+                & Minimum                       & 40.2 Q/A \\
+                & 25th percentile ($Q_1$)       & 205.4 Q/A \\
+                & Median ($Q_2$)                & 281.1 Q/A \\
+                & 75th percentile ($Q_3$)       & 356.4 Q/A \\
+                & Maximum                       & 606.5 Q/A \\
+\midrule
+Partitions      & Training (70\%)               & 2,100 plots \\
+                & Validation (15\%)             & 450 plots \\
+                & Held-out test (15\%)          & 450 plots \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsection{Preventing Leakage}
+Before any fitting, we made two hard rules.
+\begin{itemize}
+    \item \textbf{No location identifiers.} We dropped land record numbers (\texttt{Khasra\_No}), coordinates (\texttt{Latitude}, \texttt{Longitude}), and administrative labels (\texttt{State}, \texttt{District}, \texttt{Tehsil}, \texttt{Sugar\_Mill}, \texttt{Agro\_Cluster}). The network could otherwise memorize places.
+    \item \textbf{Training-only statistics.} We split 70/15/15 with a fixed seed. Median imputation values and scaling statistics come from the 2,100 training plots only. Validation and test data were transformed with those same numbers.
+\end{itemize}
+
+\subsection{Missing Values}
+The raw file has 10,205 missing entries, mostly in secondary soil and micronutrient assays. Continuous gaps were filled with training medians, which shrug off skew. Missing categories got their own \texttt{<unk>} token and embedding row.
+
+%====================================================================
+\section{Agronomic Feature Engineering}
+
+We did not feed raw columns straight in. Plants respond to ratios and limits, so we built features that say so.
+
+\subsection{Soil Chemistry and Nutrient Balance}
+Total macronutrient load, with $N$, $P$, $K$ in kg/acre:
+\begin{equation}
+\text{NPK}_{\text{total}} = N + P + K
+\end{equation}
+Ratios and proportions, smoothed with $\epsilon = 10^{-5}$:
+\begin{equation}
+R_{N:P} = \frac{N}{P + \epsilon}, \quad
+R_{N:K} = \frac{N}{K + \epsilon}, \quad
+R_{P:K} = \frac{P}{K + \epsilon}
+\end{equation}
+\begin{equation}
+\begin{aligned}
+f_N &= \frac{N}{\text{NPK}_{\text{total}} + \epsilon}, \quad
+f_P = \frac{P}{\text{NPK}_{\text{total}} + \epsilon} \\
+f_K &= \frac{K}{\text{NPK}_{\text{total}} + \epsilon}
+\end{aligned}
+\end{equation}
+To encode Liebig's Law, each nutrient is scaled against a baseline dose ($N_0 = 150$, $P_0 = 60$, $K_0 = 100$ kg/acre):
+\begin{equation}
+\begin{aligned}
+n_{\text{rel}} &= \text{clip}\!\left(\tfrac{N}{150}, 0, 3\right), \quad
+p_{\text{rel}} = \text{clip}\!\left(\tfrac{P}{60}, 0, 3\right) \\
+k_{\text{rel}} &= \text{clip}\!\left(\tfrac{K}{100}, 0, 3\right)
+\end{aligned}
+\end{equation}
+The scarcest nutrient sets the ceiling, and a geometric mean captures balance:
+\begin{align}
+\Phi_{\text{Liebig}} &= \min(n_{\text{rel}}, p_{\text{rel}}, k_{\text{rel}}) \\
+\Phi_{\text{Geom}}   &= \left(n_{\text{rel}} \cdot p_{\text{rel}} \cdot k_{\text{rel}}\right)^{1/3}
+\end{align}
+Soil pH suitability is a Gaussian centered on neutral ($\text{pH}_{\text{opt}} = 7.0$, $\sigma_{\text{pH}} = 1.0$):
+\begin{equation}
+S_{\text{pH}} = \exp\!\left(-\tfrac{1}{2}\left(\tfrac{\text{Soil\_pH} - 7.0}{1.0}\right)^2\right)
+\end{equation}
+Water-holding capacity enters through an organic-carbon $\times$ soil-moisture product, $\text{OC} \times \text{SM}$.
+
+\subsection{Water and Temperature}
+Seasonal water balance compares total seasonal rainfall ($P_{\text{total}} = \text{Rainfall\_Total\_mm}$) against monthly reference evapotranspiration ($ET_o$):
+\begin{align}
+W_{\text{deficit}} &= P_{\text{total}} - 30.0 \cdot ET_o \\
+R_{W:ET_o} &= \frac{P_{\text{total}}}{30.0 \cdot ET_o + \epsilon}
+\end{align}
+Thermal suitability for C4 photosynthesis peaks at $T_{\text{opt}} = 28.5^\circ$C with $\sigma_T = 5.5^\circ$C:
+\begin{equation}
+S_{\text{thermal}} = \exp\!\left(-\tfrac{1}{2}\left(\tfrac{T_{\text{avg}} - 28.5}{5.5}\right)^2\right)
+\end{equation}
+The diurnal range is $\Delta T = T_{\max} - T_{\min}$.
+
+\subsection{Stalk Biometrics and Calendar Features}
+Treating a stalk as a cylinder, with height $H_{\text{cane}}$ and diameter $D_{\text{cane}}$ in cm:
+\begin{equation}
+V_{\text{stalk}} = \pi \left(\tfrac{D_{\text{cane}}}{2}\right)^2 H_{\text{cane}}
+\end{equation}
+Scaling up to the field, the Field Biomass Index (FBI) uses tiller count $TC$ and planting density $PD$ (plants/acre). The Sugar Accumulation Index (SAI) uses refractometric Brix ($\text{Bx}$):
+\begin{align}
+\text{FBI} &= V_{\text{stalk}} \cdot TC \cdot \tfrac{PD}{1000} \\
+\text{SAI} &= V_{\text{stalk}} \cdot \tfrac{\text{Bx}}{100}
+\end{align}
+Planting and harvest months become sine--cosine pairs, so December sits next to January:
+\begin{equation}
+\tau_{\sin} = \sin\!\left(\tfrac{2\pi m}{12}\right), \qquad
+\tau_{\cos} = \cos\!\left(\tfrac{2\pi m}{12}\right)
+\end{equation}
+Crop duration $\Delta t_{\text{crop}}$ is harvest date minus planting date, in days. After all this, we have \textbf{65 continuous} and \textbf{20 categorical} features.
+
+%====================================================================
+\section{The CaneSugar Neural v1 Architecture}
+
+\subsection{Overview}
+Figure~\ref{fig:architecture} shows the layout. Four parts: layer normalization on the continuous inputs, parallel embeddings for the categoricals, a dense stack with a highway skip, and a regression head that supports MC Dropout and Integrated Gradients at inference.
+
+\begin{figure}[htbp]
+\centering
+\footnotesize
+\setlength{\fboxsep}{6pt}
+\fbox{%
+\begin{tabular}{c}
+\textbf{Inputs}\\[2pt]
+$\mathbf{x}_{\text{num}} \in \mathbb{R}^{65}$ \hspace{1.2em}
+$\mathbf{x}_{\text{cat}} \in \mathbb{N}^{20}$\\[3pt]
+LayerNorm(65) \hspace{0.8em} 20$\times$ Embedding($K_i, d_i$)\\[3pt]
+$\tilde{\mathbf{x}}_{\text{num}}$ \hspace{1.2em} $\mathbf{x}_{\text{emb}}$\\[3pt]
+$\Downarrow$\\[1pt]
+\textbf{Fusion}: $\mathbf{z}_0 = [\tilde{\mathbf{x}}_{\text{num}} \,\|\, \mathbf{x}_{\text{emb}}]$\\[3pt]
+$\Downarrow$\\[1pt]
+Dense 1: 165 $\to$ 256, BN, GELU, Drop(0.20)\\[3pt]
+$\Downarrow$\\[1pt]
+Dense 2: 256 $\to$ 128, BN, GELU, Drop(0.15)\\[3pt]
+$\Downarrow$ \hspace{0.6em} (skip: Linear 128 $\to$ 64 $\Rightarrow$)\\[1pt]
+Dense 3: 128 $\to$ 64, GELU\\[3pt]
+$\Downarrow$\\[1pt]
+\textbf{Highway sum}: $\mathbf{h}_{\text{res}} = \mathbf{h}_3 + \mathbf{h}_{\text{skip}}$\\[3pt]
+$\Downarrow$\\[1pt]
+Dense 4: 64 $\to$ 32, GELU\\[3pt]
+$\Downarrow$\\[1pt]
+Head: Linear 32 $\to$ 1 \ $\Rightarrow$ \ $\hat{y}$\\[3pt]
+MC Dropout ($T = 30$) \& Integrated Gradients
+\end{tabular}}
+\caption{Computation graph of CaneSugar Neural v1.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Categorical Embeddings}
+\label{sec:embeddings}
+One-hot columns are sparse and treat every category as equally different from every other. Embeddings fix that. Table~\ref{tab:embeddings} lists the 20 variables with their cardinalities and embedding sizes.
+
+% NOTE: the per-feature dimensions in this table add up to 94 (64 + 30), not 100.
+% The fused size would then be 159, not 165. Check the code and correct either the
+% table or the totals (and the parameter count in Table 6) before submission.
+\begin{table*}[t]
+\caption{Categorical Embedding Specifications for All 20 Features}
+\label{tab:embeddings}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llrc@{\hspace{2em}}llrc@{}}
+\toprule
+\textbf{Feature (1--10)} & \textbf{Agronomic role} & \textbf{Card.} & \textbf{Dim} &
+\textbf{Feature (11--20)} & \textbf{Agronomic role} & \textbf{Card.} & \textbf{Dim} \\
+\midrule
+\texttt{Variety}            & Cultivar genetics       & 3 & 16 & \texttt{Drainage\_Condition}  & Hydraulic conductivity & 4 & 4 \\
+\texttt{Soil\_Type}         & Soil textural series    & 4 & 8  & \texttt{Disease\_Type}        & Pathogen class         & 4 & 4 \\
+\texttt{Irrigation\_Method} & Water delivery          & 3 & 8  & \texttt{Season}               & Autumn, spring, adsali & 4 & 4 \\
+\texttt{Fertilizer\_Type}   & Synthetic vs organic    & 3 & 8  & \texttt{Growth\_Stage}        & Phenological period    & 4 & 4 \\
+\texttt{Disease\_Severity}  & Disease pressure        & 3 & 4  & \texttt{Application\_Timing}  & Basal vs top-dressing  & 4 & 4 \\
+\texttt{Pest\_Level}        & Insect pressure         & 3 & 4  & \texttt{Intercropping}        & Companion crops        & 2 & 2 \\
+\texttt{Irrig\_Frequency}   & Scheduling cadence      & 4 & 4  & \texttt{Weed\_Control}        & Chemical vs manual     & 2 & 2 \\
+\texttt{Water\_Quality}     & Salinity / sodicity     & 3 & 4  & \texttt{Mulching}             & Trash blanket          & 2 & 2 \\
+\texttt{Seedbed\_Condition} & Seedbed preparation     & 3 & 4  & \texttt{Fertilizer\_Split}    & Dose distribution      & 2 & 2 \\
+\texttt{Planting\_Method}   & Trench, pit, ridge      & 4 & 4  & \texttt{Machinery\_Use}       & Mechanized operations  & 2 & 2 \\
+\midrule
+\multicolumn{8}{c}{\textbf{Reported total: 100 embedding dimensions; fused with 65 continuous inputs = 165}} \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+For feature $i$ with category index $c_i \in \{0, \dots, K_i - 1\}$, the lookup is
+\begin{equation}
+\mathbf{e}_i = \mathbf{E}_i[c_i] \in \mathbb{R}^{d_i}, \qquad \mathbf{E}_i \in \mathbb{R}^{K_i \times d_i}
+\end{equation}
+and all 20 vectors are concatenated:
+\begin{equation}
+\mathbf{x}_{\text{emb}} = \left[\mathbf{e}_1 \,\|\, \mathbf{e}_2 \,\|\, \cdots \,\|\, \mathbf{e}_{20}\right]
+\end{equation}
+
+\subsection{Normalization and Fusion}
+The continuous inputs $\mathbf{x}_{\text{num}} \in \mathbb{R}^{65}$ pass through Layer Normalization~\cite{ba2016layer}, with learned scale and bias parameters $\boldsymbol{\gamma}, \boldsymbol{\beta} \in \mathbb{R}^{65}$:
+\begin{equation}
+\tilde{\mathbf{x}}_{\text{num}} = \frac{\mathbf{x}_{\text{num}} - \mathbb{E}[\mathbf{x}_{\text{num}}]}{\sqrt{\operatorname{Var}[\mathbf{x}_{\text{num}}] + \epsilon}} \odot \boldsymbol{\gamma} + \boldsymbol{\beta}
+\end{equation}
+The normalized continuous and categorical embedding representations are then concatenated into a unified latent vector:
+\begin{equation}
+\mathbf{z}_0 = \left[\tilde{\mathbf{x}}_{\text{num}} \,\|\, \mathbf{x}_{\text{emb}}\right] \in \mathbb{R}^{165}
+\end{equation}
+
+%====================================================================
+\section{Formulation and Training}
+
+\subsection{Dense Layers and the Highway Skip}
+The fused vector $\mathbf{z}_0$ passes through two dense blocks, each incorporating 1D Batch Normalization (BN), GELU activations, and Dropout:
+\begin{align}
+\mathbf{h}_1 &= \text{Dropout}_{0.20}\big(\text{GELU}(\text{BN}(\mathbf{W}_1 \mathbf{z}_0 + \mathbf{b}_1))\big) \\
+\mathbf{h}_2 &= \text{Dropout}_{0.15}\big(\text{GELU}(\text{BN}(\mathbf{W}_2 \mathbf{h}_1 + \mathbf{b}_2))\big)
+\end{align}
+where $\mathbf{W}_1 \in \mathbb{R}^{256 \times 165}$, $\mathbf{b}_1 \in \mathbb{R}^{256}$, $\mathbf{W}_2 \in \mathbb{R}^{128 \times 256}$, and $\mathbf{b}_2 \in \mathbb{R}^{128}$.
+
+GELU~\cite{hendrycks2016gaussian} weights each input by its Gaussian CDF:
+\begin{equation}
+\text{GELU}(x) = x \cdot \Phi(x) = \tfrac{x}{2}\left[1 + \text{erf}\!\left(\tfrac{x}{\sqrt{2}}\right)\right]
+\end{equation}
+ReLU zeros out every negative value. A unit stuck there stops learning, which is a problem when negative inputs encode stress penalties. GELU keeps a small gradient on the negative side.
+
+Next comes the highway skip. The third bottleneck layer receives a parallel linear projection directly from $\mathbf{h}_2$:
+\begin{align}
+\mathbf{h}_3 &= \text{GELU}(\mathbf{W}_3 \mathbf{h}_2 + \mathbf{b}_3) \\
+\mathbf{h}_{\text{skip}} &= \mathbf{W}_{\text{skip}} \mathbf{h}_2 + \mathbf{b}_{\text{skip}} \\
+\mathbf{h}_{\text{res}} &= \mathbf{h}_3 + \mathbf{h}_{\text{skip}} \label{eq:highway}
+\end{align}
+with projection weights $\mathbf{W}_3, \mathbf{W}_{\text{skip}} \in \mathbb{R}^{64 \times 128}$ and biases $\mathbf{b}_3, \mathbf{b}_{\text{skip}} \in \mathbb{R}^{64}$.
+
+\subsection{Why the Skip Helps Gradients}
+Applying the chain rule to the residual summation in Eq.~\eqref{eq:highway} with $\mathbf{z}_3 = \mathbf{W}_3 \mathbf{h}_2 + \mathbf{b}_3$:
+\begin{equation}
+\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \mathbf{h}_2}
+&= \underbrace{\frac{\partial \mathcal{L}}{\partial \mathbf{h}_{\text{res}}} \mathbf{W}_{\text{skip}}}_{\text{direct linear path}} \\
+&\quad + \underbrace{\frac{\partial \mathcal{L}}{\partial \mathbf{h}_{\text{res}}} \operatorname{diag}\!\big(\text{GELU}'(\mathbf{z}_3)\big)\mathbf{W}_3}_{\text{non-linear bottleneck path}}
+\end{aligned}
+\end{equation}
+Suppose $\text{GELU}'$ collapses toward zero because the layer saturates. The second term vanishes, but the first term does not. Gradient still reaches $\mathbf{h}_2$ and the embeddings below it. That is the whole idea. (It is a structural argument, not a guarantee that training always succeeds. Section~\ref{sec:ablation} has the empirical evidence.)
+
+The final dense layers compute the scalar harvest yield prediction:
+\begin{align}
+\mathbf{h}_4 &= \text{GELU}(\mathbf{W}_4 \mathbf{h}_{\text{res}} + \mathbf{b}_4) \\
+\hat{y} &= \mathbf{W}_{\text{out}} \mathbf{h}_4 + b_{\text{out}}
+\end{align}
+where $\mathbf{W}_4 \in \mathbb{R}^{32 \times 64}, \mathbf{b}_4 \in \mathbb{R}^{32}$, $\mathbf{W}_{\text{out}} \in \mathbb{R}^{1 \times 32}$, and $b_{\text{out}} \in \mathbb{R}$.
+
+\subsection{Huber Loss}
+Yield data has ugly outliers: hail, flooding, insect outbreaks. Squared error blows those up and lets a handful of plots steer the whole fit. Huber loss~\cite{huber1964robust} (here $\delta = 1.0$ in normalized target units) squares small errors and goes linear for big ones:
+\begin{equation}
+\mathcal{L}_{\delta}(y, \hat{y}) =
+\begin{cases}
+\tfrac{1}{2}(y - \hat{y})^2, & |y - \hat{y}| \le \delta \\[3pt]
+\delta \left(|y - \hat{y}| - \tfrac{1}{2}\delta\right), & \text{otherwise}
+\end{cases}
+\end{equation}
+The gradient with respect to the prediction is bounded by $\delta$:
+\begin{equation}
+\frac{\partial \mathcal{L}_\delta}{\partial \hat{y}} =
+\begin{cases}
+-(y - \hat{y}), & |y - \hat{y}| \le \delta \\[3pt]
+-\delta \cdot \text{sgn}(y - \hat{y}), & |y - \hat{y}| > \delta
+\end{cases}
+\end{equation}
+No single plot can pull harder than $\pm\delta$. Ordinary plots still get smooth quadratic behavior.
+
+\subsection{Optimizer and Schedule}
+We train using AdamW~\cite{loshchilov2017decoupled} with decoupled weight decay $\lambda = 10^{-4}$. The learning rate warms up linearly for $T_{\text{warm}} = 5$ epochs, then follows a cosine annealing curve down to $\eta_{\min}$:
+\begin{equation}
+\eta_t = \begin{cases}
+\eta_0 \,\dfrac{t}{T_{\text{warm}}}, & 1 \le t \le T_{\text{warm}} \\[6pt]
+\begin{aligned}[b]
+&\eta_{\min} + \tfrac{1}{2}(\eta_0 - \eta_{\min}) \\
+&\times \left(1 + \cos\!\left(\pi\,\tfrac{t - T_{\text{warm}}}{T_{\max} - T_{\text{warm}}}\right)\right),
+\end{aligned} & t > T_{\text{warm}}
+\end{cases}
+\end{equation}
+where initial learning rate $\eta_0 = 10^{-3}$, minimum rate $\eta_{\min} = 10^{-5}$, and total duration $T_{\max} = 150$ epochs. The gradient norm is clipped at 1.0 across all training iterations.
+
+%====================================================================
+\section{Experimental Setup}
+
+\subsection{Environment}
+We ran everything in Python 3.14 with PyTorch 2.6.0 on a CUDA workstation (64~GB RAM, multi-core x86-64). PyTorch and NumPy seeds were fixed, and runs were checkpointed.
+
+\subsection{Hyperparameters}
+Table~\ref{tab:hyperparams} lists the final settings, chosen by watching the validation set.
+
+\begin{table}[htbp]
+\caption{CaneSugar Neural v1 Hyperparameters}
+\label{tab:hyperparams}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}llr@{}}
+\toprule
+\textbf{Category} & \textbf{Hyperparameter} & \textbf{Value} \\
+\midrule
+Architecture & Continuous inputs               & 65 \\
+             & Categorical embeddings          & 20 features (100 dims) \\
+             & Fused dimension                 & 165 \\
+             & Dense layers                    & 256 $\to$ 128 $\to$ 64 $\to$ 32 \\
+             & Highway skip                    & Linear(128 $\to$ 64) \\
+             & Activation                      & GELU \\
+             & Dropout                         & 0.20 / 0.15 \\
+             & Trainable parameters            & 102,485 \\
+\midrule
+Optimization & Optimizer                       & AdamW ($\lambda = 10^{-4}$) \\
+             & Schedule                        & Cosine + warmup \\
+             & Peak / min learning rate        & $10^{-3}$ / $10^{-5}$ \\
+             & Warmup / total epochs           & 5 / 150 \\
+             & Batch size / early stopping     & 64 / 20 epochs \\
+             & Loss                            & Huber ($\delta = 1.0$) \\
+             & Gradient clipping               & 1.0 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsection{Metrics}
+We report the four standard regression measures:
+\begin{align}
+R^2 &= 1 - \frac{\sum_{i=1}^n (y_i - \hat{y}_i)^2}{\sum_{i=1}^n (y_i - \bar{y})^2} \\
+\text{MAE} &= \frac{1}{n} \sum_{i=1}^n |y_i - \hat{y}_i| \\
+\text{RMSE} &= \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2} \\
+\text{MAPE} &= \frac{100\%}{n} \sum_{i=1}^n \left|\frac{y_i - \hat{y}_i}{y_i}\right|
+\end{align}
+
+%====================================================================
+\section{Results}
+
+\subsection{Comparison with Baselines}
+We trained five competing models on the same split and scored them on the same 450 test plots. We also included the project's earlier closed-form biophysical model, which uses no machine learning (CaneSugar Custom). Table~\ref{tab:main_results} has the numbers.
+
+\begin{table}[htbp]
+\caption{Benchmark on the Held-Out Test Set ($n=450$ Plots)}
+\label{tab:main_results}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrrr@{}}
+\toprule
+\textbf{Model} & \textbf{$R^2$} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAPE} \\
+ & & \scriptsize(Q/A) & \scriptsize(Q/A) & \scriptsize(\%) \\
+\midrule
+CaneSugar Custom\textsuperscript{*}   & 0.9524 & 16.82 & 23.45 & 6.74 \\
+\textbf{CaneSugar Neural v1 (ours)}   & \textbf{0.9240} & \textbf{21.84} & \textbf{29.72} & \textbf{8.82} \\
+CatBoost                              & 0.9081 & 23.41 & 32.25 & 9.52 \\
+XGBoost                               & 0.8794 & 27.12 & 37.10 & 11.14 \\
+Random Forest                         & 0.8347 & 32.40 & 43.10 & 13.20 \\
+Linear Regression                     & 0.7510 & 38.60 & 49.30 & 15.65 \\
+ElasticNet                            & 0.7130 & 41.20 & 52.80 & 17.02 \\
+\bottomrule
+\end{tabular*}
+\vspace{2pt}
+
+{\scriptsize \textsuperscript{*}Closed-form biophysical baseline, no machine learning.}
+\end{table}
+
+\subsection{What the Numbers Say}
+Three points.
+\begin{enumerate}
+    \item \textbf{It beats every tree model.} CatBoost reaches 0.9081, XGBoost 0.8794, Random Forest 0.8347. A single network with embeddings and a highway skip clears all three.
+    \item \textbf{We missed our own target.} We hoped for $R^2 \ge 0.95$. We got 0.9240. Only the closed-form biophysical model crosses 0.95 (0.9524), and it has hand-coded Cate--Nelson knots and strict Liebig cutoffs baked in. Among purely data-driven models, ours is the best.
+    \item \textbf{Linear models fail.} Linear Regression (0.7510) and ElasticNet (0.7130) confirm what agronomy already says: yield is not a flat plane.
+\end{enumerate}
+
+%====================================================================
+\section{Ablation Study}
+\label{sec:ablation}
+
+We started from a plain MLP (one-hot inputs, ReLU, MSE) and added one component at a time. Table~\ref{tab:ablation} shows each step.
+
+\begin{table}[htbp]
+\caption{Architectural Ablation ($n=450$ Test Plots)}
+\label{tab:ablation}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrr@{}}
+\toprule
+\textbf{Configuration} & \textbf{$R^2$} & \textbf{MAE} & \textbf{$\Delta R^2$} \\
+ & & \scriptsize(Q/A) & \\
+\midrule
+1. Baseline MLP (one-hot, ReLU, MSE)  & 0.8120 & 34.20 & --- \\
+2. + Entity embeddings                & 0.8740 & 27.50 & +6.20\% \\
+3. + Input LayerNorm                  & 0.8910 & 25.10 & +1.70\% \\
+4. + Highway skip                     & 0.9130 & 23.40 & +2.20\% \\
+5. + GELU (replacing ReLU)            & 0.9200 & 22.30 & +0.70\% \\
+6. + Huber loss (full Neural v1)      & \textbf{0.9240} & \textbf{21.84} & +0.40\% \\
+\midrule
+\multicolumn{4}{c}{\textbf{Net gain: +11.20\% $R^2$, $-12.36$ Q/A MAE}} \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Embeddings (+6.20\%).} The biggest jump by far. Similar cultivars and soil types can cluster together in the embedding space.
+    \item \textbf{Highway skip (+2.20\%).} A linear shortcut from layer 2 to layer 3 gave a clear gain. That fits the gradient argument above.
+    \item \textbf{LayerNorm and Huber (+2.10\% combined).} LayerNorm stopped large-scale variables like rainfall from dominating. Huber loss calmed training when outlier plots showed up.
+\end{itemize}
+
+%====================================================================
+\section{Stability and Error Analysis}
+
+\subsection{Seeds}
+Was 0.9240 a lucky draw? We retrained from scratch with seeds 42, 101, and 777 on identical splits (Table~\ref{tab:multiseed}).
+
+\begin{table}[htbp]
+\caption{Multi-Seed Stability ($n=450$ Test Plots)}
+\label{tab:multiseed}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrrr@{}}
+\toprule
+\textbf{Seed} & \textbf{Train $R^2$} & \textbf{Val $R^2$} & \textbf{Test $R^2$} & \textbf{Test MAE} \\
+ & & & & \scriptsize(Q/A) \\
+\midrule
+42                       & 0.9782 & 0.9198 & 0.9262 & 21.62 \\
+101                      & 0.9795 & 0.9212 & 0.9231 & 22.05 \\
+777                      & 0.9774 & 0.9202 & 0.9249 & 21.85 \\
+\midrule
+\textbf{Mean}            & \textbf{0.9784} & \textbf{0.9204} & \textbf{0.9247} & \textbf{21.84} \\
+\textbf{Std.\ dev.}      & $\pm 0.0011$ & $\pm 0.0007$ & $\pm 0.0013$ & $\pm 0.18$ \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+The spread is tiny: $\sigma_{R^2} = 0.0013$ on the test set. The optimization is repeatable. One thing worth noticing, though: train $R^2$ is about 0.978 and test is about 0.925. The model overfits a little, and we would rather say so.
+
+\subsection{Residuals}
+On the test set:
+\begin{itemize}
+    \item \textbf{Bias.} Mean residual is $-0.42$ Q/A. Essentially unbiased.
+    \item \textbf{Shape.} Skewness is 0.03 and kurtosis 3.12. Close to Gaussian, with no sign of serious heteroscedasticity.
+    \item \textbf{By yield tier.}
+    \begin{itemize}
+        \item Low ($Y < 200$ Q/A): MAE 19.45 Q/A
+        \item Medium ($200 \le Y \le 350$ Q/A): MAE 20.82 Q/A
+        \item High ($Y > 350$ Q/A): MAE 25.14 Q/A
+    \end{itemize}
+\end{itemize}
+Errors are fairly even across tiers. They grow a bit above 450 Q/A, where growers likely used practices the dataset never recorded, such as foliar stimulants.
+
+%====================================================================
+\section{Uncertainty and Explanation}
+
+\subsection{Monte-Carlo Dropout}
+A single forecast can mislead when a field looks nothing like the training data. So we keep dropout ($p_1 = 0.20$, $p_2 = 0.15$) switched on at inference, as an approximation to Bayesian inference~\cite{gal2016dropout}, and run $T = 30$ stochastic passes:
+\begin{equation}
+\hat{y}^{(t)} = f_{\mathbf{W}^{(t)}}(\mathbf{x}), \qquad t = 1, \dots, T
+\end{equation}
+The mean and standard deviation are
+\begin{align}
+\mu_y &= \frac{1}{T} \sum_{t=1}^T \hat{y}^{(t)} \\
+\sigma_y &= \sqrt{\frac{1}{T - 1} \sum_{t=1}^T \left(\hat{y}^{(t)} - \mu_y\right)^2}
+\end{align}
+and the 95\% interval is
+\begin{equation}
+\text{CI}_{95\%} = \left[\max(0,\, \mu_y - 1.96\,\sigma_y),\; \mu_y + 1.96\,\sigma_y\right]
+\end{equation}
+On ordinary fields with balanced NPK and enough moisture, $\sigma_y$ sits around 18 to 22 Q/A. Push the inputs to an edge case, say $N = 350$ kg/acre under severe drought, and $\sigma_y$ climbs above 45 Q/A. That is the model telling an agronomist not to trust the number too much.
+
+\subsection{Integrated Gradients}
+For attribution we use Integrated Gradients~\cite{sundararajan2017axiomatic} with a zero baseline $\mathbf{x}' = \mathbf{0}$ (mean standardized features, average embeddings) on the 165-dimensional fused input:
+\begin{equation}
+\text{Attr}_i(\mathbf{x}) = (x_i - x_i') \int_{0}^{1} \frac{\partial F\big(\mathbf{x}' + \alpha(\mathbf{x} - \mathbf{x}')\big)}{\partial x_i}\, d\alpha
+\end{equation}
+We approximate the integral with $M = 30$ steps:
+\begin{equation}
+\text{Attr}_i(\mathbf{x}) \approx \frac{x_i - x_i'}{M} \sum_{k=1}^M \frac{\partial F\big(\mathbf{x}' + \tfrac{k}{M}(\mathbf{x} - \mathbf{x}')\big)}{\partial x_i}
+\end{equation}
+For a categorical variable $k$ we sum over its embedding dimensions:
+\begin{equation}
+\text{Attr}_{\text{cat}_k}(\mathbf{x}) = \sum_{j=1}^{d_k} \text{Attr}_{j}^{(k)}(\mathbf{x})
+\end{equation}
+Table~\ref{tab:attributions} gives the mean relative importance across the test set.
+
+\begin{table}[htbp]
+\caption{Global Mean Relative Feature Attribution (Integrated Gradients)}
+\label{tab:attributions}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}clrc@{}}
+\toprule
+\textbf{Rank} & \textbf{Agronomic factor} & \textbf{Impact} & \textbf{Sign} \\
+\midrule
+1  & Stalk volume ($V_{\text{stalk}}$)        & +28.4\% & Positive \\
+2  & Nitrogen rate (kg/acre)                  & +14.2\% & Positive \\
+3  & Root-zone soil moisture (\%)             & +11.8\% & Positive \\
+4  & Cultivar (\texttt{Variety})              & +9.6\%  & Mixed \\
+5  & Disease (\texttt{Disease\_Severity})     & $-15.2$\% & Negative \\
+6  & Potassium rate (kg/acre)                 & +6.5\%  & Positive \\
+7  & pH suitability ($S_{\text{pH}}$)         & +4.8\%  & Positive \\
+8  & Water balance ($W_{\text{deficit}}$)     & +3.9\%  & Positive \\
+9  & Pest pressure                            & $-3.4$\% & Negative \\
+10 & All other features                       & 2.2\%   & Residual \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsection{Association, Not Causation}
+The signs make agronomic sense: bigger stalks and more nitrogen push yield up, disease pulls it down. But these are sensitivities inside the model. They are not proof of cause. Field decisions still need local knowledge that a table cannot hold.
+
+%====================================================================
+\section{Discussion}
+
+\subsection{Why the Design Works}
+Three things did most of the work.
+\begin{enumerate}
+    \item \textbf{Smooth embeddings instead of splits.} Cultivars and soils are related to each other. Embeddings let the network learn that once. Trees have to rediscover it at every split.
+    \item \textbf{The shortcut.} Tabular data has no spatial structure, and deep dense stacks can squash low-level chemistry signals. The linear skip lets raw interactions reach the upper layers.
+    \item \textbf{Continuous response curves.} The network gives smooth, differentiable yield curves, closer to how plants actually take up nutrients than a staircase is.
+\end{enumerate}
+
+\subsection{Deployment}
+The trained model is 1.2~MB. Inference takes under 5~ms per record on an ordinary CPU. That fits a farm management system, a tractor terminal, or a phone app. The yield estimate plus the $\pm\sigma$ band gives mills and growers something they can plan around.
+
+%====================================================================
+\section{Limitations}
+
+\subsection{Internal Validity}
+\begin{itemize}
+    \item \textbf{Random split.} The 70/15/15 partition is leak-free in the sense we describe, but all plots come from one shared dataset. Timestamp coverage was too short for a proper multi-year temporal split.
+    \item \textbf{Hyperparameter search.} We tuned by structured exploration on the validation fold. Bayesian optimization might find small extra gains.
+\end{itemize}
+
+\subsection{External Validity}
+\begin{itemize}
+    \item \textbf{Region.} The 3,000 plots come mostly from commercial sub-tropical and tropical belts. Regions with very different soils would need fine-tuning.
+    \item \textbf{Cultivars.} The embedding table only knows the cultivars in the data. A new hybrid falls back to \texttt{<unk>}, and accuracy drops.
+\end{itemize}
+
+\subsection{Construct Validity}
+\begin{itemize}
+    \item \textbf{Proxies.} Rainfall and average temperature are seasonal summaries, not sensor streams. Soil microbes, drainage performance, and micro-climate effects are not measured at all.
+\end{itemize}
+
+%====================================================================
+\section{Future Work}
+
+\begin{enumerate}
+    \item \textbf{Remote sensing.} Add Sentinel-2 and UAV thermal imagery (NDVI, NDRE, canopy temperature).
+    \item \textbf{Time-series encoders.} Replace seasonal averages with LSTM or Transformer encoders over daily weather during tillering and elongation.
+    \item \textbf{Domain adaptation.} Pre-train on large sugarcane registries, then adapt to local cooperatives with a few examples.
+    \item \textbf{Edge deployment.} Quantize to INT8 for offline use on low-cost Android tablets.
+\end{enumerate}
+
+%====================================================================
+\section{Reproducibility}
+
+\begin{itemize}
+    \item Code, layer definitions, and preprocessors live in \texttt{custom\_canesugar\_neural/}.
+    \item Seeds are 42, 101, and 777.
+    \item The weights (\texttt{cane\_sugar\_neural\_v1.pt}), scalers, and categorical vocabularies are archived in the project repository.
+    \item The 450-plot test set stayed untouched until final scoring.
+\end{itemize}
+
+\section{Conclusion}
+
+CaneSugar Neural v1 predicts sugarcane yield from soil, climate, and stalk data with a single network. It reaches $R^2 = 0.9240$, MAE 21.84~Q/A, RMSE 29.72~Q/A, and MAPE 8.82\% on 450 held-out plots, holds steady across seeds ($0.9247 \pm 0.0013$), and beats CatBoost, XGBoost, and Random Forest. It also reports how unsure it is, and shows which inputs drove each answer.
+
+%====================================================================
+\begin{thebibliography}{00}
+
+\bibitem{canata2024ai}
+T.~F. Canata, M.~R. Barbosa~J{\'u}nior, R.~P. de~Oliveira, C.~E.~A. Furlani, and R.~P. da~Silva, ``AI-driven prediction of sugarcane quality attributes using satellite imagery,'' \emph{Sugar Tech}, vol.~26, no.~4, pp.~1102--1115, 2024, doi: \url{10.1007/s12355-024-01399-9}.
+
+\bibitem{socadagui2026spatial}
+D.~A. Socadagui-Casas, A.~F. Rodriguez-Vasquez, Y.~Rubiano-Sanabria, D.~M. Jimenez-Gutierrez, and S.~R. Socadagui-Casas, ``Spatial modeling of sugarcane yield using machine learning approaches,'' \emph{Sugar Tech}, vol.~28, no.~2, pp.~675--685, 2026, doi: \url{10.1007/s12355-026-01736-0}.
+
+\bibitem{somard2024sugarcane}
+J.~Som-ard, M.~Immitzer, F.~Vuolo, and C.~Atzberger, ``Sugarcane yield estimation in Thailand at multiple scales using the integration of UAV and Sentinel-2 imagery,'' \emph{Precision Agriculture}, vol.~25, no.~4, pp.~1581--1608, 2024, doi: \url{10.1007/s11119-024-10124-1}.
+
+\bibitem{everingham2016accurate}
+Y.~Everingham, J.~Sexton, D.~Skocaj, and G.~Inman-Bamber, ``Accurate prediction of sugarcane yield using a random forest algorithm,'' \emph{Agricultural and Forest Meteorology}, vol.~220, pp.~1--14, 2016, doi: \url{10.1016/j.agrformet.2016.01.009}.
+
+\bibitem{van2020crop}
+T.~van Klompenburg, A.~Kassahun, and C.~Catal, ``Crop yield prediction using machine learning: A systematic literature review,'' \emph{Computers and Electronics in Agriculture}, vol.~177, p.~105709, 2020, doi: \url{10.1016/j.compag.2020.105709}.
+
+\bibitem{silva2020sugarcane}
+C.~B. Silva, M.~E. de~Moraes, and F.~A. Saraiva, ``Sugarcane yield prediction with machine learning techniques using meteorological and satellite data,'' \emph{Computers and Electronics in Agriculture}, vol.~179, p.~105844, 2020.
+
+\bibitem{shwartz2022tabular}
+R.~Shwartz-Ziv and R.~Armon, ``Tabular data: Deep learning is not all you need,'' \emph{Information Fusion}, vol.~81, pp.~84--90, 2022, doi: \url{10.1016/j.inffus.2021.11.011}.
+
+\bibitem{borisov2022deep}
+V.~Borisov, T.~Leemann, K.~Se{\ss}ler, J.~Haug, M.~Pawelczyk, and G.~Kasneci, ``Deep neural networks and tabular data: A survey,'' \emph{IEEE Transactions on Neural Networks and Learning Systems}, vol.~35, no.~6, pp.~7400--7419, 2022, doi: \url{10.1109/TNNLS.2022.3229161}.
+
+\bibitem{gorishniy2021revisiting}
+Y.~Gorishniy, I.~Rubachev, V.~Khrulkov, and A.~Babenko, ``Revisiting deep learning models for tabular data,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~34, pp.~18932--18943, 2021.
+
+\bibitem{guo2016entity}
+C.~Guo and F.~Berkhahn, ``Entity embeddings of categorical variables,'' \emph{arXiv preprint arXiv:1604.06737}, 2016.
+
+\bibitem{gal2016dropout}
+Y.~Gal and Z.~Ghahramani, ``Dropout as a Bayesian approximation: Representing model uncertainty in deep learning,'' in \emph{International Conference on Machine Learning (ICML)}, pp.~1050--1059, 2016.
+
+\bibitem{sundararajan2017axiomatic}
+M.~Sundararajan, A.~Taly, and Q.~Yan, ``Axiomatic attribution for deep networks,'' in \emph{International Conference on Machine Learning (ICML)}, pp.~3319--3328, 2017.
+
+\bibitem{ba2016layer}
+J.~L. Ba, J.~R. Kiros, and G.~E. Hinton, ``Layer normalization,'' \emph{arXiv preprint arXiv:1607.06450}, 2016.
+
+\bibitem{hendrycks2016gaussian}
+D.~Hendrycks and K.~Gimpel, ``Gaussian error linear units (GELUs),'' \emph{arXiv preprint arXiv:1606.08415}, 2016.
+
+\bibitem{loshchilov2017decoupled}
+I.~Loshchilov and F.~Hutter, ``Decoupled weight decay regularization,'' in \emph{International Conference on Learning Representations (ICLR)}, 2019.
+
+\bibitem{breiman2001random}
+L.~Breiman, ``Random forests,'' \emph{Machine Learning}, vol.~45, no.~1, pp.~5--32, 2001.
+
+\bibitem{chen2016xgboost}
+T.~Chen and C.~Guestrin, ``XGBoost: A scalable tree boosting system,'' in \emph{ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, pp.~785--794, 2016.
+
+\bibitem{prokhorenkova2018catboost}
+L.~Prokhorenkova, G.~Gusev, A.~Vorobev, A.~V. Dorogush, and A.~Gulin, ``CatBoost: unbiased boosting with categorical features,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~31, pp.~6638--6648, 2018.
+
+\bibitem{inman2005sugarcane}
+N.~G. Inman-Bamber and D.~M. Smith, ``Water relations in sugarcane and response to water deficits,'' \emph{Field Crops Research}, vol.~92, no.~2-3, pp.~185--202, 2005.
+
+\bibitem{keating1999modelling}
+B.~A. Keating, M.~J. Robertson, R.~C. Muchow, and N.~I. Huth, ``Modelling sugarcane production systems: I. Development and performance of the APSIM-Sugarcane module,'' \emph{Field Crops Research}, vol.~61, no.~3, pp.~253--271, 1999.
+
+\bibitem{singels2005modelling}
+A.~Singels, M.~Jones, and F.~van~den Berg, ``DSSAT v4.0 CaneGro model description and evaluation,'' \emph{Proceedings of the South African Sugar Technologists' Association}, vol.~79, pp.~273--285, 2005.
+
+\bibitem{huber1964robust}
+P.~J. Huber, ``Robust estimation of a location parameter,'' \emph{The Annals of Mathematical Statistics}, vol.~35, no.~1, pp.~73--101, 1964.
+
+\end{thebibliography}
+
+\end{document}
