@@ -79,27 +79,27 @@
 \newlabel{fig:model_comparison}{{2}{7}{Benchmark comparison of all seven models on the 450 held-out test plots. \textbf {(a)} Coefficient of determination ($R^2$): higher is better; the dashed red line marks $R^2 = 0.90$. \textbf {(b)} MAE and RMSE in Quintals/Acre: lower is better. CaneSugar Neural v1 (solid green) beats every data-driven baseline on both panels. The closed-form CaneSugar Custom* is included for reference only; it uses hand-coded biophysical equations and is not trained on data}{figure.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Prediction quality on the 450 held-out test plots. \textbf  {(a)} Actual vs.\ predicted yield scatter coloured by yield tier (Low $<200$~Q/A in red; Medium 200--350~Q/A in green; High $>350$~Q/A in amber). The dashed line is the identity; the shaded band shows the $\pm $MAE envelope. \textbf  {(b)} Residual distribution histogram overlaid with a fitted $\mathcal  {N}(-0.44,\,32.3)$ curve, confirming near-Gaussian, zero-mean errors.}}{7}{figure.3}\protected@file@percent }
 \newlabel{fig:actual_vs_predicted}{{3}{7}{Prediction quality on the 450 held-out test plots. \textbf {(a)} Actual vs.\ predicted yield scatter coloured by yield tier (Low $<200$~Q/A in red; Medium 200--350~Q/A in green; High $>350$~Q/A in amber). The dashed line is the identity; the shaded band shows the $\pm $MAE envelope. \textbf {(b)} Residual distribution histogram overlaid with a fitted $\mathcal {N}(-0.44,\,32.3)$ curve, confirming near-Gaussian, zero-mean errors}{figure.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {XI}Stability and Error Analysis}{7}{section.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XI-A}}Reproducibility Across Seeds}{7}{subsection.11.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Neural architecture ablation: each component is added incrementally to the baseline MLP. \textbf  {(a)} Test $R^2$ rising from 0.8120 to 0.9240 across six configurations. \textbf  {(b)} Test MAE falling from 34.20 to 21.84~Q/A. \textbf  {(c)} Incremental $\Delta R^2$ gain per added component, showing entity embeddings as the single largest contributor ($+6.20\%$) followed by the highway skip ($+2.20\%$).}}{8}{figure.4}\protected@file@percent }
 \newlabel{fig:neural_ablation}{{4}{8}{Neural architecture ablation: each component is added incrementally to the baseline MLP. \textbf {(a)} Test $R^2$ rising from 0.8120 to 0.9240 across six configurations. \textbf {(b)} Test MAE falling from 34.20 to 21.84~Q/A. \textbf {(c)} Incremental $\Delta R^2$ gain per added component, showing entity embeddings as the single largest contributor ($+6.20\%$) followed by the highway skip ($+2.20\%$)}{figure.4}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Feature-group ablation study using the closed-form CaneSugar Custom model. Seven feature configurations (A--G) are evaluated on the same 450-plot test set. \textbf  {(a)} Test $R^2$ rises sharply when agronomic interaction terms are added (Exp.\ E) and again when biotic/abiotic stress penalties are included (Exp.\ F). \textbf  {(b)} Corresponding MAE reduction, with the number of active features annotated on each bar. The full model (G) achieves $R^2 = 0.9136$ and MAE = 23.54~Q/A.}}{8}{figure.5}\protected@file@percent }
 \newlabel{fig:ablation}{{5}{8}{Feature-group ablation study using the closed-form CaneSugar Custom model. Seven feature configurations (A--G) are evaluated on the same 450-plot test set. \textbf {(a)} Test $R^2$ rises sharply when agronomic interaction terms are added (Exp.\ E) and again when biotic/abiotic stress penalties are included (Exp.\ F). \textbf {(b)} Corresponding MAE reduction, with the number of active features annotated on each bar. The full model (G) achieves $R^2 = 0.9136$ and MAE = 23.54~Q/A}{figure.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XI-B}}Residual Diagnostics}{8}{subsection.11.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {XI}Stability and Error Analysis}{8}{section.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XI-A}}Reproducibility Across Seeds}{8}{subsection.11.1}\protected@file@percent }
 \citation{gal2016dropout}
 \citation{sundararajan2017axiomatic}
 \@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Architectural Ablation ($n=450$ Test Plots)}}{9}{table.5}\protected@file@percent }
 \newlabel{tab:ablation}{{V}{9}{Architectural Ablation ($n=450$ Test Plots)}{table.5}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Multi-Seed Stability ($n=450$ Test Plots)}}{9}{table.6}\protected@file@percent }
 \newlabel{tab:multiseed}{{VI}{9}{Multi-Seed Stability ($n=450$ Test Plots)}{table.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XI-B}}Residual Diagnostics}{9}{subsection.11.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {XII}Uncertainty and Explanation}{9}{section.12}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XII-A}}Monte-Carlo Dropout}{9}{subsection.12.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XII-B}}Integrated Gradients}{9}{subsection.12.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Global Mean Relative Feature Attribution (Integrated Gradients)}}{9}{table.7}\protected@file@percent }
-\newlabel{tab:attributions}{{VII}{9}{Global Mean Relative Feature Attribution (Integrated Gradients)}{table.7}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XII-C}}Association, Not Causation}{9}{subsection.12.3}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Stability and sensitivity analysis. \textbf  {(a)} Train, validation, and test $R^2$ across five independent random seeds; error bars on the test set are $\pm 0.0041$ ($\bar  {R}^2_{\text  {test}} = 0.9159$), confirming repeatable optimisation. \textbf  {(b)} Nitrogen sensitivity sweep (40--220~kg/acre with all other inputs held at median): the model follows a diminishing-return curve consistent with Mitscherlich kinetics. \textbf  {(c)} Soil moisture sweep (12--45\%): monotonically increasing with saturation above $\approx $35\%. \textbf  {(d)} Soil pH sweep (5.0--9.0): mild peak near acidic conditions, reflecting the Gaussian $S_{\text  {pH}}$ suitability feature.}}{10}{figure.6}\protected@file@percent }
 \newlabel{fig:stability_sensitivity}{{6}{10}{Stability and sensitivity analysis. \textbf {(a)} Train, validation, and test $R^2$ across five independent random seeds; error bars on the test set are $\pm 0.0041$ ($\bar {R}^2_{\text {test}} = 0.9159$), confirming repeatable optimisation. \textbf {(b)} Nitrogen sensitivity sweep (40--220~kg/acre with all other inputs held at median): the model follows a diminishing-return curve consistent with Mitscherlich kinetics. \textbf {(c)} Soil moisture sweep (12--45\%): monotonically increasing with saturation above $\approx $35\%. \textbf {(d)} Soil pH sweep (5.0--9.0): mild peak near acidic conditions, reflecting the Gaussian $S_{\text {pH}}$ suitability feature}{figure.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Global Mean Relative Feature Attribution (Integrated Gradients)}}{10}{table.7}\protected@file@percent }
+\newlabel{tab:attributions}{{VII}{10}{Global Mean Relative Feature Attribution (Integrated Gradients)}{table.7}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {XIII}Discussion}{10}{section.13}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIII-A}}Why the Architecture Works}{10}{subsection.13.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Global mean relative feature attribution computed via Integrated Gradients ($M=30$ steps, zero baseline) averaged over all 450 test plots. Green bars denote positive yield influence; red bars denote negative. Stalk volume ($V_{\text  {stalk}}$, +28.4\%), nitrogen rate (+14.2\%), and root-zone moisture (+11.8\%) are the dominant drivers. Disease severity ($-15.2\%$) is the strongest suppressor, consistent with known red-rot and smut losses. Attribution totals 100\%.}}{11}{figure.7}\protected@file@percent }
@@ -111,7 +111,6 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {XIV-C}}Construct Validity}{11}{subsection.14.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {XV}Future Work}{11}{section.15}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {XVI}Reproducibility}{11}{section.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {XVII}Conclusion}{11}{section.17}\protected@file@percent }
 \bibcite{canata2024ai}{1}
 \bibcite{socadagui2026spatial}{2}
 \bibcite{somard2024sugarcane}{3}
@@ -134,5 +133,6 @@
 \bibcite{keating1999modelling}{20}
 \bibcite{singels2005modelling}{21}
 \bibcite{huber1964robust}{22}
+\@writefile{toc}{\contentsline {section}{\numberline {XVII}Conclusion}{12}{section.17}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{References}{12}{section*.1}\protected@file@percent }
 \gdef \@abspage@last{12}

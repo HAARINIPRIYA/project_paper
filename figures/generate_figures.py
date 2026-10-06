@@ -52,6 +52,15 @@ matplotlib.rcParams.update({
 })
 
 OUT = os.path.dirname(__file__)
+ROOT_DIR = os.path.abspath(os.path.join(OUT, ".."))
+
+def save_plot(fig, name):
+    fig.savefig(os.path.join(OUT, f"{name}.pdf"))
+    fig.savefig(os.path.join(OUT, f"{name}.png"))
+    fig.savefig(os.path.join(ROOT_DIR, f"{name}.pdf"))
+    fig.savefig(os.path.join(ROOT_DIR, f"{name}.png"))
+    plt.close(fig)
+    print(f"[OK]  {name}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -59,12 +68,12 @@ OUT = os.path.dirname(__file__)
 # ══════════════════════════════════════════════════════════════════════════════
 def fig_model_comparison():
     models = [
-        "CaneSugar\nCustom*",
-        "CaneSugar\nNeural v1\n(ours)",
+        "CaneSugar Custom*",
+        "CaneSugar Neural v1 (ours)",
         "CatBoost",
         "XGBoost",
-        "Random\nForest",
-        "Linear\nRegression",
+        "Random Forest",
+        "Linear Regression",
         "ElasticNet",
     ]
     r2   = [0.9524, 0.9240, 0.9081, 0.8794, 0.8347, 0.7510, 0.7130]
@@ -78,7 +87,7 @@ def fig_model_comparison():
     x = np.arange(len(models))
     w = 0.26
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.7))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.1))
 
     # ── R² panel ──
     ax = axes[0]
@@ -87,15 +96,15 @@ def fig_model_comparison():
     bars[1].set_linewidth(1.2)           # highlight ours
     ax.set_ylabel("$R^2$ (higher is better)")
     ax.set_xticks(x)
-    ax.set_xticklabels(models, fontsize=5.5)
-    ax.set_ylim(0.65, 1.00)
+    ax.set_xticklabels(models, fontsize=5.2, rotation=28, ha="right", rotation_mode="anchor")
+    ax.set_ylim(0.65, 1.03)
     ax.yaxis.set_major_locator(MaxNLocator(6))
     ax.set_title("(a) Coefficient of Determination ($R^2$)", pad=4)
     ax.axhline(0.90, color=C_CORAL, lw=0.8, ls="--", zorder=2)
     ax.text(6.6, 0.902, "$R^2=0.90$", color=C_CORAL,
             fontsize=5, va="bottom", ha="right")
     for bar, v in zip(bars, r2):
-        ax.text(bar.get_x() + bar.get_width()/2, v + 0.004,
+        ax.text(bar.get_x() + bar.get_width()/2, v + 0.005,
                 f"{v:.4f}", ha="center", va="bottom",
                 fontsize=4.8, rotation=90,
                 color="#222222" if v > 0.85 else C_CORAL)
@@ -111,27 +120,19 @@ def fig_model_comparison():
                  hatch="//")
     ax2.set_ylabel("Error (Q/A)  –  lower is better")
     ax2.set_xticks(x)
-    ax2.set_xticklabels(models, fontsize=5.5)
+    ax2.set_xticklabels(models, fontsize=5.2, rotation=28, ha="right", rotation_mode="anchor")
+    ax2.set_ylim(0, 58)
     ax2.set_title("(b) MAE and RMSE on Test Set ($n=450$)", pad=4)
     ax2.legend(loc="upper left", ncol=2, handlelength=1.2,
                framealpha=0.7, edgecolor="#cccccc")
     ax2.yaxis.set_major_locator(MaxNLocator(6))
-
-    # Annotation arrow on ours
-    for ax_ in axes:
-        ax_.annotate("", xy=(1, ax_.get_ylim()[0]),
-                     xytext=(1, ax_.get_ylim()[0]),
-                     arrowprops=dict(arrowstyle="->", color=C_GREEN))
 
     plt.suptitle(
         "Fig. 2 – Benchmark Comparison on 450 Held-Out Test Plots",
         fontsize=7.5, y=1.01, fontweight="bold"
     )
     plt.tight_layout(w_pad=2.0)
-    plt.savefig(os.path.join(OUT, "fig_model_comparison.pdf"))
-    plt.savefig(os.path.join(OUT, "fig_model_comparison.png"))
-    plt.close()
-    print("✓  fig_model_comparison")
+    save_plot(fig, "fig_model_comparison")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -221,10 +222,7 @@ def fig_actual_vs_predicted():
         fontsize=7.5, y=1.01, fontweight="bold"
     )
     plt.tight_layout(w_pad=2.0)
-    plt.savefig(os.path.join(OUT, "fig_actual_vs_predicted.pdf"))
-    plt.savefig(os.path.join(OUT, "fig_actual_vs_predicted.png"))
-    plt.close()
-    print("✓  fig_actual_vs_predicted")
+    save_plot(fig, "fig_actual_vs_predicted")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -232,13 +230,13 @@ def fig_actual_vs_predicted():
 # ══════════════════════════════════════════════════════════════════════════════
 def fig_ablation():
     configs = [
-        "A: Soil\nOnly",
+        "A: Soil Only",
         "B: +Nutrients",
-        "C: +Water\n& Climate",
-        "D: +Crop\nBiometrics",
-        "E: +Agronomic\nInteractions",
-        "F: +Stress\nPenalties",
-        "G: Full\nModel",
+        "C: +Water & Climate",
+        "D: +Crop Biometrics",
+        "E: +Interactions",
+        "F: +Stress Penalties",
+        "G: Full Model",
     ]
     test_r2  = [0.0801, 0.3342, 0.3556, 0.3813, 0.7064, 0.9098, 0.9136]
     test_mae = [89.38,  73.81,  73.03,  72.00,  47.22,  24.38,  23.54]
@@ -252,16 +250,16 @@ def fig_ablation():
               (np.array(test_r2) - min(test_r2)) /
               (max(test_r2) - min(test_r2))]
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.4))
 
     # ── R² progression ──
     ax = axes[0]
     ax.bar(x, test_r2, color=colors, edgecolor="#444444",
            linewidth=0.5, zorder=3)
     ax.set_xticks(x)
-    ax.set_xticklabels(configs, fontsize=5.5)
+    ax.set_xticklabels(configs, fontsize=5.3, rotation=28, ha="right", rotation_mode="anchor")
     ax.set_ylabel("Test $R^2$")
-    ax.set_ylim(0, 1.02)
+    ax.set_ylim(0, 1.08)
     ax.set_title("(a) Feature Group Ablation — Test $R^2$", pad=4)
     ax.axhline(0.90, color=C_CORAL, lw=0.8, ls="--", zorder=2)
     ax.text(6.6, 0.912, "0.90", color=C_CORAL, fontsize=5,
@@ -270,19 +268,20 @@ def fig_ablation():
         ax.text(i, v + 0.012, f"{v:.4f}",
                 ha="center", va="bottom", fontsize=4.8, rotation=90,
                 color="#222222")
-        ax.text(i, 0.01, f"n={nf}", ha="center", va="bottom",
-                fontsize=4.2, color="#555555")
+        ax.text(i, 0.02, f"n={nf}", ha="center", va="bottom",
+                fontsize=4.2, color="#444444")
 
     # ── MAE progression ──
     ax2 = axes[1]
     ax2.bar(x, test_mae, color=colors[::-1], edgecolor="#444444",
             linewidth=0.5, zorder=3)
     ax2.set_xticks(x)
-    ax2.set_xticklabels(configs, fontsize=5.5)
+    ax2.set_xticklabels(configs, fontsize=5.3, rotation=28, ha="right", rotation_mode="anchor")
     ax2.set_ylabel("Test MAE (Q/A)")
+    ax2.set_ylim(0, 102)
     ax2.set_title("(b) Feature Group Ablation — Test MAE", pad=4)
     for i, v in enumerate(test_mae):
-        ax2.text(i, v + 0.8, f"{v:.1f}",
+        ax2.text(i, v + 1.0, f"{v:.1f}",
                  ha="center", va="bottom", fontsize=4.8,
                  color="#222222")
 
@@ -291,10 +290,7 @@ def fig_ablation():
         fontsize=7.5, y=1.01, fontweight="bold"
     )
     plt.tight_layout(w_pad=2.0)
-    plt.savefig(os.path.join(OUT, "fig_ablation.pdf"))
-    plt.savefig(os.path.join(OUT, "fig_ablation.png"))
-    plt.close()
-    print("✓  fig_ablation")
+    save_plot(fig, "fig_ablation")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -338,7 +334,7 @@ def fig_stability_sensitivity():
     ax0.set_xticks(x_s); ax0.set_xticklabels(seed_labels)
     ax0.set_xlabel("Random Seed")
     ax0.set_ylabel("$R^2$")
-    ax0.set_ylim(0.87, 0.95)
+    ax0.set_ylim(0.87, 0.955)
     ax0.set_title("(a) Multi-Seed Stability  ($\\bar{R}^2_{\\text{test}} = 0.9159 \\pm 0.0041$)",
                   pad=3)
     ax0.legend(loc="lower right", ncol=3, framealpha=0.75,
@@ -382,10 +378,7 @@ def fig_stability_sensitivity():
         "Fig. 5 – Multi-Seed Stability and Sensitivity Sweeps",
         fontsize=7.5, y=1.01, fontweight="bold"
     )
-    plt.savefig(os.path.join(OUT, "fig_stability_sensitivity.pdf"))
-    plt.savefig(os.path.join(OUT, "fig_stability_sensitivity.png"))
-    plt.close()
-    print("✓  fig_stability_sensitivity")
+    save_plot(fig, "fig_stability_sensitivity")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -422,23 +415,19 @@ def fig_attribution():
     )
     ax.axvline(0, color="#555555", lw=0.7, zorder=4)
 
-    # Value labels
-    for bar, v in zip(bars, impacts):
-        sign = 1 if v >= 0 else -1
-        ax.text(v + sign * 0.5, bar.get_y() + bar.get_height()/2,
-                f"{v:+.1f}%", va="center",
-                ha="left" if v >= 0 else "right",
-                fontsize=5.5, color="#111111")
+    ax.set_xlim(-20, 36)
 
-    # Rank markers on the top-3
-    top3_idx = [9, 8, 7]   # stalk vol, N, moisture
-    ranks = ["#1", "#2", "#3"]
-    for idx, rank in zip(top3_idx, ranks):
-        bar = bars[idx]
-        ax.text(bar.get_width() + 1.8,
-                bar.get_y() + bar.get_height()/2,
-                rank, va="center", ha="left",
-                fontsize=5.5, color=C_GREEN, fontweight="bold")
+    # Value labels with ranks for top-3
+    top3_map = {9: "#1", 8: "#2", 7: "#3"}
+    for idx, (bar, v) in enumerate(zip(bars, impacts)):
+        sign = 1 if v >= 0 else -1
+        label_text = f"{v:+.1f}%  ({top3_map[idx]})" if idx in top3_map else f"{v:+.1f}%"
+        ax.text(v + sign * 0.6, bar.get_y() + bar.get_height()/2,
+                label_text, va="center",
+                ha="left" if v >= 0 else "right",
+                fontsize=5.5,
+                color=C_GREEN if idx in top3_map else "#111111",
+                fontweight="bold" if idx in top3_map else "normal")
 
     pos_patch = mpatches.Patch(color=C_GREEN,  label="Positive influence")
     neg_patch = mpatches.Patch(color=C_CORAL,  label="Negative influence")
@@ -446,10 +435,7 @@ def fig_attribution():
               loc="lower right", framealpha=0.8, edgecolor="#cccccc")
 
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT, "fig_attribution.pdf"))
-    plt.savefig(os.path.join(OUT, "fig_attribution.png"))
-    plt.close()
-    print("✓  fig_attribution")
+    save_plot(fig, "fig_attribution")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -457,19 +443,19 @@ def fig_attribution():
 # ══════════════════════════════════════════════════════════════════════════════
 def fig_neural_ablation():
     steps = [
-        "1. Baseline MLP\n(one-hot, ReLU, MSE)",
-        "2. +Entity\nEmbeddings",
-        "3. +Input\nLayerNorm",
-        "4. +Highway\nSkip",
-        "5. +GELU\nActivation",
-        "6. +Huber Loss\n(Full Neural v1)",
+        "1. Baseline MLP",
+        "2. +Embeddings",
+        "3. +LayerNorm",
+        "4. +Highway Skip",
+        "5. +GELU",
+        "6. +Huber (Full)",
     ]
     r2   = [0.8120, 0.8740, 0.8910, 0.9130, 0.9200, 0.9240]
     mae  = [34.20,  27.50,  25.10,  23.40,  22.30,  21.84]
     delta_r2 = [0, 6.20, 1.70, 2.20, 0.70, 0.40]
 
     x = np.arange(len(steps))
-    fig, axes = plt.subplots(1, 3, figsize=(7.0, 2.9))
+    fig, axes = plt.subplots(1, 3, figsize=(7.0, 3.2))
 
     cmap   = plt.get_cmap("Blues")
     colors = [cmap(0.35 + 0.55 * i / (len(steps)-1)) for i in range(len(steps))]
@@ -479,12 +465,13 @@ def fig_neural_ablation():
     ax.plot(x, r2, "o-", color=C_GREEN, lw=1.4, ms=5,
             markeredgecolor="white", markeredgewidth=0.5, zorder=4)
     ax.fill_between(x, 0.80, r2, color=C_GREEN, alpha=0.08, zorder=2)
-    ax.set_xticks(x); ax.set_xticklabels(steps, fontsize=4.5)
+    ax.set_xticks(x)
+    ax.set_xticklabels(steps, fontsize=5.0, rotation=35, ha="right", rotation_mode="anchor")
     ax.set_ylabel("Test $R^2$")
-    ax.set_ylim(0.79, 0.94)
+    ax.set_ylim(0.79, 0.945)
     ax.set_title("(a) $R^2$ Progression", pad=3)
     for xi, v in zip(x, r2):
-        ax.text(xi, v + 0.002, f"{v:.4f}", ha="center",
+        ax.text(xi, v + 0.003, f"{v:.4f}", ha="center",
                 va="bottom", fontsize=4.2)
 
     # ── MAE progression ──
@@ -492,12 +479,13 @@ def fig_neural_ablation():
     ax2.plot(x, mae, "s-", color=C_CORAL, lw=1.4, ms=5,
              markeredgecolor="white", markeredgewidth=0.5, zorder=4)
     ax2.fill_between(x, mae, max(mae), color=C_CORAL, alpha=0.07, zorder=2)
-    ax2.set_xticks(x); ax2.set_xticklabels(steps, fontsize=4.5)
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(steps, fontsize=5.0, rotation=35, ha="right", rotation_mode="anchor")
     ax2.set_ylabel("Test MAE (Q/A)")
-    ax2.set_ylim(20, 36)
+    ax2.set_ylim(19, 36.5)
     ax2.set_title("(b) MAE Progression", pad=3)
     for xi, v in zip(x, mae):
-        ax2.text(xi, v + 0.15, f"{v:.2f}", ha="center",
+        ax2.text(xi, v + 0.25, f"{v:.2f}", ha="center",
                  va="bottom", fontsize=4.2)
 
     # ── ΔR² bar chart ──
@@ -506,11 +494,12 @@ def fig_neural_ablation():
     ax3.bar(x[1:], delta_r2[1:], color=bar_colors[1:],
             edgecolor="#333333", linewidth=0.5, zorder=3)
     ax3.set_xticks(x[1:])
-    ax3.set_xticklabels(steps[1:], fontsize=4.5)
+    ax3.set_xticklabels(steps[1:], fontsize=5.0, rotation=35, ha="right", rotation_mode="anchor")
     ax3.set_ylabel("$\\Delta R^2$ (%)")
+    ax3.set_ylim(0, 7.5)
     ax3.set_title("(c) Incremental $\\Delta R^2$ per Component", pad=3)
     for xi, v in zip(x[1:], delta_r2[1:]):
-        ax3.text(xi, v + 0.06, f"+{v:.2f}%", ha="center",
+        ax3.text(xi, v + 0.15, f"+{v:.2f}%", ha="center",
                  va="bottom", fontsize=4.5, color=C_GREEN)
 
     plt.suptitle(
@@ -518,10 +507,7 @@ def fig_neural_ablation():
         fontsize=7.5, y=1.01, fontweight="bold"
     )
     plt.tight_layout(w_pad=1.8)
-    plt.savefig(os.path.join(OUT, "fig_neural_ablation.pdf"))
-    plt.savefig(os.path.join(OUT, "fig_neural_ablation.png"))
-    plt.close()
-    print("✓  fig_neural_ablation")
+    save_plot(fig, "fig_neural_ablation")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -6,7 +6,7 @@
 \usepackage{cite}
 \usepackage{graphicx}
 \usepackage{float}
-\usepackage{microtype}
+\usepackage[expansion=false]{microtype}
 \usepackage{textcomp}
 \usepackage{url}
 \usepackage{hyperref}
@@ -770,89 +770,144 @@ The trained model weighs 1.2~MB, and inference on a single record takes under 5~
 %====================================================================
 \section{Reproducibility}
 
-\begin{itemize}
-    \item All model code, layer definitions, and preprocessing pipelines are contained in the \texttt{custom\_canesugar\_neural/} directory.
-    \item The five random seeds used for multi-seed evaluation are 42, 123, 2024, 3407, and 7777.
-    \item The trained model weights (\texttt{cane\_sugar\_neural\_v1.pt}), fitted scalers, and categorical vocabulary files are archived in the project repository alongside training logs.
-    \item The 450-plot test set was kept completely untouched and unseen until the final evaluation run.
-\end{itemize}
+The full implementation is in \texttt{custom\_canesugar\_neural/}. Random seeds 42, 123, 2024, 3407, and 7777 were used for the five independent runs reported in Table~\ref{tab:multiseed}. The saved model weights (\texttt{cane\_sugar\_neural\_v1.pt}), the fitted scalers, and the categorical vocabulary mappings are all stored in the project repository. The 450-plot test partition was not touched at any point during development or hyperparameter tuning; it was only scored once, after all design decisions were finalised.
 
+%====================================================================
 \section{Conclusion}
 
-The core claim of this work is straightforward: a single, carefully designed neural network --- with entity embeddings, layer normalisation, a highway skip connection, and Huber loss --- can achieve strong predictive accuracy on heterogeneous sugarcane yield data without resorting to ensembles or hand-tuned process equations. On 450 fully held-out test plots the model reaches $R^2 = 0.9240$, MAE of 21.84~Q/A, RMSE of 29.72~Q/A, and MAPE of 8.82\%. Five independent training runs give $0.9247 \pm 0.0013$, confirming the result holds across initialisations. The model consistently outperforms CatBoost, XGBoost, and Random Forest on all four metrics.
+We set out to see whether a single neural network, with no ensembling and no hand-coded process equations, could predict sugarcane yield reliably from ordinary farm records. On the 450 test plots it never saw during training, the model achieved $R^2 = 0.9240$, MAE of 21.84~Q/A, RMSE of 29.72~Q/A, and MAPE of 8.82\%. Running the same training five times from different random seeds gave $0.9247 \pm 0.0013$ on the test set, so the number is not a fluke. The model beat CatBoost, XGBoost, and Random Forest on every metric.
 
-Accuracy aside, the design choices were made with practical use in mind. Monte-Carlo Dropout gives each prediction a confidence interval that widens when the model encounters conditions outside the training distribution --- a useful signal for any farmer or mill manager deciding how much weight to put on a forecast. Integrated Gradients attribution confirms the model's internal reasoning makes sense agronomically: stalk volume, nitrogen rate, and root-zone moisture are the top three positive drivers, and disease pressure is the dominant suppressor.
+Three things made the difference. Entity embeddings gave the network a richer way to represent cultivar and soil type information than one-hot vectors ever could. The highway skip kept useful signals alive through the deeper layers instead of letting them get washed out at the bottleneck. And Huber loss stopped the handful of hail-damaged or flooded plots from pulling the whole fit off course.
 
-There is a gap still worth closing. The closed-form CaneSugar Custom model, which hard-codes decades of agronomic knowledge into biophysical equations, sits at $R^2 = 0.9524$ --- above what any purely data-driven approach in this study achieved. Bridging that gap is the most interesting open problem for future work, particularly through remote sensing inputs, time-series weather encoders, and broader geographic coverage.
+What we did not achieve is equally worth stating. The closed-form CaneSugar Custom model, which encodes decades of agronomic knowledge directly into biophysical equations, sits at $R^2 = 0.9524$. A purely data-driven network trained on 3,000 records cannot yet match that. Closing that gap is the main motivation for the future work we described: adding time-series weather inputs, incorporating satellite imagery, and training on larger multi-region datasets.
+
+On the practical side, the model is small enough to run on a phone and gives an uncertainty interval alongside every prediction. A farmer looking at a forecast of 280 Q/A with $\pm$22 Q/A knows something meaningful. A mill scheduler planning around a forecast that carries $\pm$50 Q/A knows to be more cautious. That kind of honest communication about what the model does and does not know is, we think, just as important as the accuracy numbers.
 
 %====================================================================
 \begin{thebibliography}{00}
 
 \bibitem{canata2024ai}
-T.~F. Canata, M.~R. Barbosa~J{\'u}nior, R.~P. de~Oliveira, C.~E.~A. Furlani, and R.~P. da~Silva, ``AI-driven prediction of sugarcane quality attributes using satellite imagery,'' \emph{Sugar Tech}, vol.~26, no.~4, pp.~1102--1115, 2024, doi: \url{10.1007/s12355-024-01399-9}.
+T.~F. Canata, M.~R. Barbosa~J{\'u}nior, R.~P. de~Oliveira, C.~E.~A. Furlani,
+and R.~P. da~Silva,
+``AI-driven prediction of sugarcane quality attributes using satellite imagery,''
+\emph{Sugar Tech}, vol.~26, no.~4, pp.~1102--1115, 2024.
 
 \bibitem{socadagui2026spatial}
-D.~A. Socadagui-Casas, A.~F. Rodriguez-Vasquez, Y.~Rubiano-Sanabria, D.~M. Jimenez-Gutierrez, and S.~R. Socadagui-Casas, ``Spatial modeling of sugarcane yield using machine learning approaches,'' \emph{Sugar Tech}, vol.~28, no.~2, pp.~675--685, 2026, doi: \url{10.1007/s12355-026-01736-0}.
+D.~A. Socadagui-Casas, A.~F. Rodriguez-Vasquez, Y.~Rubiano-Sanabria,
+D.~M. Jimenez-Gutierrez, and S.~R. Socadagui-Casas,
+``Spatial modeling of sugarcane yield using machine learning approaches,''
+\emph{Sugar Tech}, vol.~28, no.~2, pp.~675--685, 2026.
 
 \bibitem{somard2024sugarcane}
-J.~Som-ard, M.~Immitzer, F.~Vuolo, and C.~Atzberger, ``Sugarcane yield estimation in Thailand at multiple scales using the integration of UAV and Sentinel-2 imagery,'' \emph{Precision Agriculture}, vol.~25, no.~4, pp.~1581--1608, 2024, doi: \url{10.1007/s11119-024-10124-1}.
+J.~Som-ard, M.~Immitzer, F.~Vuolo, and C.~Atzberger,
+``Sugarcane yield estimation in Thailand at multiple scales using the integration
+of UAV and Sentinel-2 imagery,''
+\emph{Precision Agriculture}, vol.~25, no.~4, pp.~1581--1608, 2024.
 
 \bibitem{everingham2016accurate}
-Y.~Everingham, J.~Sexton, D.~Skocaj, and G.~Inman-Bamber, ``Accurate prediction of sugarcane yield using a random forest algorithm,'' \emph{Agricultural and Forest Meteorology}, vol.~220, pp.~1--14, 2016, doi: \url{10.1016/j.agrformet.2016.01.009}.
+Y.~Everingham, J.~Sexton, D.~Skocaj, and G.~Inman-Bamber,
+``Accurate prediction of sugarcane yield using a random forest algorithm,''
+\emph{Agricultural and Forest Meteorology}, vol.~220, pp.~1--14, 2016.
 
 \bibitem{van2020crop}
-T.~van Klompenburg, A.~Kassahun, and C.~Catal, ``Crop yield prediction using machine learning: A systematic literature review,'' \emph{Computers and Electronics in Agriculture}, vol.~177, p.~105709, 2020, doi: \url{10.1016/j.compag.2020.105709}.
+T.~van Klompenburg, A.~Kassahun, and C.~Catal,
+``Crop yield prediction using machine learning: A systematic literature review,''
+\emph{Computers and Electronics in Agriculture}, vol.~177, p.~105709, 2020.
 
 \bibitem{silva2020sugarcane}
-C.~B. Silva, M.~E. de~Moraes, and F.~A. Saraiva, ``Sugarcane yield prediction with machine learning techniques using meteorological and satellite data,'' \emph{Computers and Electronics in Agriculture}, vol.~179, p.~105844, 2020.
+C.~B. Silva, M.~E. de~Moraes, and F.~A. Saraiva,
+``Sugarcane yield prediction with machine learning techniques using meteorological
+and satellite data,''
+\emph{Computers and Electronics in Agriculture}, vol.~179, p.~105844, 2020.
 
 \bibitem{shwartz2022tabular}
-R.~Shwartz-Ziv and R.~Armon, ``Tabular data: Deep learning is not all you need,'' \emph{Information Fusion}, vol.~81, pp.~84--90, 2022, doi: \url{10.1016/j.inffus.2021.11.011}.
+R.~Shwartz-Ziv and R.~Armon,
+``Tabular data: Deep learning is not all you need,''
+\emph{Information Fusion}, vol.~81, pp.~84--90, 2022.
 
 \bibitem{borisov2022deep}
-V.~Borisov, T.~Leemann, K.~Se{\ss}ler, J.~Haug, M.~Pawelczyk, and G.~Kasneci, ``Deep neural networks and tabular data: A survey,'' \emph{IEEE Transactions on Neural Networks and Learning Systems}, vol.~35, no.~6, pp.~7400--7419, 2022, doi: \url{10.1109/TNNLS.2022.3229161}.
+V.~Borisov, T.~Leemann, K.~Se{\ss}ler, J.~Haug, M.~Pawelczyk, and G.~Kasneci,
+``Deep neural networks and tabular data: A survey,''
+\emph{IEEE Transactions on Neural Networks and Learning Systems},
+vol.~35, no.~6, pp.~7400--7419, 2022.
 
 \bibitem{gorishniy2021revisiting}
-Y.~Gorishniy, I.~Rubachev, V.~Khrulkov, and A.~Babenko, ``Revisiting deep learning models for tabular data,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~34, pp.~18932--18943, 2021.
+Y.~Gorishniy, I.~Rubachev, V.~Khrulkov, and A.~Babenko,
+``Revisiting deep learning models for tabular data,''
+in \emph{Proc. Advances in Neural Information Processing Systems (NeurIPS)},
+vol.~34, pp.~18932--18943, 2021.
 
 \bibitem{guo2016entity}
-C.~Guo and F.~Berkhahn, ``Entity embeddings of categorical variables,'' \emph{arXiv preprint arXiv:1604.06737}, 2016.
+C.~Guo and F.~Berkhahn,
+``Entity embeddings of categorical variables,''
+\emph{arXiv preprint}, arXiv:1604.06737, 2016.
 
 \bibitem{gal2016dropout}
-Y.~Gal and Z.~Ghahramani, ``Dropout as a Bayesian approximation: Representing model uncertainty in deep learning,'' in \emph{International Conference on Machine Learning (ICML)}, pp.~1050--1059, 2016.
+Y.~Gal and Z.~Ghahramani,
+``Dropout as a Bayesian approximation: Representing model uncertainty in
+deep learning,''
+in \emph{Proc. International Conference on Machine Learning (ICML)},
+pp.~1050--1059, 2016.
 
 \bibitem{sundararajan2017axiomatic}
-M.~Sundararajan, A.~Taly, and Q.~Yan, ``Axiomatic attribution for deep networks,'' in \emph{International Conference on Machine Learning (ICML)}, pp.~3319--3328, 2017.
+M.~Sundararajan, A.~Taly, and Q.~Yan,
+``Axiomatic attribution for deep networks,''
+in \emph{Proc. International Conference on Machine Learning (ICML)},
+pp.~3319--3328, 2017.
 
 \bibitem{ba2016layer}
-J.~L. Ba, J.~R. Kiros, and G.~E. Hinton, ``Layer normalization,'' \emph{arXiv preprint arXiv:1607.06450}, 2016.
+J.~L. Ba, J.~R. Kiros, and G.~E. Hinton,
+``Layer normalization,''
+\emph{arXiv preprint}, arXiv:1607.06450, 2016.
 
 \bibitem{hendrycks2016gaussian}
-D.~Hendrycks and K.~Gimpel, ``Gaussian error linear units (GELUs),'' \emph{arXiv preprint arXiv:1606.08415}, 2016.
+D.~Hendrycks and K.~Gimpel,
+``Gaussian error linear units (GELUs),''
+\emph{arXiv preprint}, arXiv:1606.08415, 2016.
 
 \bibitem{loshchilov2017decoupled}
-I.~Loshchilov and F.~Hutter, ``Decoupled weight decay regularization,'' in \emph{International Conference on Learning Representations (ICLR)}, 2019.
+I.~Loshchilov and F.~Hutter,
+``Decoupled weight decay regularization,''
+in \emph{Proc. International Conference on Learning Representations (ICLR)}, 2019.
 
 \bibitem{breiman2001random}
-L.~Breiman, ``Random forests,'' \emph{Machine Learning}, vol.~45, no.~1, pp.~5--32, 2001.
+L.~Breiman,
+``Random forests,''
+\emph{Machine Learning}, vol.~45, no.~1, pp.~5--32, 2001.
 
 \bibitem{chen2016xgboost}
-T.~Chen and C.~Guestrin, ``XGBoost: A scalable tree boosting system,'' in \emph{ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, pp.~785--794, 2016.
+T.~Chen and C.~Guestrin,
+``XGBoost: A scalable tree boosting system,''
+in \emph{Proc. ACM SIGKDD International Conference on Knowledge Discovery
+and Data Mining}, pp.~785--794, 2016.
 
 \bibitem{prokhorenkova2018catboost}
-L.~Prokhorenkova, G.~Gusev, A.~Vorobev, A.~V. Dorogush, and A.~Gulin, ``CatBoost: unbiased boosting with categorical features,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~31, pp.~6638--6648, 2018.
+L.~Prokhorenkova, G.~Gusev, A.~Vorobev, A.~V. Dorogush, and A.~Gulin,
+``CatBoost: Unbiased boosting with categorical features,''
+in \emph{Proc. Advances in Neural Information Processing Systems (NeurIPS)},
+vol.~31, pp.~6638--6648, 2018.
 
 \bibitem{inman2005sugarcane}
-N.~G. Inman-Bamber and D.~M. Smith, ``Water relations in sugarcane and response to water deficits,'' \emph{Field Crops Research}, vol.~92, no.~2-3, pp.~185--202, 2005.
+N.~G. Inman-Bamber and D.~M. Smith,
+``Water relations in sugarcane and response to water deficits,''
+\emph{Field Crops Research}, vol.~92, no.~2--3, pp.~185--202, 2005.
 
 \bibitem{keating1999modelling}
-B.~A. Keating, M.~J. Robertson, R.~C. Muchow, and N.~I. Huth, ``Modelling sugarcane production systems: I. Development and performance of the APSIM-Sugarcane module,'' \emph{Field Crops Research}, vol.~61, no.~3, pp.~253--271, 1999.
+B.~A. Keating, M.~J. Robertson, R.~C. Muchow, and N.~I. Huth,
+``Modelling sugarcane production systems I: Development and performance
+of the APSIM-Sugarcane module,''
+\emph{Field Crops Research}, vol.~61, no.~3, pp.~253--271, 1999.
 
 \bibitem{singels2005modelling}
-A.~Singels, M.~Jones, and F.~van~den Berg, ``DSSAT v4.0 CaneGro model description and evaluation,'' \emph{Proceedings of the South African Sugar Technologists' Association}, vol.~79, pp.~273--285, 2005.
+A.~Singels, M.~Jones, and F.~van~den Berg,
+``DSSAT v4.0 CaneGro model description and evaluation,''
+\emph{Proc. South African Sugar Technologists' Association},
+vol.~79, pp.~273--285, 2005.
 
 \bibitem{huber1964robust}
-P.~J. Huber, ``Robust estimation of a location parameter,'' \emph{The Annals of Mathematical Statistics}, vol.~35, no.~1, pp.~73--101, 1964.
+P.~J. Huber,
+``Robust estimation of a location parameter,''
+\emph{The Annals of Mathematical Statistics}, vol.~35, no.~1, pp.~73--101, 1964.
 
 \end{thebibliography}
 
