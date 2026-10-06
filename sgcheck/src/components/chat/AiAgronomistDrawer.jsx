@@ -19,10 +19,10 @@ import MarkdownRenderer from "@/components/MarkdownRenderer"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const SUGGESTIONS = [
-  { icon: Trophy, label: "Why is CaneSugar v6 the best model?", query: "Why is CaneSugar v6 the most accurate model and how does its 8-fold stacking ensemble work?" },
-  { icon: GitCompare, label: "Compare CaneSugar vs CatBoost", query: "Compare CaneSugar v6 and CatBoost performance, R² scores, and error rates." },
+  { icon: Trophy, label: "How does the CaneSugar Custom Model work?", query: "Explain how the CaneSugar Custom Model works and how it predicts yield using closed-form domain equations without conventional ML." },
+  { icon: GitCompare, label: "Compare Custom Model vs Baselines", query: "Compare the CaneSugar Custom Model against baseline models like CatBoost and XGBoost." },
   { icon: Target, label: "How to maximize my sugarcane yield?", query: "Based on my field data, what agronomic adjustments (NPK, moisture, spacing) will maximize yield?" },
-  { icon: BarChartHorizontal, label: "Show all model benchmarks", query: "Show me the complete R², MAE, and RMSE comparison for all 6 models." },
+  { icon: BarChartHorizontal, label: "Show all model benchmarks", query: "Show me the complete R², MAE, and RMSE comparison across models." },
   { icon: Sprout, label: "Fertilizer dosage recommendations", query: "What is the recommended Nitrogen, Phosphorus, and Potassium application schedule for optimal Brix?" },
 ]
 

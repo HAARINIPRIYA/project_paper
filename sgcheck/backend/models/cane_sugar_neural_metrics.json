@@ -1,0 +1,24 @@
+{
+  "train": {
+    "r2": 0.9782,
+    "mae": 11.24,
+    "rmse": 14.85,
+    "mape": 4.38
+  },
+  "val": {
+    "r2": 0.9212,
+    "mae": 22.18,
+    "rmse": 30.04,
+    "mape": 8.95
+  },
+  "test": {
+    "r2": 0.9240,
+    "mae": 21.84,
+    "rmse": 29.72,
+    "mape": 8.82,
+    "max_error": 84.15,
+    "mean_bias": -0.42
+  },
+  "architecture": "CaneSugar Physics-Informed Neural Network (Entity Embeddings + Biophysical Highway)",
+  "framework": "PyTorch"
+}

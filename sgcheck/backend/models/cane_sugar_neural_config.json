@@ -1,0 +1,18 @@
+{
+  "dense1_dim": 256,
+  "dense2_dim": 128,
+  "dense3_dim": 64,
+  "dense4_dim": 32,
+  "dropout_p1": 0.2,
+  "dropout_p2": 0.15,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0001,
+  "batch_size": 64,
+  "max_epochs": 150,
+  "patience": 20,
+  "warmup_epochs": 5,
+  "activation": "gelu",
+  "loss_fn": "huber",
+  "huber_delta": 1.0,
+  "mc_dropout_samples": 50
+}

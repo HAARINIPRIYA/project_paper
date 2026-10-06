@@ -1,0 +1,48 @@
+D:\MiKTeX\miktex\bin\x64\pdflatex.exe -interaction=nonstopmode main.tex
+
+
+
+Analyze the text I provide.
+
+1. Check whether the writing shows common signs of AI-generated text, such as:
+
+   * Repetitive or predictable phrasing
+   * Overly formal or polished language
+   * Generic statements or unnecessary explanations
+   * Repeated sentence structures
+   * Excessive use of transition words
+   * Unnatural word choices
+   * Lack of personal or natural variation in sentence length
+   * A consistently neutral or robotic tone
+
+2. Give me a brief assessment of how natural the text sounds. Do not claim with certainty that text was written by AI, because AI-detection tools are not always reliable.
+
+3. Rewrite the text so it sounds naturally written by a real person while preserving:
+
+   * The original meaning
+   * Important facts and details
+   * The intended message
+   * The appropriate level of formality
+
+4. Make the rewritten version:
+
+   * Natural and conversational where appropriate
+   * Varied in sentence length and structure
+   * Clear and easy to read
+   * Less repetitive and formulaic
+   * Specific rather than generic
+   * Appropriate for the intended audience
+
+Do not deliberately add mistakes, awkward grammar, or fake personal experiences just to make the text appear human.
+
+Return the answer in this format:
+
+**Naturalness assessment:** [brief assessment]
+
+**What makes it sound AI-like:** [2–5 specific points, if applicable]
+
+**Rewritten version:**
+[fully rewritten text]
+
+Text to analyze:
+[PASTE TEXT HERE]

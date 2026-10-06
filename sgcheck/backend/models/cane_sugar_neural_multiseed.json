@@ -1,0 +1,43 @@
+{
+  "seeds_evaluated": [
+    42,
+    101,
+    777
+  ],
+  "results_by_seed": [
+    {
+      "seed": 42,
+      "train_r2": 0.9782,
+      "val_r2": 0.9198,
+      "test_r2": 0.9262,
+      "test_mae": 21.62,
+      "test_rmse": 29.35,
+      "test_mape": 8.71
+    },
+    {
+      "seed": 101,
+      "train_r2": 0.9795,
+      "val_r2": 0.9212,
+      "test_r2": 0.9231,
+      "test_mae": 22.05,
+      "test_rmse": 29.95,
+      "test_mape": 8.89
+    },
+    {
+      "seed": 777,
+      "train_r2": 0.9774,
+      "val_r2": 0.9202,
+      "test_r2": 0.9249,
+      "test_mae": 21.85,
+      "test_rmse": 29.86,
+      "test_mape": 8.86
+    }
+  ],
+  "mean_test_r2": 0.9247,
+  "std_test_r2": 0.0013,
+  "max_test_r2": 0.9262,
+  "mean_test_mae": 21.84,
+  "std_test_mae": 0.18,
+  "mean_test_rmse": 29.72,
+  "mean_test_mape": 8.82
+}

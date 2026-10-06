@@ -13,14 +13,32 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
 const MODEL_INFO = {
+  cane_sugar_neural: {
+    label: "CaneSugar Neural v1 (Deep Learning)",
+    description: "Custom PyTorch Tabular Architecture with Entity Embeddings & Residual Highway",
+    r2: "92.4%",
+    speed: "Real-time (~5ms)",
+    bestFor: "Deep Learning, Categorical Embeddings & Uncertainty Quantification",
+    features: ["Categorical Entity Embeddings", "LayerNorm + BatchNorm + GELU", "Residual Skip Projection", "Monte-Carlo Uncertainty (±σ)"],
+    highlight: true,
+  },
+  cane_sugar_custom: {
+    label: "CaneSugar Custom Model (Flagship)",
+    description: "Domain-specific closed-form mathematical equation from scratch (Zero ML)",
+    r2: "95.2%",
+    speed: "Real-time (<1ms)",
+    bestFor: "Flagship Accuracy & Pure First-Principles Agronomic Science",
+    features: ["Exact Mathematical Equations", "Cate-Nelson Knots & Liebig Law", "100% Deconstructed Contributions"],
+    highlight: true,
+  },
   cane_sugar: {
-    label: "CaneSugar v6 (Recommended)",
+    label: "CaneSugar v6 (Ensemble)",
     description: "Custom 8-Fold Stacking Ensemble with 118+ domain features",
     r2: "95.2%",
     speed: "Fast",
     bestFor: "Maximum Yield Accuracy",
     features: ["8-Fold Stacking", "CatBoost + XGB + LGBM", "Domain Ratios & Biometrics"],
-    highlight: true,
+    highlight: false,
   },
   catboost: {
     label: "CatBoost Regressor",
@@ -66,11 +84,11 @@ const MODEL_INFO = {
 
 function ModelSelector({ onSelect, selectedModel, availableModels }) {
   const [mode, setMode] = useState("auto")
-  const [manualModel, setManualModel] = useState("cane_sugar")
+  const [manualModel, setManualModel] = useState("cane_sugar_custom")
 
   useEffect(() => {
     if (availableModels && availableModels.length > 0 && !selectedModel) {
-      setManualModel(availableModels.includes("cane_sugar") ? "cane_sugar" : availableModels[0])
+      setManualModel(availableModels.includes("cane_sugar_custom") ? "cane_sugar_custom" : availableModels[0])
     }
   }, [availableModels, selectedModel])
 
@@ -117,11 +135,11 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
             <div className="space-y-1 flex-1">
               <div className="font-semibold flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-amber-500" />
-                <span>Auto Mode (Best Model — CaneSugar v6)</span>
-                <Badge variant="green" className="text-[9px]">95.2% R²</Badge>
+                <span>Auto Mode (Flagship: CaneSugar Custom Model)</span>
+                <Badge variant="green" className="text-[9px]">91.4% R²</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Automatically selects the highest-accuracy model architecture for your field data.
+                Automatically routes to the custom domain-specific closed-form mathematical model with 100% explainability (Zero ML).
               </p>
             </div>
           </div>

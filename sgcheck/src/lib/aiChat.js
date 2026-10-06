@@ -145,18 +145,18 @@ function generateLocalAgronomistFallback(messages, fieldData = {}) {
 3. **Micronutrient Foliar Spray:** Apply 0.5% ZnSO₄ + 1.0% FeSO₄ at 45 and 75 days.
 
 ### 3. Projected Outcome
-With these adjustments, **CaneSugar v6** projects yield to rebound from suboptimal levels to **285 – 320 Quintal/Acre** (+300% gain).`
+With these adjustments, **CaneSugar Custom Model** projects yield to rebound from suboptimal levels to **285 – 320 Quintal/Acre** (+300% gain).`
   }
 
   if (lastMsg.includes("best model") || lastMsg.includes("which model")) {
-    return `## Best Performing Model\n\n**CaneSugar v6 Flagship** is the top-performing model with **95.24% R²**, **16.82 Q/A MAE**, and **23.45 Q/A RMSE** across an 8-Fold Stacking Ensemble.`
+    return `## Flagship Model\n\n**CaneSugar Custom Model** is the flagship domain model with **91.39% R²**, **23.78 Q/A MAE**, and **32.25 Q/A RMSE** across 87 features using closed-form mathematical equations and zero conventional ML.`
   }
 
   if (lastMsg.includes("predict") || lastMsg.includes("yield")) {
-    return `## Yield Prediction Forecast\n\nBased on your active parameters, projected yield is **280 – 320 Quintal per Acre** using the **CaneSugar v6 Flagship** stacking ensemble.`
+    return `## Yield Prediction Forecast\n\nBased on your active parameters, projected yield is **270 – 310 Quintal per Acre** using the **CaneSugar Custom Model** domain equations.`
   }
 
-  return `## CaneSense Agronomist AI\n\nI can assist you with:\n- **Yield Predictions:** Forecast cane tonnage based on field variables\n- **Fertilizer Guidance:** Balance NPK nutrient application\n- **Model Comparisons:** Benchmark CaneSugar v6 against CatBoost and XGBoost`
+  return `## CaneSense Agronomist AI\n\nI can assist you with:\n- **Yield Predictions:** Forecast cane tonnage based on field variables\n- **Fertilizer Guidance:** Balance NPK nutrient application\n- **Model Comparisons:** Benchmark CaneSugar Custom Model against CatBoost, XGBoost, and other baselines`
 }
 
 export function extractFieldData(text) {

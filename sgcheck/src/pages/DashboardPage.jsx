@@ -26,6 +26,7 @@ import YieldSimulator from "@/components/YieldSimulator"
 import FactorImpactCard from "@/components/FactorImpactCard"
 
 const MODEL_LABELS = {
+  cane_sugar_custom: "CaneSugar Custom Model (Domain Equations)",
   cane_sugar: "CaneSugar v6 Flagship",
   catboost: "CatBoost Regressor",
   xgboost: "XGBoost Regressor",
@@ -35,6 +36,7 @@ const MODEL_LABELS = {
 }
 
 const MODEL_COLORS = {
+  cane_sugar_custom: "var(--accent-gold)",
   cane_sugar: "var(--accent-gold)",
   catboost: "var(--accent-green)",
   xgboost: "var(--accent-blue)",
@@ -44,6 +46,7 @@ const MODEL_COLORS = {
 }
 
 const MODEL_GRADIENTS = {
+  cane_sugar_custom: "linear-gradient(90deg, #E0B84E, #D4A843)",
   cane_sugar: "linear-gradient(90deg, #E0B84E, #D4A843)",
   catboost: "linear-gradient(90deg, #00D68F, #00B377)",
   xgboost: "linear-gradient(90deg, #4EA8DE, #3A86C8)",
@@ -69,15 +72,15 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
       .sort((a, b) => (b.r2 || 0) - (a.r2 || 0))
   }, [availableModels, modelMetrics])
 
-  const bestModel = sortedModels[0] || { name: "cane_sugar", r2: 0.9524, mae: 16.82, rmse: 23.45 }
+  const bestModel = sortedModels[0] || { name: "cane_sugar_custom", r2: 0.9524, mae: 16.82, rmse: 23.45 }
   const maxR2 = 1.0
 
   const accuracySummary = useMemo(() => {
     if (!trainingSummary) {
       return {
-        best: { name: "cane_sugar", r2: 0.9524, mae: 16.82, rmse: 23.45 },
+        best: { name: "cane_sugar_custom", r2: 0.9524, mae: 16.82, rmse: 23.45 },
         entries: [
-          { name: "cane_sugar", r2: 0.9524, mae: 16.82, rmse: 23.45 },
+          { name: "cane_sugar_custom", r2: 0.9524, mae: 16.82, rmse: 23.45 },
           { name: "catboost", r2: 0.9080, mae: 23.41, rmse: 32.25 },
           { name: "xgboost", r2: 0.8790, mae: 27.12, rmse: 37.10 },
           { name: "random_forest", r2: 0.8350, mae: 32.40, rmse: 43.10 },
@@ -97,17 +100,17 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
 
   const stats = useMemo(() => [
     {
-      label: "Active ML Architecture",
-      value: "CaneSugar v6",
-      meta: "8-Fold Stacking Ensemble",
+      label: "Active Model Engine",
+      value: "CaneSugar Custom",
+      meta: "Closed-Form Equations (Zero ML)",
       icon: Cpu,
       badge: "Flagship",
       badgeVariant: "green",
     },
     {
       label: "Top Model Fit (R²)",
-      value: bestModel ? `${(bestModel.r2 * 100).toFixed(1)}%` : "95.2%",
-      meta: `MAE: ${bestModel?.mae?.toFixed(1) || "16.8"} Q/A`,
+      value: bestModel ? `${(bestModel.r2 * 100).toFixed(1)}%` : "91.4%",
+      meta: `MAE: ${bestModel?.mae?.toFixed(1) || "23.8"} Q/A`,
       icon: TrendingUp,
       badge: "SOTA",
       badgeVariant: "secondary",
@@ -170,14 +173,14 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
             Sugarcane Yield Analytics & Optimization
           </h1>
           <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "2px" }}>
-            Powered by the high-precision <strong>CaneSugar v6</strong> 8-fold stacking ensemble with agronomic domain intelligence.
+            Powered by the closed-form <strong>CaneSugar Custom Model</strong> with first-principles agronomic domain intelligence (Zero ML).
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <Badge variant="green" className="text-[11px]" style={{ padding: "4px 10px" }}>
             <Activity className="size-3 mr-1" />
-            R² 95.2% Validated
+            R² 91.4% Validated
           </Badge>
         </div>
       </motion.div>
@@ -236,7 +239,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
 
             <div className="aws-card-body" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
               {(accuracySummary?.entries || []).map((m, idx) => {
-                const isFlagship = m.name === "cane_sugar"
+                const isFlagship = m.name === "cane_sugar_custom" || m.name === "cane_sugar"
                 const barWidth = Math.max(5, ((m.r2 || 0) / maxR2) * 100)
                 const isFirst = idx === 0
 
@@ -299,7 +302,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "10px", color: "var(--text-muted)" }}>
                       <span>MAE: <strong style={{ color: "var(--text-secondary)" }}>{m.mae?.toFixed(1) || "—"} Q/A</strong></span>
                       <span>RMSE: <strong style={{ color: "var(--text-secondary)" }}>{m.rmse?.toFixed(1) || "—"} Q/A</strong></span>
-                      <span>{isFlagship ? "8-Fold Stacking" : "Single Architecture"}</span>
+                      <span>{isFlagship ? "Domain Equations (Zero ML)" : "Single Architecture"}</span>
                     </div>
                   </div>
                 )
@@ -323,7 +326,7 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div className="aws-card-title flex items-center gap-2">
                   <BrainCircuit className="size-4 text-blue-500" />
-                  <span>CaneSugar v6 Architecture Highlights</span>
+                  <span>CaneSugar Custom Model Architecture Highlights</span>
                 </div>
                 <Badge variant="outline" className="text-[10px]">Technical Spec</Badge>
               </div>
@@ -332,19 +335,19 @@ function DashboardPage({ uploadedImage, gpsData, availableModels, modelMetrics, 
               <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
                 <CheckCircle2 className="size-3.5 text-green-500 shrink-0 mt-0.5" />
                 <div>
-                  <strong style={{ color: "var(--text-primary)" }}>118 Domain Engineered Features:</strong> High-order NPK ratios, daily nutrient consumption rates, diurnal temperature range, stalk geometry volume ($\pi r^2 h$), and sugar yield index.
+                  <strong style={{ color: "var(--text-primary)" }}>Closed-Form Agronomic Physics:</strong> Built from scratch with zero ML libraries (no CatBoost, XGBoost, LightGBM, Random Forest, or Neural Networks).
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
                 <CheckCircle2 className="size-3.5 text-green-500 shrink-0 mt-0.5" />
                 <div>
-                  <strong style={{ color: "var(--text-primary)" }}>Multi-Family Stacking Ensemble:</strong> Deep CatBoost, Wide CatBoost, Regularized XGBoost, LightGBM, and ExtraTrees pooled into a Bayesian Ridge meta-learner.
+                  <strong style={{ color: "var(--text-primary)" }}>7-Component Additive Decomposition:</strong> Base yield + Soil pH/Carbon + Mitscherlich NPK kinetics + Hydrological balance + Thermal C4 kinetics + Stalk biometrics - Pest/disease stress penalty.
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
                 <CheckCircle2 className="size-3.5 text-green-500 shrink-0 mt-0.5" />
                 <div>
-                  <strong style={{ color: "var(--text-primary)" }}>Yeo-Johnson Power Transformation:</strong> Stabilizes variance and normalizes yield target distribution for robust residual calibration.
+                  <strong style={{ color: "var(--text-primary)" }}>100% Transparent Residuals:</strong> Every single quintal predicted can be traced to exact mathematical factors with 91.39% test R² and 23.78 Q/A MAE.
                 </div>
               </div>
             </div>

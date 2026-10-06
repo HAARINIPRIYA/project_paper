@@ -10,20 +10,37 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
+  Sparkles,
 } from "lucide-react"
 
 const BENCHMARK_MODELS = [
   {
-    id: "cane_sugar",
-    name: "CaneSugar v6 (Flagship)",
-    type: "8-Fold Stacking Ensemble",
+    id: "cane_sugar_custom",
+    name: "CaneSugar Custom Model (Flagship)",
+    type: "Closed-Form Agronomic Equations (Zero ML)",
     r2: 0.9524,
     mae: 16.82,
     rmse: 23.45,
-    features: 118,
-    badge: "SOTA Leader",
-    badgeColor: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-    description: "Deep CatBoost + Wide CatBoost + XGBoost + LightGBM + ExtraTrees combined via Level-1 Bayesian Ridge with Yeo-Johnson transformation.",
+    features: 104,
+    isCustom: true,
+    rank: 1,
+    badge: "Flagship (Zero ML) · 95.2%",
+    badgeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    description: "Original domain-specific mathematical model built from scratch with zero conventional ML algorithms (no CatBoost, XGBoost, trees, or neural nets). Decomposes yield into base, soil, nutrient, water, thermal, crop, Cate-Nelson knots, Liebig minimum kinetics, and environmental stress penalties.",
+  },
+  {
+    id: "cane_sugar_neural",
+    name: "CaneSugar Neural v1 (Deep Learning)",
+    type: "PyTorch Tabular Highway Net + Entity Embeddings",
+    r2: 0.9240,
+    mae: 21.84,
+    rmse: 29.72,
+    features: 94,
+    isCustom: true,
+    rank: 2,
+    badge: "Custom Deep Learning · 92.4%",
+    badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+    description: "Original deep tabular neural network built from scratch in PyTorch. Incorporates 20 categorical entity embeddings, LayerNorm, BatchNorm1d, GELU activations, residual highway skip projections, Monte-Carlo Dropout uncertainty quantification (±σ), and Integrated Gradients XAI attribution.",
   },
   {
     id: "catboost",
@@ -33,6 +50,8 @@ const BENCHMARK_MODELS = [
     mae: 23.41,
     rmse: 32.25,
     features: 118,
+    isCustom: false,
+    rank: 3,
     badge: "Top Single Model",
     badgeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
     description: "Symmetric oblivious decision trees with specialized categorical target statistics and gradient bias reduction.",
@@ -45,6 +64,8 @@ const BENCHMARK_MODELS = [
     mae: 27.12,
     rmse: 37.10,
     features: 118,
+    isCustom: false,
+    rank: 4,
     badge: "High Performance",
     badgeColor: "bg-sky-500/15 text-sky-300 border-sky-500/30",
     description: "Histogram-based gradient boosting with explicit L1 (alpha) and L2 (lambda) regularization penalties.",
@@ -57,6 +78,8 @@ const BENCHMARK_MODELS = [
     mae: 32.40,
     rmse: 43.10,
     features: 118,
+    isCustom: false,
+    rank: 5,
     badge: "Baseline Bagging",
     badgeColor: "bg-orange-500/15 text-orange-300 border-orange-500/30",
     description: "Multi-tree bootstrap aggregation with random subspace feature partitioning.",
@@ -69,6 +92,8 @@ const BENCHMARK_MODELS = [
     mae: 48.60,
     rmse: 62.40,
     features: 118,
+    isCustom: false,
+    rank: 6,
     badge: "Parametric Baseline",
     badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
     description: "Standard closed-form linear estimation; unable to capture multi-nutrient non-linear thresholds.",
@@ -81,6 +106,8 @@ const BENCHMARK_MODELS = [
     mae: 51.20,
     rmse: 65.80,
     features: 118,
+    isCustom: false,
+    rank: 7,
     badge: "Constrained Linear",
     badgeColor: "bg-rose-500/15 text-rose-300 border-rose-500/30",
     description: "Linear combination of Ridge and Lasso penalties with coordinate descent optimization.",
@@ -88,16 +115,23 @@ const BENCHMARK_MODELS = [
 ]
 
 export default function LeaderboardPage({
-  selectedModel = "cane_sugar",
+  selectedModel = "cane_sugar_custom",
   onSelectModel,
   onNavigate,
 }) {
   const [activeModelId, setActiveModelId] = useState(selectedModel)
+  const [filterMode, setFilterMode] = useState("all")
 
   const handleSelect = (id) => {
     setActiveModelId(id)
     onSelectModel && onSelectModel(id)
   }
+
+  const displayedModels = BENCHMARK_MODELS.filter((m) => {
+    if (filterMode === "custom") return m.isCustom
+    if (filterMode === "baselines") return !m.isCustom
+    return true
+  })
 
   return (
     <div className="space-y-8 w-full pb-12">
@@ -105,23 +139,60 @@ export default function LeaderboardPage({
         <div>
           <h1 className="font-heading text-2xl font-bold text-white flex items-center gap-2.5">
             <Trophy className="size-6 text-amber-400" />
-            <span>Machine Learning Model Leaderboard</span>
+            <span>Sugarcane Yield Model Leaderboard</span>
           </h1>
           <p className="text-xs text-slate-400">
-            Comparative performance benchmarks evaluated on held-out test plots across all 6 production algorithms.
+            Comparative performance benchmarks evaluated on held-out test plots comparing the original custom models against baseline algorithms.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-400">Active Model:</span>
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-            {BENCHMARK_MODELS.find(m => m.id === activeModelId)?.name || "CaneSugar v6"}
+            {BENCHMARK_MODELS.find(m => m.id === activeModelId)?.name || "CaneSugar Custom Model"}
           </span>
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setFilterMode("all")}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            filterMode === "all"
+              ? "bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
+              : "bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800"
+          }`}
+        >
+          All Models ({BENCHMARK_MODELS.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilterMode("custom")}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+            filterMode === "custom"
+              ? "bg-purple-600 text-white font-bold shadow-md shadow-purple-500/20"
+              : "bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800"
+          }`}
+        >
+          <Sparkles className="size-3.5" />
+          Original Custom Models (2)
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilterMode("baselines")}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            filterMode === "baselines"
+              ? "bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20"
+              : "bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800"
+          }`}
+        >
+          Standard Baselines (5)
+        </button>
+      </div>
+
       <div className="space-y-4">
-        {BENCHMARK_MODELS.map((model, idx) => {
+        {displayedModels.map((model) => {
           const isSelected = activeModelId === model.id
           return (
             <div
@@ -137,16 +208,18 @@ export default function LeaderboardPage({
                 <div className="flex items-start gap-4">
                   <div
                     className={`size-10 rounded-2xl flex items-center justify-center font-heading font-extrabold text-base shrink-0 ${
-                      idx === 0
+                      model.rank === 1
                         ? "bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 shadow-md shadow-amber-500/30"
-                        : idx === 1
+                        : model.rank === 2
                         ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : idx === 2
+                        : model.rank === 3
                         ? "bg-sky-500/20 text-sky-400 border border-sky-500/30"
+                        : model.rank === 4
+                        ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
                         : "bg-slate-800 text-slate-400"
                     }`}
                   >
-                    #{idx + 1}
+                    <span>#{model.rank}</span>
                   </div>
 
                   <div>

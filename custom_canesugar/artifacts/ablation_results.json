@@ -1,0 +1,124 @@
+[
+  {
+    "experiment": "Experiment A: Soil Factors Only",
+    "description": "Baseline soil properties (pH Gaussian curve, OC log-uptake, sand/clay, depth)",
+    "active_groups": [
+      "soil"
+    ],
+    "num_features": 21,
+    "regularization_alpha": 2.788548171726286,
+    "train_r2": 0.0884,
+    "val_r2": 0.1448,
+    "test_r2": 0.0801,
+    "test_mae": 89.38,
+    "test_rmse": 105.43
+  },
+  {
+    "experiment": "Experiment B: Soil + Nutrients",
+    "description": "Adds Mitscherlich diminishing return response and N:P:K stoichiometry",
+    "active_groups": [
+      "soil",
+      "nutrient"
+    ],
+    "num_features": 68,
+    "regularization_alpha": 11.231045018329516,
+    "train_r2": 0.3654,
+    "val_r2": 0.3693,
+    "test_r2": 0.3342,
+    "test_mae": 73.81,
+    "test_rmse": 89.69
+  },
+  {
+    "experiment": "Experiment C: Soil + Nutrients + Water & Climate",
+    "description": "Adds water balance (Rain - ET0), soil moisture suitability, and thermal curves",
+    "active_groups": [
+      "soil",
+      "nutrient",
+      "water",
+      "temperature"
+    ],
+    "num_features": 108,
+    "regularization_alpha": 22.539339047347887,
+    "train_r2": 0.4025,
+    "val_r2": 0.3981,
+    "test_r2": 0.3556,
+    "test_mae": 73.03,
+    "test_rmse": 88.24
+  },
+  {
+    "experiment": "Experiment D: Soil + Nutrients + Climate + Crop",
+    "description": "Adds stalk cylindrical volume (pi*r^2*h), field biomass index, crop duration",
+    "active_groups": [
+      "soil",
+      "nutrient",
+      "water",
+      "temperature",
+      "crop"
+    ],
+    "num_features": 154,
+    "regularization_alpha": 45.23370744772096,
+    "train_r2": 0.4412,
+    "val_r2": 0.4419,
+    "test_r2": 0.3813,
+    "test_mae": 72.0,
+    "test_rmse": 86.46
+  },
+  {
+    "experiment": "Experiment E: Add Agronomic Interactions",
+    "description": "Adds cross-nutrient (NxP, NxK) and moisture-nutrient synergies",
+    "active_groups": [
+      "soil",
+      "nutrient",
+      "water",
+      "temperature",
+      "crop",
+      "interaction"
+    ],
+    "num_features": 178,
+    "regularization_alpha": 3.319008795914677,
+    "train_r2": 0.7442,
+    "val_r2": 0.69,
+    "test_r2": 0.7064,
+    "test_mae": 47.22,
+    "test_rmse": 59.57
+  },
+  {
+    "experiment": "Experiment F: Add Biotic/Abiotic Stress Penalties",
+    "description": "Includes disease severity, pest infestation, and heat stress penalties (no interactions)",
+    "active_groups": [
+      "soil",
+      "nutrient",
+      "water",
+      "temperature",
+      "crop",
+      "stress"
+    ],
+    "num_features": 169,
+    "regularization_alpha": 4.701851489299847,
+    "train_r2": 0.9244,
+    "val_r2": 0.8831,
+    "test_r2": 0.9098,
+    "test_mae": 24.38,
+    "test_rmse": 33.01
+  },
+  {
+    "experiment": "Experiment G: Full Custom Mathematical Model",
+    "description": "Complete domain mathematical formulation with all 7 physical components",
+    "active_groups": [
+      "soil",
+      "nutrient",
+      "water",
+      "temperature",
+      "crop",
+      "interaction",
+      "stress"
+    ],
+    "num_features": 193,
+    "regularization_alpha": 2.3428684237322304,
+    "train_r2": 0.9326,
+    "val_r2": 0.8966,
+    "test_r2": 0.9136,
+    "test_mae": 23.54,
+    "test_rmse": 32.31
+  }
+]

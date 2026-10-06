@@ -26,11 +26,11 @@ export default function PredictionShowcase({
 
   const yieldValue = predictionResult?.predictions?.[0] !== undefined
     ? predictionResult.predictions[0]
-    : 312.45
+    : 272.29
 
-  const modelUsed = predictionResult?.model_name || "CaneSugar v6 (Stacking Ensemble)"
+  const modelUsed = predictionResult?.display_name || predictionResult?.model_name || "CaneSugar Custom Model (Domain Equations)"
   const metricTons = (yieldValue * 0.1).toFixed(1)
-  const maeMargin = Number(predictionResult?.metrics?.mae || 16.82)
+  const maeMargin = Number(predictionResult?.metrics?.mae || 23.78)
 
   const getTier = (val) => {
     if (val >= 350) return { label: "Elite Yield (SOTA)", color: "text-emerald-400", bg: "bg-emerald-500/15", border: "border-emerald-500/30", icon: Award }
@@ -169,7 +169,7 @@ export default function PredictionShowcase({
           </div>
           <div>
             <h3 className="font-heading text-base font-bold text-white">Harvest Forecast Result</h3>
-            <p className="text-[11px] text-slate-400">Validated 8-Fold Stacking Prediction</p>
+            <p className="text-[11px] text-slate-400">Validated Custom Closed-Form Prediction (Zero ML)</p>
           </div>
         </div>
 
@@ -223,6 +223,102 @@ export default function PredictionShowcase({
           </span>
         </div>
       </div>
+
+      {predictionResult?.explanation && (
+        <div className="space-y-3 pt-4 border-t border-slate-800">
+          <div className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="size-3.5" />
+              Mathematical Equation Decomposition
+            </span>
+            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+              Zero Black-Box ML
+            </span>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
+            <div className="text-[11px] font-mono text-slate-400 border-b border-slate-800/60 pb-1.5">
+              Ŷ = Base + ΔSoil + ΔNutrient + ΔWater + ΔTemp + ΔCrop + ΔInteract - Stress
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="flex justify-between items-center bg-slate-900/60 px-2 py-1 rounded">
+                <span className="text-slate-400 text-[11px]">Base Yield (Y₀):</span>
+                <span className="font-mono font-bold text-slate-200">+{predictionResult.explanation.base_yield}</span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-900/60 px-2 py-1 rounded">
+                <span className="text-slate-400 text-[11px]">Soil (ΔSoil):</span>
+                <span className={`font-mono font-bold ${predictionResult.explanation.soil_contribution >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                  {predictionResult.explanation.soil_contribution >= 0 ? "+" : ""}{predictionResult.explanation.soil_contribution}
+                </span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-900/60 px-2 py-1 rounded">
+                <span className="text-slate-400 text-[11px]">Nutrient (ΔNut):</span>
+                <span className={`font-mono font-bold ${predictionResult.explanation.nutrient_contribution >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                  {predictionResult.explanation.nutrient_contribution >= 0 ? "+" : ""}{predictionResult.explanation.nutrient_contribution}
+                </span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-900/60 px-2 py-1 rounded">
+                <span className="text-slate-400 text-[11px]">Water (ΔWater):</span>
+                <span className={`font-mono font-bold ${predictionResult.explanation.water_contribution >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                  {predictionResult.explanation.water_contribution >= 0 ? "+" : ""}{predictionResult.explanation.water_contribution}
+                </span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-900/60 px-2 py-1 rounded">
+                <span className="text-slate-400 text-[11px]">Climate (ΔTemp):</span>
+                <span className={`font-mono font-bold ${predictionResult.explanation.temperature_contribution >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                  {predictionResult.explanation.temperature_contribution >= 0 ? "+" : ""}{predictionResult.explanation.temperature_contribution}
+                </span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-900/60 px-2 py-1 rounded">
+                <span className="text-slate-400 text-[11px]">Crop Biometrics:</span>
+                <span className={`font-mono font-bold ${predictionResult.explanation.crop_contribution >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                  {predictionResult.explanation.crop_contribution >= 0 ? "+" : ""}{predictionResult.explanation.crop_contribution}
+                </span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-900/60 px-2 py-1 rounded">
+                <span className="text-slate-400 text-[11px]">Synergies (ΔInteract):</span>
+                <span className={`font-mono font-bold ${predictionResult.explanation.interaction_contribution >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                  {predictionResult.explanation.interaction_contribution >= 0 ? "+" : ""}{predictionResult.explanation.interaction_contribution}
+                </span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-900/60 px-2 py-1 rounded">
+                <span className="text-slate-400 text-[11px]">Stress Penalty:</span>
+                <span className="font-mono font-bold text-rose-400">
+                  -{predictionResult.explanation.stress_penalty}
+                </span>
+              </div>
+            </div>
+            <div className="text-[10px] text-slate-500 pt-1 flex justify-between items-center">
+              <span>Exact Mathematical Identity</span>
+              <span className="font-mono text-amber-400/90 font-semibold">= {predictionResult.explanation.predicted_yield} Q/A</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {predictionResult?.is_deep_neural && (
+        <div className="space-y-3 pt-4 border-t border-slate-800">
+          <div className="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="size-3.5 text-purple-400" />
+              CaneSugar Neural v1 Architecture
+            </span>
+            <span className="text-[10px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
+              Deep Learning
+            </span>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
+            <div className="text-[11px] font-mono text-slate-400 border-b border-slate-800/60 pb-1.5 flex justify-between">
+              <span>Embeddings ➔ LayerNorm ➔ Dense(256) ➔ ResProjection(128➔64) ➔ Dense(32) ➔ Head</span>
+            </div>
+            {predictionResult?.uncertainty && (
+              <div className="flex items-center justify-between text-xs bg-slate-900/60 px-2.5 py-1.5 rounded">
+                <span className="text-slate-400 text-[11px]">Monte-Carlo Dropout Dispersion:</span>
+                <span className="font-mono font-bold text-purple-300">±{predictionResult.uncertainty[0]} Q/A (95% CI: {predictionResult.ci_lower?.[0]} - {predictionResult.ci_upper?.[0]} Q/A)</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-3 pt-4 border-t border-slate-800">
         <div className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">

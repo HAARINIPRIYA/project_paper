@@ -774,7 +774,7 @@ export default function SmartFieldForm({
             className="btn-modern-primary w-full shadow-lg shadow-amber-500/25 cursor-pointer font-heading tracking-wide text-base"
           >
             <Sparkles className="size-5" />
-            <span>{isPredicting ? "Computing Stacking Ensemble Prediction..." : "Forecast Harvest Yield Now"}</span>
+            <span>{isPredicting ? "Computing Custom Mathematical Prediction..." : "Forecast Harvest Yield Now"}</span>
           </button>
         </div>
       </form>

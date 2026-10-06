@@ -1,0 +1,17 @@
+{
+  "model_name": "CaneSugar Custom Agronomic Mathematical Model",
+  "version": "1.0.0",
+  "target": "Yield_Quintal_per_Acre",
+  "equation_structure": "Y_hat = Base_Yield + Delta_Soil + Delta_Nutrient + Delta_Water + Delta_Temp + Delta_Crop + Delta_Interact - Stress_Penalty",
+  "components": [
+    "soil_factor",
+    "nutrient_factor",
+    "water_factor",
+    "temperature_factor",
+    "crop_factor",
+    "interaction_factor",
+    "stress_penalty"
+  ],
+  "base_yield": 258.0272162607595,
+  "regularization_lambda": 2.3428684237322304
+}

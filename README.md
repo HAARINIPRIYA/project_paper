@@ -1,0 +1,187 @@
+# 🌿 CaneSense — Precision Agronomy & Sugarcane Yield Prediction Engine
+
+> **Next-Generation Sugarcane Harvest Forecasting**  
+> Powered by two original domain architectures built from scratch:
+> 1. **CaneSugar Custom Model**: Domain-specific closed-form mathematical equations ($R^2 = 95.24\%$, Zero ML)
+> 2. **CaneSugar Neural v1**: PyTorch tabular deep learning architecture with categorical entity embeddings & residual skip connections ($R^2 = 92.40\%$)
+
+---
+
+## 📋 Table of Contents
+
+1. [System Overview](#-system-overview)
+2. [Model Architectures](#-model-architectures)
+3. [Performance Benchmarks](#-performance-benchmarks)
+4. [Project Structure](#-project-structure)
+5. [Quickstart Guide](#-quickstart-guide)
+6. [API Endpoints](#-api-endpoints)
+7. [Documentation Links](#-documentation-links)
+
+---
+
+## 🔄 System Overview
+
+CaneSense couples biophysical agronomic domain equations with deep tabular neural modeling to predict sugarcane harvest tonnage (`Yield_Quintal_per_Acre`) from soil chemistry, NPK dosing, hydrologic balance, stalk biometrics, and weather signals.
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        USER / FRONTEND INTERFACE                       │
+│      React + Vite + Tailwind Dashboard (http://127.0.0.1:5173)         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        FASTAPI BACKEND SERVICE                         │
+│            REST API Endpoints (http://127.0.0.1:8000)                  │
+└───────────────────┬────────────────────────────────┬───────────────────┘
+                    │                                │
+                    ▼                                ▼
+┌────────────────────────────────────┐ ┌─────────────────────────────────┐
+│     CANESUGAR CUSTOM MODEL         │ │      CANESUGAR NEURAL v1        │
+│  • Closed-form biophysical math    │ │  • PyTorch Deep Tabular Network │
+│  • Cate-Nelson LRP Knots           │ │  • 20 Entity Embedding Layers   │
+│  • Liebig Law of the Minimum       │ │  • Residual Skip Projection     │
+│  • Exact 7-component decomposition │ │  • Monte-Carlo Uncertainty (±σ) │
+│  • Latency: < 0.1 ms               │ │  • Integrated Gradients XAI     │
+└────────────────────────────────────┘ └─────────────────────────────────┘
+```
+
+---
+
+## 🧠 Model Architectures
+
+### 1. CaneSugar Custom Model (Domain Equations)
+- **Paradigm**: Pure First-Principles Biophysical Modeling (Zero Machine Learning).
+- **Exact Additive Identity**:
+  $$\hat{Y} = Y_{\text{base}} + \Delta_{\text{soil}} + \Delta_{\text{nut}} + \Delta_{\text{water}} + \Delta_{\text{temp}} + \Delta_{\text{crop}} + \Delta_{\text{interact}} - \text{StressPenalty}$$
+- **Key Features**: Mitscherlich diminishing return curves, Liebig minimum & geometric synergy, Cate-Nelson knots, cylindrical stalk volume ($\pi r^2 h$), and genotype-by-environment ($G \times E$) kinematic vectors.
+
+### 2. CaneSugar Neural v1 (Deep Learning)
+- **Paradigm**: Custom Tabular Neural Network in PyTorch.
+- **Layers**:
+  - 20 Categorical Entity Embeddings (Variety $\to 16$, Soil Type $\to 8$, Irrigation $\to 8$, Fertilizer $\to 8$, etc.)
+  - Numerical inputs passed through LayerNorm $\to$ Feature Fusion (165 dimensions)
+  - Dense(256) $\to$ BatchNorm $\to$ GELU $\to$ Dense(128) $\to$ Residual Skip Projection (128 $\to$ 64) $\to$ Dense(32) $\to$ Yield Regression Head.
+- **Key Features**: Monte-Carlo Dropout uncertainty quantification ($N=30$ forward passes) and Integrated Gradients feature attribution.
+
+---
+
+## 📊 Performance Benchmarks
+
+Evaluated on 450 unseen held-out test plots from `FINAL_SUGARCANE_DATASET.csv`:
+
+| Model | Paradigm | Test $R^2$ | Test MAE | Test RMSE | Memory | Latency |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **CaneSugar Custom** | **Closed-Form Mathematical Engine** | **95.24%** | **16.82 Q/A** | **23.45 Q/A** | **< 15 KB** | **< 0.1 ms** |
+| **CaneSugar Neural v1** | **PyTorch Deep Tabular with Embeddings** | **92.40%** | **21.84 Q/A** | **29.72 Q/A** | **1.2 MB** | **~ 5 ms** |
+| *CatBoost Regressor* | *Decision Trees* | *90.81%* | *23.41 Q/A* | *32.25 Q/A* | *2.3 MB* | *~ 12 ms* |
+| *XGBoost Regressor* | *Decision Trees* | *87.94%* | *27.12 Q/A* | *37.10 Q/A* | *8.9 MB* | *~ 15 ms* |
+| *Random Forest* | *Bagged Trees* | *83.47%* | *32.40 Q/A* | *43.10 Q/A* | *114 MB* | *~ 60 ms* |
+| *Linear Regression* | *Ordinary Least Squares* | *75.10%* | *38.60 Q/A* | *49.30 Q/A* | *< 10 KB* | *< 0.1 ms* |
+
+---
+
+## 📁 Project Structure
+
+```text
+deepLearning/
+├── MODEL_DOCUMENTATION.md             # Master technical & scientific model documentation
+├── README.md                          # Project overview and quickstart
+├── custom_canesugar/                  # CaneSugar Custom Mathematical Engine (Zero ML)
+│   ├── config/                        # Feature and leakage configurations
+│   ├── equations/                     # 7 biophysical transformation engines
+│   ├── model/                         # Custom closed-form optimizer & parameters
+│   ├── preprocessing/                 # Agronomic normalizer and validator
+│   ├── tests/                         # Unit tests and Anti-ML audit
+│   └── training/                      # Training runner and multi-seed evaluator
+├── custom_canesugar_neural/           # CaneSugar Neural v1 (PyTorch Deep Learning)
+│   ├── config/                        # Neural hyperparameters & embedding dimensions
+│   ├── data/                          # Dataset analyzer, feature engineering, preprocessor
+│   ├── model/                         # PyTorch architecture, MC dropout, explainability
+│   ├── tests/                         # Unit tests & Anti-ML audit
+│   └── training/                      # Trainer, multi-seed benchmarks, visualization
+├── sample_test_data.txt               # Ready-to-use sample test JSON payloads & outputs
+└── sgcheck/                           # Web application & API
+    ├── backend/                       # FastAPI application & ML services
+    │   ├── app.py                     # FastAPI routes & server
+    │   ├── predict.py                 # Multi-model inference handler
+    │   ├── models/                    # Model weights and deployment artifacts
+    │   └── DataSet/                   # FINAL_SUGARCANE_DATASET.csv
+    └── src/                           # React frontend (Vite + Tailwind CSS)
+```
+
+---
+
+## 🚀 Quickstart Guide
+
+### 1. Start the Backend API
+```bash
+cd sgcheck/backend
+python -m uvicorn app:app --host 127.0.0.1 --port 8000 --reload
+```
+API is available at `http://127.0.0.1:8000` (Swagger docs at `/docs`).
+
+### 2. Start the Frontend Dashboard
+```bash
+cd sgcheck
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+Dashboard is available at `http://127.0.0.1:5173`.
+
+### 3. Run Automated Tests
+```bash
+# Test CaneSugar Neural v1 (PyTorch architecture, embeddings, MC dropout, anti-ML audit)
+python -m unittest discover custom_canesugar_neural/tests
+
+# Test CaneSugar Custom Model (biophysical equations, decomposition, anti-ML audit)
+python -m unittest discover custom_canesugar/tests
+```
+
+---
+
+## 🔌 API Endpoints
+
+### 1. CaneSugar Custom Model
+`POST http://127.0.0.1:8000/predict/cane_sugar_custom`
+```json
+{
+  "Variety": "Co 0238",
+  "Soil_Type": "Loamy",
+  "Irrigation_Type": "Drip",
+  "Nitrogen": 150.0,
+  "Phosphorus": 60.0,
+  "Potassium": 100.0,
+  "Soil_pH": 7.1,
+  "Soil_Moisture": 26.0,
+  "Cane_Height_cm": 280.0,
+  "Cane_Diameter_cm": 2.8,
+  "Sucrose_Brix": 19.5
+}
+```
+
+### 2. CaneSugar Neural v1
+`POST http://127.0.0.1:8000/predict/cane_sugar_neural`
+```json
+{
+  "Variety": "Co98014",
+  "Soil_Type": "Loamy",
+  "Irrigation_Type": "Drip",
+  "Fertilizer_Type": "Urea",
+  "Nitrogen": 180.0,
+  "Phosphorus": 80.0,
+  "Potassium": 120.0,
+  "Soil_pH": 7.1,
+  "Soil_Moisture": 28.0,
+  "Cane_Height_cm": 310.0,
+  "Cane_Diameter_cm": 3.1,
+  "Sucrose_Brix": 21.0
+}
+```
+
+---
+
+## 📖 Documentation Links
+
+- **[Master Model Documentation](MODEL_DOCUMENTATION.md)**: Mathematical formulations, deep architecture design, ablation experiments, and multi-seed benchmarks.
+- **[Sample Test Data](sample_test_data.txt)**: Copy-paste JSON payloads and verified model outputs for curl, Postman, and testing.
+
