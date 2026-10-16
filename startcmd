@@ -1,6 +1,7 @@
 D:\MiKTeX\miktex\bin\x64\pdflatex.exe -interaction=nonstopmode main.tex
 
-
+.\.venv\Scripts\Activate.ps1
+python app.py
 
 Analyze the text I provide.
 
