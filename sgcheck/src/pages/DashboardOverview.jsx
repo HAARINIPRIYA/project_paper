@@ -28,9 +28,9 @@ export default function DashboardOverview({
   availableModels = [],
   onOpenAiChat,
 }) {
-  const bestR2 = modelMetrics["cane_sugar_custom"]?.r2 || 0.9524
-  const bestMae = modelMetrics["cane_sugar_custom"]?.mae || 16.82
-  const bestRmse = modelMetrics["cane_sugar_custom"]?.rmse || 23.45
+  const bestR2 = modelMetrics["cane_sugar_neural"]?.r2 || 0.9240
+  const bestMae = modelMetrics["cane_sugar_neural"]?.mae || 21.84
+  const bestRmse = modelMetrics["cane_sugar_neural"]?.rmse || 29.72
 
   const recentYield = predictionResult?.predictions?.[0] !== undefined 
     ? predictionResult.predictions[0] 
@@ -46,7 +46,7 @@ export default function DashboardOverview({
           <div className="lg:col-span-7 xl:col-span-8 min-w-0 flex flex-col justify-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-300 w-fit">
               <Sparkles className="size-3.5 text-amber-400 shrink-0" />
-              <span>Custom Agronomic Mathematical Yield Engine</span>
+              <span>Tabular Deep Learning & Neural Yield Engine</span>
             </div>
 
             <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight">
@@ -54,7 +54,7 @@ export default function DashboardOverview({
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-              Forecasting harvest tonnage using <span className="text-amber-400 font-semibold">closed-form mathematical equations</span>, Mitscherlich nutrient kinetics, and real-time sensitivity simulations with zero black-box ML.
+              Forecasting harvest tonnage using <span className="text-amber-400 font-semibold">CaneSugar Neural v1</span>, entity embeddings, residual highway connections, and calibrated epistemic uncertainty bounds.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -93,10 +93,10 @@ export default function DashboardOverview({
               <div className="flex items-center justify-between text-xs font-semibold text-slate-400 pb-3 border-b border-slate-800/80">
                 <span className="flex items-center gap-1.5 text-slate-300 font-semibold">
                   <Award className="size-4 text-amber-400" />
-                  <span>CaneSugar Custom Model</span>
+                  <span>CaneSugar Neural v1</span>
                 </span>
                 <span className="text-emerald-400 font-bold flex items-center gap-1 text-[11px] bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <CheckCircle2 className="size-3" /> Validated Closed-Form
+                  <CheckCircle2 className="size-3" /> Flagship Neural Model
                 </span>
               </div>
 
@@ -113,7 +113,7 @@ export default function DashboardOverview({
                 <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
                   <span>~{(recentYield * 0.1).toFixed(1)} metric tons/acre</span>
                   <span className="text-slate-600">·</span>
-                  <span className="text-emerald-400 font-mono font-medium">91.39% R² (Domain Equations)</span>
+                  <span className="text-emerald-400 font-mono font-medium">92.40% R² (Deep Learning)</span>
                 </div>
               </div>
 
@@ -157,7 +157,7 @@ export default function DashboardOverview({
             </div>
           </div>
           <div className="kpi-sub">
-            <span>Closed-form physical error</span>
+            <span>Neural generalization error</span>
           </div>
         </div>
 
@@ -168,11 +168,11 @@ export default function DashboardOverview({
           </div>
           <div>
             <div className="kpi-value text-sky-400">
-              Custom <span className="text-xs font-normal text-slate-400">Equation</span>
+              Neural <span className="text-xs font-normal text-slate-400">Deep Net</span>
             </div>
           </div>
           <div className="kpi-sub">
-            <span>Zero Black-Box ML / 100% Explainable</span>
+            <span>Entity Embeddings & Highway Skips</span>
           </div>
         </div>
 
@@ -259,8 +259,7 @@ export default function DashboardOverview({
 
             <div className="space-y-3.5 pt-1">
               {[
-                { name: "CaneSugar Custom Model (Domain Equations)", r2: 0.9520, color: "from-amber-400 to-amber-500", highlight: true },
-                { name: "CaneSugar Neural v1 (Deep Learning)", r2: 0.9240, color: "from-purple-400 to-purple-500", highlight: true },
+                { name: "CaneSugar Neural v1 (Deep Learning)", r2: 0.9240, color: "from-amber-400 to-amber-500", highlight: true },
                 { name: "CatBoost Regressor", r2: 0.9080, color: "from-emerald-400 to-emerald-500" },
                 { name: "XGBoost Regressor", r2: 0.8790, color: "from-sky-400 to-sky-500" },
                 { name: "Random Forest", r2: 0.8350, color: "from-orange-400 to-orange-500" },

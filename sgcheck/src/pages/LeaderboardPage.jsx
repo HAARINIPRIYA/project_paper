@@ -15,20 +15,6 @@ import {
 
 const BENCHMARK_MODELS = [
   {
-    id: "cane_sugar_custom",
-    name: "CaneSugar Custom Model (Flagship)",
-    type: "Closed-Form Agronomic Equations (Zero ML)",
-    r2: 0.9524,
-    mae: 16.82,
-    rmse: 23.45,
-    features: 104,
-    isCustom: true,
-    rank: 1,
-    badge: "Flagship (Zero ML) · 95.2%",
-    badgeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-    description: "Original domain-specific mathematical model built from scratch with zero conventional ML algorithms (no CatBoost, XGBoost, trees, or neural nets). Decomposes yield into base, soil, nutrient, water, thermal, crop, Cate-Nelson knots, Liebig minimum kinetics, and environmental stress penalties.",
-  },
-  {
     id: "cane_sugar_neural",
     name: "CaneSugar Neural v1 (Deep Learning)",
     type: "PyTorch Tabular Highway Net + Entity Embeddings",
@@ -37,9 +23,9 @@ const BENCHMARK_MODELS = [
     rmse: 29.72,
     features: 94,
     isCustom: true,
-    rank: 2,
-    badge: "Custom Deep Learning · 92.4%",
-    badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+    rank: 1,
+    badge: "Flagship Deep Learning · 92.4%",
+    badgeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
     description: "Original deep tabular neural network built from scratch in PyTorch. Incorporates 20 categorical entity embeddings, LayerNorm, BatchNorm1d, GELU activations, residual highway skip projections, Monte-Carlo Dropout uncertainty quantification (±σ), and Integrated Gradients XAI attribution.",
   },
   {
@@ -51,7 +37,7 @@ const BENCHMARK_MODELS = [
     rmse: 32.25,
     features: 118,
     isCustom: false,
-    rank: 3,
+    rank: 2,
     badge: "Top Single Model",
     badgeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
     description: "Symmetric oblivious decision trees with specialized categorical target statistics and gradient bias reduction.",
@@ -65,7 +51,7 @@ const BENCHMARK_MODELS = [
     rmse: 37.10,
     features: 118,
     isCustom: false,
-    rank: 4,
+    rank: 3,
     badge: "High Performance",
     badgeColor: "bg-sky-500/15 text-sky-300 border-sky-500/30",
     description: "Histogram-based gradient boosting with explicit L1 (alpha) and L2 (lambda) regularization penalties.",
@@ -79,7 +65,7 @@ const BENCHMARK_MODELS = [
     rmse: 43.10,
     features: 118,
     isCustom: false,
-    rank: 5,
+    rank: 4,
     badge: "Baseline Bagging",
     badgeColor: "bg-orange-500/15 text-orange-300 border-orange-500/30",
     description: "Multi-tree bootstrap aggregation with random subspace feature partitioning.",
@@ -93,7 +79,7 @@ const BENCHMARK_MODELS = [
     rmse: 62.40,
     features: 118,
     isCustom: false,
-    rank: 6,
+    rank: 5,
     badge: "Parametric Baseline",
     badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
     description: "Standard closed-form linear estimation; unable to capture multi-nutrient non-linear thresholds.",
@@ -107,7 +93,7 @@ const BENCHMARK_MODELS = [
     rmse: 65.80,
     features: 118,
     isCustom: false,
-    rank: 7,
+    rank: 6,
     badge: "Constrained Linear",
     badgeColor: "bg-rose-500/15 text-rose-300 border-rose-500/30",
     description: "Linear combination of Ridge and Lasso penalties with coordinate descent optimization.",
@@ -115,7 +101,7 @@ const BENCHMARK_MODELS = [
 ]
 
 export default function LeaderboardPage({
-  selectedModel = "cane_sugar_custom",
+  selectedModel = "cane_sugar_neural",
   onSelectModel,
   onNavigate,
 }) {
@@ -142,14 +128,14 @@ export default function LeaderboardPage({
             <span>Sugarcane Yield Model Leaderboard</span>
           </h1>
           <p className="text-xs text-slate-400">
-            Comparative performance benchmarks evaluated on held-out test plots comparing the original custom models against baseline algorithms.
+            Comparative performance benchmarks evaluated on held-out test plots comparing the custom neural architecture against baseline algorithms.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-400">Active Model:</span>
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-            {BENCHMARK_MODELS.find(m => m.id === activeModelId)?.name || "CaneSugar Custom Model"}
+            {BENCHMARK_MODELS.find(m => m.id === activeModelId)?.name || "CaneSugar Neural v1 (Deep Learning)"}
           </span>
         </div>
       </div>
@@ -176,7 +162,7 @@ export default function LeaderboardPage({
           }`}
         >
           <Sparkles className="size-3.5" />
-          Original Custom Models (2)
+          Neural Model (1)
         </button>
         <button
           type="button"

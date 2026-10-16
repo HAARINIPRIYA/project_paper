@@ -14,7 +14,7 @@ export default function ForecasterPage({
   onOpenAiChat,
   presets = [],
   onSelectPreset,
-  selectedModel = "cane_sugar_custom",
+  selectedModel = "cane_sugar_neural",
   onSelectModel,
 }) {
   return (
@@ -53,28 +53,11 @@ export default function ForecasterPage({
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
-              onClick={() => onSelectModel && onSelectModel("cane_sugar_custom")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                selectedModel === "cane_sugar_custom" || !selectedModel
-                  ? "bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
-                  : "bg-slate-950/60 text-slate-300 hover:text-white border border-slate-800"
-              }`}
-            >
-              <Calculator className="size-3.5 shrink-0" />
-              <span>CaneSugar Custom (Closed-Form Math · 95.2%)</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => onSelectModel && onSelectModel("cane_sugar_neural")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                selectedModel === "cane_sugar_neural"
-                  ? "bg-purple-600 text-white font-bold shadow-md shadow-purple-500/20"
-                  : "bg-slate-950/60 text-slate-300 hover:text-white border border-slate-800"
-              }`}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
             >
               <BrainCircuit className="size-3.5 shrink-0" />
-              <span>CaneSugar Neural v1 (Deep Learning · 92.4%)</span>
+              <span>CaneSugar Neural v1 (Flagship Deep Learning · 92.4%)</span>
             </button>
           </div>
         </div>

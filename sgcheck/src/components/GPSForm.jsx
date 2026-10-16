@@ -31,8 +31,8 @@ import { predictAuto, predictEnsemble, predictWithModel, getPresets } from "@/li
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ModelResults from "./ModelResults"
 const MODEL_OPTIONS = [
-  { value: "auto", label: "Auto (Best: CaneSugar Custom Model)" },
-  { value: "cane_sugar_custom", label: "CaneSugar Custom Model (Domain Equations)" },
+  { value: "auto", label: "Auto (Best: CaneSugar Neural v1)" },
+  { value: "cane_sugar_neural", label: "CaneSugar Neural v1 (Deep Learning)" },
   { value: "cane_sugar", label: "CaneSugar v6 (Ensemble)" },
   { value: "catboost", label: "CatBoost" },
   { value: "xgboost", label: "XGBoost" },
@@ -178,7 +178,7 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
   const [ensembleResult, setEnsembleResult] = useState(null)
   const [isPredicting, setIsPredicting] = useState(false)
   const [predictionMode, setPredictionMode] = useState("auto")
-  const [selectedModel, setSelectedModel] = useState("cane_sugar_custom")
+  const [selectedModel, setSelectedModel] = useState("cane_sugar_neural")
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -504,7 +504,7 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
               >
                 <button
                   type="button"
-                  onClick={() => { setPredictionMode("auto"); setSelectedModel("cane_sugar_custom") }}
+                  onClick={() => { setPredictionMode("auto"); setSelectedModel("cane_sugar_neural") }}
                   style={{
                     flex: 1,
                     display: "flex",
@@ -523,11 +523,11 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
                   }}
                 >
                   <Bot className="size-3.5" />
-                  Auto (Custom Model)
+                  Auto (Neural v1)
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setPredictionMode("manual"); setSelectedModel(manualModels[0]?.value || "cane_sugar_custom") }}
+                  onClick={() => { setPredictionMode("manual"); setSelectedModel(manualModels[0]?.value || "cane_sugar_neural") }}
                   style={{
                     flex: 1,
                     display: "flex",
@@ -567,8 +567,8 @@ function GPSForm({ onSubmit, gpsData, availableModels, onPredictionResult = null
               >
                 <Sparkles className="size-4 shrink-0 text-amber-500" />
                 <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                  <strong style={{ color: "var(--accent-gold)" }}>CaneSugar Custom Model</strong>
-                  {" "}— Original Closed-Form Agronomic Mathematical Prediction Engine ($R^2$ 91.4%) with zero conventional ML algorithms.
+                  <strong style={{ color: "var(--accent-gold)" }}>CaneSugar Neural v1</strong>
+                  {" "}— Tabular Deep Learning with Entity Embeddings and Highway Residual Skips ($R^2$ 92.4%).
                 </div>
               </motion.div>
             )}

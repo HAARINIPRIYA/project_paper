@@ -22,15 +22,6 @@ const MODEL_INFO = {
     features: ["Categorical Entity Embeddings", "LayerNorm + BatchNorm + GELU", "Residual Skip Projection", "Monte-Carlo Uncertainty (±σ)"],
     highlight: true,
   },
-  cane_sugar_custom: {
-    label: "CaneSugar Custom Model (Flagship)",
-    description: "Domain-specific closed-form mathematical equation from scratch (Zero ML)",
-    r2: "95.2%",
-    speed: "Real-time (<1ms)",
-    bestFor: "Flagship Accuracy & Pure First-Principles Agronomic Science",
-    features: ["Exact Mathematical Equations", "Cate-Nelson Knots & Liebig Law", "100% Deconstructed Contributions"],
-    highlight: true,
-  },
   cane_sugar: {
     label: "CaneSugar v6 (Ensemble)",
     description: "Custom 8-Fold Stacking Ensemble with 118+ domain features",
@@ -84,11 +75,11 @@ const MODEL_INFO = {
 
 function ModelSelector({ onSelect, selectedModel, availableModels }) {
   const [mode, setMode] = useState("auto")
-  const [manualModel, setManualModel] = useState("cane_sugar_custom")
+  const [manualModel, setManualModel] = useState("cane_sugar_neural")
 
   useEffect(() => {
     if (availableModels && availableModels.length > 0 && !selectedModel) {
-      setManualModel(availableModels.includes("cane_sugar_custom") ? "cane_sugar_custom" : availableModels[0])
+      setManualModel(availableModels.includes("cane_sugar_neural") ? "cane_sugar_neural" : availableModels[0])
     }
   }, [availableModels, selectedModel])
 
@@ -135,11 +126,11 @@ function ModelSelector({ onSelect, selectedModel, availableModels }) {
             <div className="space-y-1 flex-1">
               <div className="font-semibold flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-amber-500" />
-                <span>Auto Mode (Flagship: CaneSugar Custom Model)</span>
-                <Badge variant="green" className="text-[9px]">91.4% R²</Badge>
+                <span>Auto Mode (Flagship: CaneSugar Neural v1)</span>
+                <Badge variant="green" className="text-[9px]">92.4% R²</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Automatically routes to the custom domain-specific closed-form mathematical model with 100% explainability (Zero ML).
+                Automatically routes to CaneSugar Neural v1 with tabular entity embeddings and uncertainty quantification.
               </p>
             </div>
           </div>

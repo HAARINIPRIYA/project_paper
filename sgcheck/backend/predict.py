@@ -43,7 +43,6 @@ MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 
 ALL_MODELS = [
     "cane_sugar_neural",
-    "cane_sugar_custom",
     "cane_sugar",
     "catboost",
     "xgboost",
@@ -416,6 +415,9 @@ def predict(
         sanitized_records.append(clean_r)
     records = sanitized_records
 
+    if model_name in ["cane_sugar_custom", "custom_mathematical"]:
+        model_name = "cane_sugar_neural"
+
     if model_name in ["cane_sugar_neural", "neural_v1"]:
         import torch
         from custom_canesugar_neural.data.preprocessor import TabularNeuralPreprocessor
@@ -523,65 +525,6 @@ def predict(
             "is_deep_neural": True,
             "features_used": preprocessor.numerical_cols + preprocessor.categorical_cols,
             "features_count": len(preprocessor.numerical_cols) + len(preprocessor.categorical_cols),
-        }
-
-    if model_name in ["cane_sugar_custom", "custom_mathematical"]:
-        from custom_canesugar.model.custom_model import CaneSugarCustomModel
-        artifacts_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "custom_canesugar", "artifacts")
-        )
-        if not os.path.exists(os.path.join(artifacts_dir, "parameters.json")):
-            artifacts_dir = os.path.abspath("custom_canesugar/artifacts")
-
-        c_model = CaneSugarCustomModel.load_artifacts(artifacts_dir)
-        df_in = pd.DataFrame(records)
-        alias_map = {
-            "Nitrogen": "Nitrogen_kg_per_acre",
-            "N": "Nitrogen_kg_per_acre",
-            "Phosphorus": "Phosphorus_kg_per_acre",
-            "P": "Phosphorus_kg_per_acre",
-            "Potassium": "Potassium_kg_per_acre",
-            "K": "Potassium_kg_per_acre",
-            "Soil_Moisture": "Soil_Moisture_%",
-            "Rainfall": "Rainfall_Total_mm",
-            "Rainfall_mm": "Rainfall_Total_mm",
-            "Temperature": "Temp_Avg_C",
-            "Temperature_C": "Temp_Avg_C",
-            "Sucrose_Brix": "Brix_Value",
-            "Brix": "Brix_Value",
-            "Stalk_Height_cm": "Cane_Height_cm",
-            "Height_cm": "Cane_Height_cm",
-            "Stalk_Diameter_cm": "Cane_Diameter_cm",
-            "Diameter_cm": "Cane_Diameter_cm",
-            "Organic_Carbon": "Organic_Carbon_%",
-            "Irrigation_Type": "Irrigation_Method_Type",
-        }
-        for old_k, new_k in alias_map.items():
-            if old_k in df_in.columns and new_k not in df_in.columns:
-                df_in[new_k] = df_in[old_k]
-        preds = c_model.predict(df_in)
-        preds_list = [round(max(0.0, float(p)), 2) for p in preds]
-        explanations = c_model.explain(df_in)
-
-        factor_impacts = calculate_factor_impacts(records[0], preds_list[0]) if len(preds_list) > 0 else []
-
-        return {
-            "model": "cane_sugar_custom",
-            "model_version": "v1.0_mathematical_closed_form",
-            "display_name": "CaneSugar Custom Model (Flagship)",
-            "predictions": preds_list,
-            "explanation": explanations[0] if len(explanations) > 0 else {},
-            "metrics": {
-                "r2": 0.9524,
-                "mae": 16.82,
-                "rmse": 23.45,
-                "mape": 6.85,
-                "type": "Custom Agronomic Mathematical Closed-Form Equation",
-            },
-            "is_custom_mathematical": True,
-            "features_used": c_model.feature_names,
-            "features_count": len(c_model.feature_names),
-            "factor_impacts": factor_impacts,
         }
 
     model_data = load_model(model_name)

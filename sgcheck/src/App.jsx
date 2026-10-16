@@ -100,7 +100,7 @@ export default function App() {
   const [availableModels, setAvailableModels] = useState([])
   const [modelMetrics, setModelMetrics] = useState({})
   const [trainingSummary, setTrainingSummary] = useState(null)
-  const [selectedModel, setSelectedModel] = useState("cane_sugar_custom")
+  const [selectedModel, setSelectedModel] = useState("cane_sugar_neural")
 
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA)
   const [currentPresetName, setCurrentPresetName] = useState("")
@@ -108,25 +108,15 @@ export default function App() {
   const [weatherLinked, setWeatherLinked] = useState(false)
 
   const [predictionResult, setPredictionResult] = useState({
-    predictions: [272.29],
-    model: "cane_sugar_custom",
-    model_name: "CaneSugar Custom Model (Domain Equations)",
-    display_name: "CaneSugar Custom Model (Domain Equations)",
-    metrics: { r2: 0.9139, mae: 23.78, rmse: 32.25 },
-    explanation: {
-      base_yield: 252.53,
-      soil_contribution: 0.62,
-      nutrient_contribution: -9.00,
-      water_contribution: -12.71,
-      temperature_contribution: 0.56,
-      crop_contribution: 34.16,
-      interaction_contribution: 6.13,
-      stress_penalty: 0.00,
-      predicted_yield: 272.29,
-      unit: "quintal_per_acre",
-      equation_format: "Predicted = Base + Soil + Nutrient + Water + Temp + Crop + Interact - Stress",
-    },
-    is_custom_mathematical: true,
+    predictions: [284.50],
+    model: "cane_sugar_neural",
+    model_name: "CaneSugar Neural v1 (Deep Learning)",
+    display_name: "CaneSugar Neural v1 (Flagship)",
+    metrics: { r2: 0.9240, mae: 21.84, rmse: 29.72, mape: 8.82 },
+    ci_lower: [262.66],
+    ci_upper: [306.34],
+    uncertainty_std: [11.14],
+    is_deep_neural: true,
   })
   const [isPredicting, setIsPredicting] = useState(false)
 
@@ -135,7 +125,7 @@ export default function App() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Hello! I am your **CaneSense AI Agronomist**. I can analyze your field parameters, explain the custom closed-form mathematical yield equation, or provide fertilizer and soil moisture optimization strategies.",
+      content: "Hello! I am your **CaneSense AI Agronomist**. I can analyze your field parameters, explain the CaneSugar Neural v1 deep learning architecture, or provide fertilizer and soil moisture optimization strategies.",
       timestamp: new Date().toISOString(),
     },
   ])
@@ -199,7 +189,7 @@ export default function App() {
       try {
         let payload = { ...inputData }
 
-        const activeModel = modelToUse === "auto" || !modelToUse ? "cane_sugar_custom" : modelToUse
+        const activeModel = modelToUse === "auto" || !modelToUse ? "cane_sugar_neural" : modelToUse
         const result = await predictWithModel(activeModel, payload)
 
         if (result && result.predictions?.[0] !== undefined) {

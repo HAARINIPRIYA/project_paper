@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.9.29)  6 OCT 2026 21:40
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.5) (preloaded format=pdflatex 2026.9.29)  9 OCT 2026 09:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -530,116 +530,118 @@ o
 
 ** WARNING: \IEEEPARstart is locked out when in conference mode (line 73).
 
-Underfull \hbox (badness 2158) in paragraph at lines 79--80
-[]\OT1/ptm/b/n/10 Nutrients\OT1/ptm/m/n/10 : plant-available ni-tro-gen, phos-p
-ho-rus, and
+Underfull \hbox (badness 10000) in paragraph at lines 88--89
+[]\OT1/ptm/m/n/10 Two com-pu-ta-tional paradigms his-tor-i-cally dom-i-nate
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 88--89
+\OT1/ptm/m/n/10 crop yield fore-cast-ing. Process-based bio-phys-i-cal
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 88--89
+\OT1/ptm/m/n/10 sim-u-la-tion mod-els, in-clud-ing DSSAT-CANEGRO [[][]21[][]]
  []
 
 [1{C:/Users/gowth/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Program 
 Files/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
-] [2]
-LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 1
-48.
+]
+Underfull \hbox (badness 1496) in paragraph at lines 100--101
+[]\OT1/ptm/m/n/10 Epistemic un-cer-tainty quan-tifi-ca-tion through Monte-
+ []
 
-(D:\MiKTeX\tex/latex/psnfss\ot1pcr.fd
+[2]
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 1
+47.
+ (D:\MiKTeX\tex/latex/psnfss\ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
-Underfull \hbox (badness 10000) in paragraph at lines 148--149
-[]\OT1/ptm/m/n/10 The dataset used in this study is
+Overfull \hbox (1.39876pt too wide) in paragraph at lines 147--148
+[]\OT1/ptm/m/n/10 Experiments uti-lize \OT1/pcr/m/n/10 FINAL_SUGARCANE_DATASET.
+csv\OT1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 148--149
-\OT1/pcr/m/n/10 FINAL_SUGARCANE_DATASET.csv\OT1/ptm/m/n/10 , which con-tains
- []
-
-
-Underfull \hbox (badness 4254) in paragraph at lines 148--149
-\OT1/ptm/m/n/10 The pre-dic-tion tar-get is \OT1/pcr/m/n/10 Yield_Quintal_per_A
-cre
- []
-
-
-Underfull \hbox (badness 2689) in paragraph at lines 181--182
-[]\OT1/ptm/b/n/10 No lo-ca-tion iden-ti-fiers. \OT1/ptm/m/n/10 We re-moved land
- record
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 181--182
-\OT1/ptm/m/n/10 num-bers (\OT1/pcr/m/n/10 Khasra_No\OT1/ptm/m/n/10 ), ge-o-grap
-hic co-or-di-nates
- []
-
-
-Underfull \hbox (badness 7133) in paragraph at lines 181--182
-\OT1/ptm/m/n/10 mem-o-rise lo-ca-tions rather than learn trans-fer-able
+Underfull \hbox (badness 2229) in paragraph at lines 178--179
+\OT1/ptm/m/n/10 all ad-min-is-tra-tive and spa-tial iden-ti-fiers prior to anal
+-y-
  []
 
 [3] [4] [5]
-<fig_model_comparison.pdf, id=361, 490.6759pt x 220.50461pt>
+Underfull \vbox (badness 1320) has occurred while \output is active []
+
+ [6]
+<fig_model_comparison.pdf, id=374, 490.6759pt x 220.50461pt>
 File: fig_model_comparison.pdf Graphic file (type pdf)
 <use fig_model_comparison.pdf>
-Package pdftex.def Info: fig_model_comparison.pdf  used on input line 513.
+Package pdftex.def Info: fig_model_comparison.pdf  used on input line 509.
 (pdftex.def)             Requested size: 516.0pt x 231.90677pt.
-<fig_actual_vs_predicted.pdf, id=362, 490.33784pt x 214.7607pt>
+<fig_actual_vs_predicted.pdf, id=375, 490.33784pt x 214.7607pt>
 File: fig_actual_vs_predicted.pdf Graphic file (type pdf)
 <use fig_actual_vs_predicted.pdf>
-Package pdftex.def Info: fig_actual_vs_predicted.pdf  used on input line 525.
+Package pdftex.def Info: fig_actual_vs_predicted.pdf  used on input line 521.
 (pdftex.def)             Requested size: 516.0pt x 226.01003pt.
- [6]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-<fig_neural_ablation.pdf, id=389, 505.53351pt x 228.08952pt>
+<fig_neural_ablation.pdf, id=379, 505.53351pt x 228.08952pt>
 File: fig_neural_ablation.pdf Graphic file (type pdf)
 <use fig_neural_ablation.pdf>
-Package pdftex.def Info: fig_neural_ablation.pdf  used on input line 572.
+Package pdftex.def Info: fig_neural_ablation.pdf  used on input line 568.
 (pdftex.def)             Requested size: 516.0pt x 232.82573pt.
-<fig_ablation.pdf, id=390, 490.29549pt x 243.04715pt>
+<fig_ablation.pdf, id=380, 490.29549pt x 243.04715pt>
 File: fig_ablation.pdf Graphic file (type pdf)
 <use fig_ablation.pdf>
-Package pdftex.def Info: fig_ablation.pdf  used on input line 583.
+Package pdftex.def Info: fig_ablation.pdf  used on input line 579.
 (pdftex.def)             Requested size: 516.0pt x 255.81152pt.
-
-Underfull \vbox (badness 1043) has occurred while \output is active []
-
- [7 <./fig_model_comparison.pdf> <./fig_actual_vs_predicted.pdf>]
-Underfull \vbox (badness 4531) has occurred while \output is active []
-
- [8 <./fig_neural_ablation.pdf> <./fig_ablation.pdf>]
-<fig_stability_sensitivity.pdf, id=908, 432.14047pt x 368.59708pt>
+<fig_stability_sensitivity.pdf, id=383, 432.14047pt x 368.59708pt>
 File: fig_stability_sensitivity.pdf Graphic file (type pdf)
 <use fig_stability_sensitivity.pdf>
-Package pdftex.def Info: fig_stability_sensitivity.pdf  used on input line 638.
+Package pdftex.def Info: fig_stability_sensitivity.pdf  used on input line 626.
 
 (pdftex.def)             Requested size: 516.0pt x 440.13765pt.
-<fig_attribution.pdf, id=913, 476.37408pt x 258.61241pt>
+
+[7]
+Underfull \vbox (badness 2707) has occurred while \output is active []
+
+ [8 <./fig_model_comparison.pdf> <./fig_actual_vs_predicted.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [9 <./fig_neural_ablation.pdf> <./fig_ablation.pdf>] [10 <./fig_stability_sens
+itivity.pdf>]
+<fig_attribution.pdf, id=1044, 476.37408pt x 258.61241pt>
 File: fig_attribution.pdf Graphic file (type pdf)
 <use fig_attribution.pdf>
-Package pdftex.def Info: fig_attribution.pdf  used on input line 715.
+Package pdftex.def Info: fig_attribution.pdf  used on input line 705.
 (pdftex.def)             Requested size: 252.0pt x 136.8074pt.
- [9] [10 <./fig_stability_sensitivity.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 773--774
-[]\OT1/ptm/m/n/10 The full im-ple-men-ta-tion is in
+
+Underfull \hbox (badness 1609) in paragraph at lines 732--733
+[]\OT1/ptm/m/n/10 The ex-per-i-men-tal eval-u-a-tion re-lies on a sin-gle cross
+-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 773--774
-\OT1/pcr/m/n/10 custom_canesugar_neural/\OT1/ptm/m/n/10 . Ran-dom seeds 42,
+Underfull \hbox (badness 10000) in paragraph at lines 751--752
+[]\OT1/ptm/m/n/10 The com-plete source code, dataset load-ers,
  []
 
 
-Underfull \hbox (badness 2828) in paragraph at lines 773--774
-\OT1/ptm/m/n/10 runs re-ported in Ta-ble [][]VI[][]. The saved model weights
+Underfull \hbox (badness 10000) in paragraph at lines 751--752
+\OT1/ptm/m/n/10 and train-ing scripts are main-tained in the
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 751--752
+\OT1/pcr/m/n/10 custom_canesugar_neural/ \OT1/ptm/m/n/10 di-rec-tory. Multi-see
+d
+ []
+
+
+Underfull \hbox (badness 2626) in paragraph at lines 751--752
+\OT1/ptm/m/n/10 eval-u-a-tions were con-ducted with seeds 42, 123, 2024,
  []
 
 [11 <./fig_attribution.pdf>]
-Underfull \hbox (badness 3229) in paragraph at lines 782--783
-[]\OT1/ptm/m/n/10 What we did not achieve is equally worth stat-ing.
- []
-
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -657,16 +659,16 @@ LaTeX2e <2026-06-01>
 L3 programming layer <2026-09-09>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 614C0A933F98B96F4B42E373E8B4DCD8;8487.
+(rerunfilecheck)             Checksum: E2B1C3AA57E1848A613703DDDB3F7AA1;8667.
  ) 
 Here is how much of TeX's memory you used:
- 13332 strings out of 467392
- 210430 string characters out of 5415748
- 695008 words of memory out of 5000000
+ 13322 strings out of 467392
+ 210360 string characters out of 5415748
+ 699285 words of memory out of 5000000
  42345 multiletter control sequences out of 15000+600000
  677423 words of font info for 138 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 74i,20n,79p,1097b,603s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 74i,20n,79p,1003b,463s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Progra
 m Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx7.pfb><C:/Program Files/MiKTe
 X/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Program Files/MiKTeX/fonts/type1
@@ -691,9 +693,9 @@ sfonts/symbols/msbm10.pfb><C:/Program Files/MiKTeX/fonts/type1/urw/courier/ucrr
 les/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Program Files/MiKTeX/fonts/typ
 e1/urw/times/utmr8a.pfb><C:/Program Files/MiKTeX/fonts/type1/urw/times/utmri8a.
 pfb>
-Output written on main.pdf (12 pages, 701783 bytes).
+Output written on main.pdf (12 pages, 700197 bytes).
 PDF statistics:
- 1353 PDF objects out of 1440 (max. 8388607)
- 163 named destinations out of 1000 (max. 500000)
+ 1336 PDF objects out of 1440 (max. 8388607)
+ 153 named destinations out of 1000 (max. 500000)
  15303 words of extra memory for PDF output out of 17280 (max. 10000000)
 

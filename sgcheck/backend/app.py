@@ -147,7 +147,7 @@ def health():
     """Health check — also reports which models are available."""
     available = []
     for name in ALL_MODELS:
-        if name in ["cane_sugar_custom", "cane_sugar_neural"]:
+        if name in ["cane_sugar_neural"]:
             available.append(name)
             continue
         path = os.path.join(MODELS_DIR, f"{name}.joblib")
@@ -363,24 +363,6 @@ def list_models():
         "display_name": "CaneSugar Neural v1 (Deep Learning)",
     }
 
-    custom_metrics_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "custom_canesugar", "artifacts", "metrics.json")
-    )
-    if not os.path.exists(custom_metrics_path):
-        custom_metrics_path = os.path.abspath("custom_canesugar/artifacts/metrics.json")
-
-    models_info["cane_sugar_custom"] = {
-        "metrics": {
-            "r2": 0.9524,
-            "mae": 16.82,
-            "rmse": 23.45,
-            "mape": 6.85,
-        },
-        "features_count": 104,
-        "is_custom_mathematical": True,
-        "display_name": "CaneSugar Custom Model (Flagship)",
-    }
-
     results_path = os.path.join(MODELS_DIR, "training_results.json")
     if os.path.exists(results_path):
         with open(results_path) as f:
@@ -431,7 +413,7 @@ def predict_with_selection(input_data: ModelSelectionInput):
     """
     try:
         if input_data.mode == "auto":
-            best_model = "cane_sugar_custom"
+            best_model = "cane_sugar_neural"
 
             result = predict(best_model, input_data.dict())
             result["best_model"] = best_model
@@ -455,7 +437,7 @@ def predict_with_selection(input_data: ModelSelectionInput):
                 "status": "success"
             }
         else:
-            model_name = input_data.model_name or "cane_sugar_custom"
+            model_name = input_data.model_name or "cane_sugar_neural"
             if model_name not in ALL_MODELS:
                 raise HTTPException(
                     status_code=400,
@@ -501,7 +483,7 @@ def predict_with_selection(input_data: ModelSelectionInput):
 def predict_auto(input_data: PredictionInput):
     """Auto-predict using the best available model (by R² score)."""
     try:
-        best_model = "cane_sugar_custom"
+        best_model = "cane_sugar_neural"
 
         result = predict(best_model, input_data.dict())
         result["best_model"] = best_model
@@ -581,14 +563,13 @@ def predict_endpoint(model_name: str, input_data: PredictionInput):
 @app.post("/predict/cane_sugar_custom")
 def predict_cane_sugar_custom_endpoint(input_data: PredictionInput):
     """
-    Predict yield using the CaneSugar Custom Agronomic Mathematical Model.
-    Closed-form equation with exact component decomposition (Base + Soil + Nutrients + Water + Temp + Crop + Interactions - Stress).
+    Predict yield using the CaneSugar Neural v1 Model.
     """
     try:
-        result = predict("cane_sugar_custom", input_data.dict())
+        result = predict("cane_sugar_neural", input_data.dict())
         prediction_record = {
             "timestamp": input_data.Planting_Date or input_data.Harvesting_Date or input_data.Variety or "Unknown",
-            "model": "cane_sugar_custom",
+            "model": "cane_sugar_neural",
             "input": input_data.dict(),
             "prediction": result.get("predictions", [None])[0],
             "status": "success",
