@@ -29,7 +29,7 @@ import {
 } from "lucide-react"
 
 const MODEL_LABELS = {
-  cane_sugar_custom: "CaneSugar Custom (Domain Equations)",
+  cane_sugar_neural: "CaneSugar Neural v1 (Deep Learning)",
   cane_sugar: "CaneSugar v6 (Ensemble)",
   catboost: "CatBoost Regressor",
   xgboost: "XGBoost Regressor",
@@ -37,11 +37,11 @@ const MODEL_LABELS = {
   linear_regression: "Linear Regression (OLS)",
   elastic_net: "ElasticNet",
   ensemble: "CaneSugar Ensemble",
-  auto: "Auto (Custom Model)",
+  auto: "Auto (Neural v1)",
 }
 
 const MODEL_COLORS = {
-  cane_sugar_custom: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+  cane_sugar_neural: "text-amber-400 border-amber-500/30 bg-amber-500/10",
   cane_sugar: "text-amber-400 border-amber-500/30 bg-amber-500/10",
   catboost: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
   xgboost: "text-sky-400 border-sky-500/30 bg-sky-500/10",
@@ -120,8 +120,8 @@ export default function HistoryPage({ onBack }) {
       setHistory([
         {
           timestamp: new Date(Date.now() - 3600000).toISOString(),
-          model: "cane_sugar_custom",
-          prediction: 272.29,
+          model: "cane_sugar_neural",
+          prediction: 284.50,
           status: "success",
           input: {
             Variety: "Co 0238",

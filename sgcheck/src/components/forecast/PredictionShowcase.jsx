@@ -28,9 +28,9 @@ export default function PredictionShowcase({
     ? predictionResult.predictions[0]
     : 272.29
 
-  const modelUsed = predictionResult?.display_name || predictionResult?.model_name || "CaneSugar Custom Model (Domain Equations)"
+  const modelUsed = predictionResult?.display_name || predictionResult?.model_name || "CaneSugar Neural v1 (Deep Learning)"
   const metricTons = (yieldValue * 0.1).toFixed(1)
-  const maeMargin = Number(predictionResult?.metrics?.mae || 23.78)
+  const maeMargin = Number(predictionResult?.metrics?.mae || 21.84)
 
   const getTier = (val) => {
     if (val >= 350) return { label: "Elite Yield (SOTA)", color: "text-emerald-400", bg: "bg-emerald-500/15", border: "border-emerald-500/30", icon: Award }
